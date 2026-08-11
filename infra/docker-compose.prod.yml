@@ -96,12 +96,18 @@ services:
     build:
       context: ..
       dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_URL:-}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-${SUPABASE_PUBLISHABLE_KEY:-}}
+        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY:-${SUPABASE_ANON_KEY:-}}
+        NEXT_PUBLIC_API_URL: ${WEB_ORIGIN:-http://localhost}
     restart: unless-stopped
     environment:
       NODE_ENV: production
       PORT: 3000
       NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_URL:-}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-${SUPABASE_PUBLISHABLE_KEY:-}}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY:-${SUPABASE_ANON_KEY:-}}
       NEXT_PUBLIC_API_URL: ${WEB_ORIGIN:-http://localhost}
     depends_on:
       api:
