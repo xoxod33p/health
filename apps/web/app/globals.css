@@ -45,7 +45,39 @@
 .topbar-center-wrap .settings-tab:hover { color:var(--ink); }
 .topbar-center-wrap .settings-tab-active { border-bottom-color:var(--teal); color:var(--teal); font-weight:600; }
 .topbar-right { align-items:center; display:flex; flex:0 0 auto; justify-content:flex-end; }
-@media (max-width:900px) { .topbar { gap:10px; flex-wrap:wrap; height:auto; padding:12px 20px; } .topbar-center { flex:1 0 100%; order:3; justify-content:stretch; padding:6px 0 0; } .topbar-center-wrap { max-width:none; } }
+.sidebar-backdrop { background:rgba(10,27,33,0.55); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); position:fixed; inset:0; z-index:99; }
+@media (max-width:768px) {
+  .sidebar { position:fixed; left:-280px; top:0; bottom:0; height:100vh; width:250px; z-index:100; transition:left .25s ease; box-shadow:12px 0 40px rgba(0,0,0,0.35); flex:none; }
+  .sidebar-open { left:0 !important; }
+  .menu-trigger { display:inline-flex !important; margin-right:8px; cursor:pointer; }
+  .topbar { height:auto; min-height:56px; padding:10px 14px; flex-wrap:wrap; gap:8px; }
+  .topbar-left { flex:1 1 auto; }
+  .topbar-title { font-size:15px; }
+  .topbar-right { flex:0 0 auto; }
+  .topbar-center { flex:1 0 100%; order:3; width:100%; padding:4px 0 2px; }
+  .topbar-center-wrap { max-width:100%; flex-wrap:wrap; gap:8px; }
+  .topbar-center-wrap .search-field { max-width:100%; flex:1 1 100%; }
+  .topbar-center-wrap .select-control { flex:1 1 calc(50% - 4px); font-size:11px; }
+  .topbar-center-wrap .result-count { display:none; }
+  .topbar-center-wrap .settings-tabs { overflow-x:auto; white-space:nowrap; -webkit-overflow-scrolling:touch; width:100%; padding-bottom:4px; margin-bottom:0; }
+  .topbar-center-wrap .settings-tab { padding:8px 12px; font-size:11px; }
+}
+@media (max-width:640px) {
+  .page-content { padding:14px 10px 24px; }
+  .mini-stat-grid, .metric-grid, .report-summary { grid-template-columns:repeat(2,1fr); gap:8px; }
+  .mini-stat { padding:12px 14px; min-height:92px; }
+  .mini-stat strong { font-size:20px; margin:4px 0 2px; }
+  .mini-stat span { font-size:10px; }
+  .mini-stat small { font-size:8px; }
+  .panel { padding:14px 12px; }
+  .panel-heading h2 { font-size:15px; }
+  .table-wrap { margin:0 -12px; padding:0 12px; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .modal-backdrop { padding:12px; align-items:flex-end; }
+  .modal-card { max-width:100%; border-radius:14px 14px 0 0; padding:20px 16px; max-height:88vh; overflow-y:auto; }
+  .primary-button { font-size:11px; padding:10px 14px; }
+  .detail-grid, .form-layout { grid-template-columns:1fr; }
+}
+
 
 
 
