@@ -100,7 +100,7 @@ services:
         NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_URL:-}
         NEXT_PUBLIC_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-${SUPABASE_PUBLISHABLE_KEY:-}}
         NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY:-${SUPABASE_ANON_KEY:-}}
-        NEXT_PUBLIC_API_URL: ${WEB_ORIGIN:-http://localhost}
+        NEXT_PUBLIC_API_URL: ${WEB_ORIGIN:-http://localhost}/api/v1
     restart: unless-stopped
     environment:
       NODE_ENV: production
@@ -108,7 +108,7 @@ services:
       NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_URL:-}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-${SUPABASE_PUBLISHABLE_KEY:-}}
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY:-${SUPABASE_ANON_KEY:-}}
-      NEXT_PUBLIC_API_URL: ${WEB_ORIGIN:-http://localhost}
+      NEXT_PUBLIC_API_URL: ${WEB_ORIGIN:-http://localhost}/api/v1
     depends_on:
       api:
         condition: service_healthy
