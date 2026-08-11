@@ -16,6 +16,8 @@ A modular-monolith healthcare sensor management SaaS foundation.
 3. Start the data services: `docker compose -f infra/docker-compose.yml up -d mongodb redis minio`
 4. Start the API: `npm run dev:api`
 
+To create or reset the local development admin in Supabase and MongoDB, run `npm --workspace apps/api run admin:bootstrap`. Use the `DEFAULT_ADMIN_EMAIL` and `DEFAULT_ADMIN_PASSWORD` values from your local `.env` to sign in at `/login`.
+
 On Windows, run `run-dev.cmd` from the repository folder to open separate PowerShell windows for infrastructure, API, and web.
 
 Docker services expose only local development ports: MongoDB on `27017`, Redis on `6379`, and MinIO on `9000` with its console on `9001`. Compose reads database credentials from `.env` and falls back to development-only defaults when variables are absent.
