@@ -184,6 +184,8 @@ function CustomerForm({ onClose, onCreated }: { onClose: () => void; onCreated: 
           firstName: form.get('firstName'),
           lastName: form.get('lastName'),
           email: form.get('email') || undefined,
+          address: form.get('address') || undefined,
+          notes: form.get('description') || undefined,
         }),
       });
       onCreated();
@@ -219,8 +221,31 @@ function CustomerForm({ onClose, onCreated }: { onClose: () => void; onCreated: 
           <input name="lastName" required />
         </label>
         <label>
-          Email
-          <input name="email" type="email" />
+          Email (optional)
+          <input name="email" type="email" placeholder="patient@example.com" />
+        </label>
+        <label>
+          Address (optional)
+          <input name="address" placeholder="123 Health Ave, Colombo" />
+        </label>
+        <label>
+          Simple description (optional)
+          <textarea
+            name="description"
+            rows={2}
+            placeholder="Brief clinical notes or description"
+            style={{
+              background: '#fff',
+              border: '1px solid #dce5e5',
+              borderRadius: '5px',
+              color: 'var(--ink)',
+              fontSize: '12px',
+              outline: 0,
+              padding: '10px 12px',
+              fontFamily: 'inherit',
+              resize: 'vertical',
+            }}
+          />
         </label>
         {error && <div className="form-error">{error}</div>}
         <div className="modal-actions">
