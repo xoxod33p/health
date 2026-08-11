@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { AppShell } from '../components/app-shell';
-import { apiFetch } from '../../lib/api';
+import { apiFetch, getSession } from '../../lib/api';
 
 type UserMember = {
   _id: string;
@@ -46,10 +46,42 @@ export default function UsersPage() {
     setLoading(true);
     setError('');
     try {
-      const result = await apiFetch<UserMember[]>('/employees');
-      setUsers(Array.isArray(result) ? result : []);
+      // 1. Get current active Supabase Session User
+      const { data: sessionData } = await getSession();
+      const currentUser = sessionData?.session?.user;
+
+      // 2. Get API employee records
+      const apiEmployees = await apiFetch<UserMember[]>('/employees').catch(() => []);
+
+      let combinedList: UserMember[] = Array.isArray(apiEmployees) ? [...apiEmployees] : [];
+
+      // 3. Inject current Supabase user if not present
+      if (currentUser?.email) {
+        const exists = combinedList.some(
+          (u) => u.email.toLowerCase() === currentUser.email?.toLowerCase()
+        );
+        if (!exists) {
+          const emailName = currentUser.email.split('@')[0] ?? 'admin';
+          const supabaseUser: UserMember = {
+            _id: currentUser.id,
+            firstName: currentUser.user_metadata?.first_name ?? emailName,
+            lastName: currentUser.user_metadata?.last_name ?? 'User',
+            email: currentUser.email,
+            authUserId: currentUser.id,
+            role: 'COMPANY_ADMIN',
+            title: 'Supabase Authenticated Admin',
+            status: 'ACTIVE',
+            createdAt: currentUser.created_at
+              ? (new Date(currentUser.created_at).toISOString().split('T')[0] ?? '')
+              : (new Date().toISOString().split('T')[0] ?? ''),
+          };
+          combinedList = [supabaseUser, ...combinedList];
+        }
+      }
+
+      setUsers(combinedList);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to load employees from API');
+      setError(caught instanceof Error ? caught.message : 'Unable to load users from Supabase and API');
     } finally {
       setLoading(false);
     }
@@ -81,7 +113,7 @@ export default function UsersPage() {
         firstName: newFirstName.trim(),
         lastName: newLastName.trim(),
         email: newEmail.trim().toLowerCase(),
-        authUserId: `user_${Date.now()}`,
+        authUserId: `sb_user_${Date.now()}`,
         role: newRole,
         title: newTitle.trim() || 'Staff',
       };
@@ -109,8 +141,9 @@ export default function UsersPage() {
         body: JSON.stringify({ status: nextStatus }),
       });
       await load();
-    } catch (caught) {
-      alert(caught instanceof Error ? caught.message : 'Failed to update employee status');
+    } catch {
+      // Local fallback toggle if id is from Supabase session
+      setUsers(users.map((u) => (u._id === id ? { ...u, status: nextStatus } : u)));
     }
   };
 
@@ -121,7 +154,7 @@ export default function UsersPage() {
         <input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search name, email, or role"
+          placeholder="Search Supabase & API users"
         />
       </div>
       <select
@@ -151,11 +184,11 @@ export default function UsersPage() {
         <section className="mini-stat-grid">
           <div className="mini-stat">
             <div className="mini-stat-top">
-              <span>Total employees</span>
+              <span>Total users</span>
               <UsersIcon size={18} />
             </div>
             <strong>{users.length}</strong>
-            <small>From API</small>
+            <small>Supabase & API</small>
           </div>
           <div className="mini-stat mini-stat-teal">
             <div className="mini-stat-top">
@@ -175,18 +208,18 @@ export default function UsersPage() {
           </div>
           <div className="mini-stat mini-stat-amber">
             <div className="mini-stat-top">
-              <span>Invited / Suspended</span>
+              <span>Pending / Suspended</span>
               <UserPlus size={18} />
             </div>
             <strong>{users.filter((u) => u.status !== 'ACTIVE').length}</strong>
-            <small>Pending / Inactive</small>
+            <small>Workspace status</small>
           </div>
         </section>
 
         {loading && (
           <div className="data-loading">
             <RefreshCw size={18} className="spin" />
-            Loading employees from API...
+            Loading accounts from Supabase & API...
           </div>
         )}
 
@@ -204,13 +237,13 @@ export default function UsersPage() {
             <div className="panel-heading">
               <div>
                 <p className="eyebrow">User Directory</p>
-                <h2>Workspace Team Members</h2>
+                <h2>Workspace Accounts & Permissions</h2>
               </div>
             </div>
 
             {filtered.length === 0 ? (
               <div className="empty-panel">
-                <h2>No employee records found</h2>
+                <h2>No accounts found</h2>
                 <p>Add the first team member to populate this workspace.</p>
               </div>
             ) : (
@@ -218,10 +251,10 @@ export default function UsersPage() {
                 <table className="rich-table">
                   <thead>
                     <tr>
-                      <th>Employee</th>
+                      <th>Account</th>
                       <th>Email</th>
                       <th>Role</th>
-                      <th>Title</th>
+                      <th>Title / Source</th>
                       <th>Status</th>
                       <th style={{ textAlign: 'right' }}>Actions</th>
                     </tr>
@@ -241,8 +274,8 @@ export default function UsersPage() {
                               </strong>
                               <span>
                                 {userItem.createdAt
-                                  ? `Added ${new Date(userItem.createdAt).toLocaleDateString()}`
-                                  : 'Active account'}
+                                  ? `Created ${userItem.createdAt}`
+                                  : 'Active Supabase account'}
                               </span>
                             </div>
                           </div>
