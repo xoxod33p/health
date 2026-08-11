@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
 import { UsersModule } from '../users/users.module';
 import { SupabaseAuthGuard } from './supabase-auth.guard';
+import { PermissionGuard } from './permission.guard';
 
 @Module({
   imports: [UsersModule],
-  providers: [SupabaseAuthGuard],
-  exports: [SupabaseAuthGuard],
+  providers: [SupabaseAuthGuard, PermissionGuard],
+  exports: [SupabaseAuthGuard, PermissionGuard],
 })
 export class AuthModule {}

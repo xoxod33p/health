@@ -17,7 +17,7 @@ export class HealthController {
   }
 
   @Get('ready')
-  getReadiness(): HealthStatus {
-    return this.healthService.getStatus();
+  getReadiness(): HealthStatus & { database: 'connected' | 'disconnected' } {
+    return this.healthService.getReadiness();
   }
 }

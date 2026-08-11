@@ -1,10 +1,16 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import Joi from 'joi';
 import { AuthModule } from './auth/auth.module';
+import { AuditModule } from './audit/audit.module';
 import { CustomersModule } from './customers/customers.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { EmployeesModule } from './employees/employees.module';
 import { HealthModule } from './health/health.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { SensorsModule } from './sensors/sensors.module';
 import { UsersModule } from './users/users.module';
 
@@ -20,15 +26,21 @@ import { UsersModule } from './users/users.module';
         SUPABASE_URL: Joi.string().uri().allow('').default(''),
       }),
     }),
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 120 }]),
     MongooseModule.forRootAsync({
       useFactory: (config: ConfigService) => ({ uri: config.getOrThrow<string>('MONGODB_URI') }),
       inject: [ConfigService],
     }),
     UsersModule,
     AuthModule,
+    AuditModule,
     CustomersModule,
+    DashboardModule,
+    EmployeesModule,
     SensorsModule,
+    NotificationsModule,
     HealthModule,
   ],
+  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}
