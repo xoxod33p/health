@@ -5,6 +5,9 @@ let cachedSession: Session | null | undefined;
 
 export function getApiBaseUrl(): string {
   let url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+  if (typeof window !== 'undefined' && window.location.protocol === 'https:' && url.startsWith('http:')) {
+    url = url.replace(/^http:/, 'https:');
+  }
   url = url.replace(/\/+$/, '');
   if (!url.endsWith('/api/v1')) {
     url = `${url}/api/v1`;
