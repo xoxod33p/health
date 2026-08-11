@@ -54,6 +54,11 @@ jobs:
           tags: |
             ghcr.io/${{ steps.repo_owner.outputs.owner }}/health-web:${{ github.sha }}
             ghcr.io/${{ steps.repo_owner.outputs.owner }}/health-web:latest
+          build-args: |
+            NEXT_PUBLIC_SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+            NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+            NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+            NEXT_PUBLIC_API_URL=${{ secrets.WEB_ORIGIN }}
 
   deploy:
     name: Deploy to Private Ubuntu VPS
