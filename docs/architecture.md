@@ -8,7 +8,7 @@ Nginx -> Next.js web -> NestJS API -> MongoDB
                          |          -> MinIO metadata/object storage
                          `-> Supabase Auth JWT verification
 
-BullMQ worker -> expiration, notifications, email, reports, audit, cleanup
+Background processing is intentionally deferred while the worker process is disabled. Redis remains available for future queue integration.
 ```
 
 The browser only receives the Supabase public client configuration. The API is the trust boundary and derives `userId`, membership, `companyId`, role, and permissions from verified identity plus MongoDB membership data.

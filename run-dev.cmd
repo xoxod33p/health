@@ -11,7 +11,6 @@ if not exist "%ROOT%.env" (
 start "Healthcare Infrastructure" powershell.exe -NoExit -ExecutionPolicy Bypass -Command "Set-Location -LiteralPath '%ROOT%'; docker compose -f infra/docker-compose.yml up"
 start "Healthcare API" powershell.exe -NoExit -ExecutionPolicy Bypass -Command "Set-Location -LiteralPath '%ROOT%'; npm run dev:api"
 start "Healthcare Web" powershell.exe -NoExit -ExecutionPolicy Bypass -Command "Set-Location -LiteralPath '%ROOT%'; npm run dev:web"
-start "Healthcare Worker" powershell.exe -NoExit -ExecutionPolicy Bypass -Command "Set-Location -LiteralPath '%ROOT%'; npm run dev:worker"
 
-echo Opened separate windows for infrastructure, API, web, and worker.
+echo Opened separate windows for infrastructure, API, and web.
 endlocal
