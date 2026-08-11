@@ -1,6 +1,6 @@
 'use client';
 
-import { Boxes, Plus, RefreshCw, Search, SlidersHorizontal } from 'lucide-react';
+import { Activity, Boxes, CheckCircle2, Clock, Plus, RefreshCw, Search, SlidersHorizontal } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { AppShell } from '../components/app-shell';
@@ -88,23 +88,34 @@ export default function SensorsPage() {
       <div className="page-content">
         <section className="mini-stat-grid">
           <div className="mini-stat">
-            <Boxes size={19} />
-            <span>Loaded sensors</span>
+            <div className="mini-stat-top">
+              <span>Loaded sensors</span>
+              <Boxes size={18} />
+            </div>
             <strong>{sensors.length}</strong>
             <small>From API</small>
           </div>
           <div className="mini-stat mini-stat-teal">
-            <span>Active</span>
+            <div className="mini-stat-top">
+              <span>Active</span>
+              <Activity size={18} />
+            </div>
             <strong>{sensors.filter((sensor) => sensor.status === 'ACTIVE').length}</strong>
             <small>Current records</small>
           </div>
           <div className="mini-stat mini-stat-amber">
-            <span>Expiring soon</span>
+            <div className="mini-stat-top">
+              <span>Expiring soon</span>
+              <Clock size={18} />
+            </div>
             <strong>{sensors.filter((sensor) => sensor.status === 'EXPIRING_SOON').length}</strong>
             <small>Current page</small>
           </div>
           <div className="mini-stat mini-stat-blue">
-            <span>Available</span>
+            <div className="mini-stat-top">
+              <span>Available</span>
+              <CheckCircle2 size={18} />
+            </div>
             <strong>{sensors.filter((sensor) => sensor.status === 'AVAILABLE').length}</strong>
             <small>Current page</small>
           </div>
