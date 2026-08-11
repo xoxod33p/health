@@ -4,14 +4,30 @@ let client: SupabaseClient | undefined;
 let cachedSession: Session | null | undefined;
 
 export function getApiBaseUrl(): string {
-  let url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+  let url = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+
+  // Handle relative paths (e.g. /api/v1 or /api)
+  if (url.startsWith('/')) {
+    url = url.replace(/\/+$/, '');
+    if (!url.endsWith('/api/v1')) url = `${url}/api/v1`;
+    return url;
+  }
+
+  // Prepend https:// if protocol is missing (e.g. test.xoxod33p.tech/api/v1)
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    url = `https://${url}`;
+  }
+
+  // Upgrade http to https when loaded in browser over HTTPS
   if (typeof window !== 'undefined' && window.location.protocol === 'https:' && url.startsWith('http:')) {
     url = url.replace(/^http:/, 'https:');
   }
+
   url = url.replace(/\/+$/, '');
   if (!url.endsWith('/api/v1')) {
     url = `${url}/api/v1`;
   }
+
   return url;
 }
 
