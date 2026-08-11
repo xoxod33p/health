@@ -11,10 +11,11 @@ services:
     networks:
       - health-network
     healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ ping: 1 }).ok"]
+      test: ["CMD-SHELL", "mongosh -u \"$${MONGO_INITDB_ROOT_USERNAME:-healthcare}\" -p \"$${MONGO_INITDB_ROOT_PASSWORD}\" --authenticationDatabase admin --eval \"db.adminCommand('ping').ok\" || mongosh --eval \"db.adminCommand('ping').ok\" || exit 1"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 30s
 
   redis:
     image: redis:7.4.2-alpine
