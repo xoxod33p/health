@@ -4,13 +4,16 @@ import { FilterQuery, Model } from 'mongoose';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { Customer, CustomerDocument } from './customer.schema';
 import { CreateCustomerDto, CustomerQueryDto, UpdateCustomerDto } from './customer.dto';
+import { RealtimeGateway } from '../realtime/realtime.gateway';
 
 @Injectable()
 export class CustomersService {
-  constructor(@InjectModel(Customer.name) private readonly customers: Model<CustomerDocument>) {}
+  constructor(@InjectModel(Customer.name) private readonly customers: Model<CustomerDocument>, private readonly realtime: RealtimeGateway) {}
 
   async create(user: AuthenticatedUser, dto: CreateCustomerDto): Promise<Customer> {
-    return this.customers.create({ ...dto, dateOfBirth: dto.dateOfBirth ? new Date(dto.dateOfBirth) : undefined, companyId: user.companyId, createdBy: user.authUserId, updatedBy: user.authUserId });
+    const customer = await this.customers.create({ ...dto, dateOfBirth: dto.dateOfBirth ? new Date(dto.dateOfBirth) : undefined, companyId: user.companyId, createdBy: user.authUserId, updatedBy: user.authUserId });
+    this.realtime.broadcastCompany(user.companyId, 'customer.changed', { action: 'created', customerId: customer._id.toString() });
+    return customer;
   }
 
   async findAll(user: AuthenticatedUser, query: CustomerQueryDto): Promise<{ data: Customer[]; total: number; page: number; limit: number }> {
@@ -29,6 +32,7 @@ export class CustomersService {
   async findOne(user: AuthenticatedUser, id: string): Promise<Customer> {
     const customer = await this.customers.findOne({ _id: id, companyId: user.companyId }).lean().exec();
     if (!customer) throw new NotFoundException('Customer not found');
+    this.realtime.broadcastCompany(user.companyId, 'customer.changed', { action: 'updated', customerId: id });
     return customer;
   }
 

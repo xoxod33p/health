@@ -12,6 +12,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { EmployeesModule } from './employees/employees.module';
 import { HealthModule } from './health/health.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { RealtimeModule } from './realtime/realtime.module';
 import { SensorsModule } from './sensors/sensors.module';
 import { UsersModule } from './users/users.module';
 
@@ -41,6 +42,7 @@ import { UsersModule } from './users/users.module';
     EmployeesModule,
     SensorsModule,
     NotificationsModule,
+    RealtimeModule,
     HealthModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

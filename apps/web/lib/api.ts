@@ -1,7 +1,8 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { createClient, type Session, type SupabaseClient } from '@supabase/supabase-js';
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
 let client: SupabaseClient | undefined;
+let cachedSession: Session | null | undefined;
 
 function getSupabaseClient(): SupabaseClient {
   if (client) return client;
@@ -13,15 +14,26 @@ function getSupabaseClient(): SupabaseClient {
 }
 
 export async function getSession() {
-  return getSupabaseClient().auth.getSession();
+  if (cachedSession !== undefined) return { data: { session: cachedSession }, error: null };
+  const result = await getSupabaseClient().auth.getSession();
+  cachedSession = result.data.session;
+  return result;
+}
+
+export function getCachedSession(): Session | null | undefined {
+  return cachedSession;
 }
 
 export async function signIn(email: string, password: string) {
-  return getSupabaseClient().auth.signInWithPassword({ email, password });
+  const result = await getSupabaseClient().auth.signInWithPassword({ email, password });
+  if (!result.error) cachedSession = result.data.session;
+  return result;
 }
 
 export async function signOut() {
-  return getSupabaseClient().auth.signOut();
+  const result = await getSupabaseClient().auth.signOut();
+  cachedSession = null;
+  return result;
 }
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {

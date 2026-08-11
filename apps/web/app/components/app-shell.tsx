@@ -1,10 +1,10 @@
 'use client';
 
-import { Activity, Bell, Boxes, ChevronDown, ClipboardList, FileBarChart, LayoutDashboard, Menu, Search, Settings, ShieldCheck, Users, X } from 'lucide-react';
+import { Activity, Bell, Boxes, ClipboardList, FileBarChart, LayoutDashboard, Menu, Settings, ShieldCheck, Users } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { getSession, signOut } from '../../lib/api';
+import { getCachedSession, getSession, signOut } from '../../lib/api';
 
 const navigation = [
   { label: 'Overview', href: '/', icon: LayoutDashboard },
@@ -14,12 +14,13 @@ const navigation = [
   { label: 'Audit log', href: '/audit', icon: ClipboardList },
 ];
 
-export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) {
+export function AppShell({ children, title }: Readonly<{ children: React.ReactNode; title?: string }>) {
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [authState, setAuthState] = useState<'loading' | 'ready' | 'error'>('loading');
-  const [email, setEmail] = useState('');
+  const cachedSession = getCachedSession();
+  const [authState, setAuthState] = useState<'loading' | 'ready' | 'error'>(cachedSession ? 'ready' : 'loading');
+  const [email, setEmail] = useState(cachedSession?.user.email ?? '');
   const activeLabel = navigation.find((item) => item.href === pathname)?.label ?? (pathname.startsWith('/team') ? 'Team' : pathname.startsWith('/settings') ? 'Settings' : pathname.startsWith('/notifications') ? 'Notifications' : 'Workspace');
 
   useEffect(() => {
@@ -41,11 +42,10 @@ export function AppShell({ children }: Readonly<{ children: React.ReactNode }>) 
 
   return <div className="app-shell">
     <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
-      <div className="brand-row"><div className="brand-mark"><Activity size={19} strokeWidth={2.5} /></div><span className="brand-name">care<span>signal</span></span><button className="icon-button sidebar-close" onClick={() => setSidebarOpen(false)} aria-label="Close navigation"><X size={19} /></button></div>
-      <div className="workspace-select"><div className="workspace-avatar">NC</div><div><strong>Northstar Care</strong><span>Operations workspace</span></div><ChevronDown size={16} /></div>
-      <nav className="main-nav" aria-label="Main navigation"><span className="nav-label">Workspace</span>{navigation.map(({ label, href, icon: Icon }) => <Link key={label} href={href} className={`nav-item ${activeLabel === label ? 'nav-active' : ''}`} onClick={() => setSidebarOpen(false)}><Icon size={18} /><span>{label}</span>{label === 'Customers' && <small>1,248</small>}</Link>)}<span className="nav-label nav-label-spaced">Manage</span><Link className={`nav-item ${activeLabel === 'Notifications' ? 'nav-active' : ''}`} href="/notifications" onClick={() => setSidebarOpen(false)}><Bell size={18} /><span>Notifications</span><small>4</small></Link><Link className={`nav-item ${activeLabel === 'Team' ? 'nav-active' : ''}`} href="/team" onClick={() => setSidebarOpen(false)}><Users size={18} /><span>Team</span></Link><Link className={`nav-item ${activeLabel === 'Settings' ? 'nav-active' : ''}`} href="/settings" onClick={() => setSidebarOpen(false)}><Settings size={18} /><span>Settings</span></Link></nav>
+      <div className="brand-row"><div className="brand-mark"><Activity size={19} strokeWidth={2.5} /></div><span className="brand-name">care<span>signal</span></span></div>
+      <nav className="main-nav" aria-label="Main navigation"><span className="nav-label">Workspace</span>{navigation.map(({ label, href, icon: Icon }) => <Link key={label} href={href} className={`nav-item ${activeLabel === label ? 'nav-active' : ''}`} onClick={() => setSidebarOpen(false)}><Icon size={18} /><span>{label}</span></Link>)}<span className="nav-label nav-label-spaced">Manage</span><Link className={`nav-item ${activeLabel === 'Notifications' ? 'nav-active' : ''}`} href="/notifications" onClick={() => setSidebarOpen(false)}><Bell size={18} /><span>Notifications</span></Link><Link className={`nav-item ${activeLabel === 'Team' ? 'nav-active' : ''}`} href="/team" onClick={() => setSidebarOpen(false)}><Users size={18} /><span>Team</span></Link><Link className={`nav-item ${activeLabel === 'Settings' ? 'nav-active' : ''}`} href="/settings" onClick={() => setSidebarOpen(false)}><Settings size={18} /><span>Settings</span></Link></nav>
       <div className="sidebar-footer"><div className="secure-note"><ShieldCheck size={16} /><span>Protected workspace<br /><b>All systems operational</b></span></div><button className="profile-row" onClick={() => void signOut().then(() => router.replace('/login'))}><div className="profile-avatar">{email.slice(0, 2).toUpperCase() || 'ME'}</div><div><strong>{email || 'Signed-in user'}</strong><span>Sign out</span></div></button></div>
     </aside>
-    <main className="content-shell"><header className="topbar"><button className="icon-button menu-trigger" onClick={() => setSidebarOpen(true)} aria-label="Open navigation"><Menu size={21} /></button><div className="breadcrumb"><span>Workspace</span><b>/</b><strong>{activeLabel}</strong></div><div className="topbar-actions"><button className="icon-button" aria-label="Search"><Search size={19} /></button><Link className="notification-button" href="/notifications" aria-label="Notifications"><Bell size={19} /><i>4</i></Link><div className="topbar-avatar">OC</div></div></header>{children}</main>
+    <main className="content-shell"><header className="topbar"><button className="icon-button menu-trigger" onClick={() => setSidebarOpen(true)} aria-label="Open navigation"><Menu size={21} /></button>{title && <h1 className="topbar-title">{title}</h1>}</header>{children}</main>
   </div>;
 }

@@ -6,6 +6,7 @@ import { Customer, CustomerDocument } from '../customers/customer.schema';
 import { AssignSensorDto, CreateSensorDto, SensorQueryDto } from './sensor.dto';
 import { Sensor, SensorDocument } from './sensor.schema';
 import { SensorAssignment, SensorAssignmentDocument } from './sensor-assignment.schema';
+import { RealtimeGateway } from '../realtime/realtime.gateway';
 
 @Injectable()
 export class SensorsService {
@@ -13,10 +14,13 @@ export class SensorsService {
     @InjectModel(Sensor.name) private readonly sensors: Model<SensorDocument>,
     @InjectModel(SensorAssignment.name) private readonly assignments: Model<SensorAssignmentDocument>,
     @InjectModel(Customer.name) private readonly customers: Model<CustomerDocument>,
+    private readonly realtime: RealtimeGateway,
   ) {}
 
   async create(user: AuthenticatedUser, dto: CreateSensorDto): Promise<Sensor> {
-    return this.sensors.create({ ...dto, expiresAt: new Date(dto.expiresAt), companyId: user.companyId });
+    const sensor = await this.sensors.create({ ...dto, expiresAt: new Date(dto.expiresAt), companyId: user.companyId });
+    this.realtime.broadcastCompany(user.companyId, 'sensor.changed', { action: 'created', sensorId: sensor._id.toString() });
+    return sensor;
   }
 
   async findAll(user: AuthenticatedUser, query: SensorQueryDto): Promise<{ data: Sensor[]; total: number; page: number; limit: number }> {
@@ -44,7 +48,9 @@ export class SensorsService {
     await this.assignments.create({ companyId: user.companyId, sensorId: sensor._id, customerId: customer._id, assignedBy: user.authUserId, assignedAt: new Date(), reason: dto.reason });
     sensor.customerId = customer._id;
     sensor.status = 'ASSIGNED';
-    return sensor.save();
+    const saved = await sensor.save();
+    this.realtime.broadcastCompany(user.companyId, 'sensor.changed', { action: 'assigned', sensorId: sensorId, customerId: dto.customerId });
+    return saved;
   }
 
   async history(user: AuthenticatedUser, sensorId: string): Promise<SensorAssignment[]> {
