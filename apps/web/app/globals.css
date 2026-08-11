@@ -33,6 +33,14 @@
 .page-header-row { align-items:center; display:flex; gap:16px; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; }
 .page-title-text { color:var(--ink); font:800 26px/1.1 'Manrope',sans-serif; letter-spacing:-.8px; margin:0; }
 .header-actions-group { align-items:center; display:flex; gap:10px; flex-wrap:wrap; }
-.topbar-left { align-items:center; display:flex; gap:12px; }
-.topbar-actions-wrap { align-items:center; display:flex; gap:10px; flex-wrap:wrap; }
+.topbar-left { align-items:center; display:flex; flex:0 0 auto; gap:12px; }
+.topbar-center { align-items:center; display:flex; flex:1; justify-content:center; padding:0 12px; min-width:0; }
+.topbar-center-wrap { align-items:center; display:flex; flex-wrap:nowrap; gap:10px; max-width:520px; width:100%; }
+.topbar-center-wrap .search-field { flex:1 1 auto; margin:0; max-width:280px; width:auto; }
+.topbar-center-wrap .filter-button { flex:0 0 auto; white-space:nowrap; }
+.topbar-center-wrap .result-count { flex:0 0 auto; margin-left:0; white-space:nowrap; }
+.topbar-right { align-items:center; display:flex; flex:0 0 auto; justify-content:flex-end; }
+@media (max-width:900px) { .topbar { gap:10px; flex-wrap:wrap; height:auto; padding:12px 20px; } .topbar-center { flex:1 0 100%; order:3; justify-content:stretch; padding:6px 0 0; } .topbar-center-wrap { max-width:none; } }
+
+
 

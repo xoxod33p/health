@@ -49,8 +49,8 @@ export default function CustomersPage() {
     [customers, query]
   );
 
-  const topbarActions = (
-    <div className="topbar-actions-wrap">
+  const topbarCenter = (
+    <div className="topbar-center-wrap">
       <div className="search-field">
         <Search size={16} />
         <input
@@ -63,14 +63,17 @@ export default function CustomersPage() {
         <SlidersHorizontal size={16} /> Filters
       </button>
       <span className="result-count">{filtered.length} loaded</span>
-      <button className="primary-button" onClick={() => setShowForm(true)}>
-        <Plus size={17} /> Add customer
-      </button>
     </div>
   );
 
+  const topbarRight = (
+    <button className="primary-button" onClick={() => setShowForm(true)}>
+      <Plus size={17} /> Add customer
+    </button>
+  );
+
   return (
-    <AppShell headerActions={topbarActions}>
+    <AppShell headerCenter={topbarCenter} headerActions={topbarRight}>
       <div className="page-content">
         {loading && (
           <div className="data-loading">

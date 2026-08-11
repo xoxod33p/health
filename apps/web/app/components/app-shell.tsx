@@ -14,7 +14,7 @@ const navigation = [
   { label: 'Audit log', href: '/audit', icon: ClipboardList },
 ];
 
-export function AppShell({ children, title, headerActions }: Readonly<{ children: React.ReactNode; title?: string; headerActions?: React.ReactNode }>) {
+export function AppShell({ children, title, headerCenter, headerActions }: Readonly<{ children: React.ReactNode; title?: string; headerCenter?: React.ReactNode; headerActions?: React.ReactNode }>) {
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -52,7 +52,8 @@ export function AppShell({ children, title, headerActions }: Readonly<{ children
           <button className="icon-button menu-trigger" onClick={() => setSidebarOpen(true)} aria-label="Open navigation"><Menu size={21} /></button>
           <h1 className="topbar-title">{title ?? activeLabel}</h1>
         </div>
-        {headerActions && <div className="topbar-actions">{headerActions}</div>}
+        {headerCenter && <div className="topbar-center">{headerCenter}</div>}
+        {headerActions && <div className="topbar-right">{headerActions}</div>}
       </header>
       {children}
     </main>
