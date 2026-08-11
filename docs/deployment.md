@@ -101,14 +101,22 @@ SENTRY_DSN=https://examplePublicKey@o0.ingest.sentry.io/0
 
 Once your domain DNS `A record` points to your VPS IP:
 
-1. Obtain a free Let's Encrypt SSL certificate using Certbot:
+1. Ensure Nginx container is running and UFW firewall allows HTTP traffic:
    ```bash
-   sudo certbot certonly --webroot -w /var/www/certbot -d yourdomain.com -d www.yourdomain.com
+   sudo ufw allow 80/tcp
+   sudo ufw allow 443/tcp
+   sudo mkdir -p /var/www/certbot
+   docker compose -f /opt/health/infra/docker-compose.prod.yml up -d nginx
    ```
 
-2. Edit `/opt/health/infra/nginx/conf.d/app.conf` on your VPS and uncomment the HTTPS `server { ... }` block, replacing `yourdomain.com` with your actual domain name.
+2. Obtain a free Let's Encrypt SSL certificate using Certbot for your domain (omit `www` if you do not have a `www` DNS A-record):
+   ```bash
+   sudo certbot certonly --webroot -w /var/www/certbot -d test.xoxod33p.tech
+   ```
 
-3. Reload Nginx configuration:
+3. Edit `/opt/health/infra/nginx/conf.d/app.conf` on your VPS and uncomment the HTTPS `server { ... }` block, replacing `yourdomain.com` with your actual domain name.
+
+4. Reload Nginx configuration:
    ```bash
    docker compose -f /opt/health/infra/docker-compose.prod.yml exec nginx nginx -s reload
    ```
