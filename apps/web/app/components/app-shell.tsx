@@ -14,7 +14,7 @@ const navigation = [
   { label: 'Audit log', href: '/audit', icon: ClipboardList },
 ];
 
-export function AppShell({ children, title }: Readonly<{ children: React.ReactNode; title?: string }>) {
+export function AppShell({ children, title, headerActions }: Readonly<{ children: React.ReactNode; title?: string; headerActions?: React.ReactNode }>) {
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -46,6 +46,15 @@ export function AppShell({ children, title }: Readonly<{ children: React.ReactNo
       <nav className="main-nav" aria-label="Main navigation"><span className="nav-label">Workspace</span>{navigation.map(({ label, href, icon: Icon }) => <Link key={label} href={href} className={`nav-item ${activeLabel === label ? 'nav-active' : ''}`} onClick={() => setSidebarOpen(false)}><Icon size={18} /><span>{label}</span></Link>)}<span className="nav-label nav-label-spaced">Manage</span><Link className={`nav-item ${activeLabel === 'Notifications' ? 'nav-active' : ''}`} href="/notifications" onClick={() => setSidebarOpen(false)}><Bell size={18} /><span>Notifications</span></Link><Link className={`nav-item ${activeLabel === 'Team' ? 'nav-active' : ''}`} href="/team" onClick={() => setSidebarOpen(false)}><Users size={18} /><span>Team</span></Link><Link className={`nav-item ${activeLabel === 'Settings' ? 'nav-active' : ''}`} href="/settings" onClick={() => setSidebarOpen(false)}><Settings size={18} /><span>Settings</span></Link></nav>
       <div className="sidebar-footer"><div className="secure-note"><ShieldCheck size={16} /><span>Protected workspace<br /><b>All systems operational</b></span></div><button className="profile-row" onClick={() => void signOut().then(() => router.replace('/login'))}><div className="profile-avatar">{email.slice(0, 2).toUpperCase() || 'ME'}</div><div><strong>{email || 'Signed-in user'}</strong><span>Sign out</span></div></button></div>
     </aside>
-    <main className="content-shell"><header className="topbar"><button className="icon-button menu-trigger" onClick={() => setSidebarOpen(true)} aria-label="Open navigation"><Menu size={21} /></button><h1 className="topbar-title">{title ?? activeLabel}</h1></header>{children}</main>
+    <main className="content-shell">
+      <header className="topbar">
+        <div className="topbar-left">
+          <button className="icon-button menu-trigger" onClick={() => setSidebarOpen(true)} aria-label="Open navigation"><Menu size={21} /></button>
+          <h1 className="topbar-title">{title ?? activeLabel}</h1>
+        </div>
+        {headerActions && <div className="topbar-actions">{headerActions}</div>}
+      </header>
+      {children}
+    </main>
   </div>;
 }

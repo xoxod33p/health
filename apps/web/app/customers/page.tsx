@@ -49,30 +49,29 @@ export default function CustomersPage() {
     [customers, query]
   );
 
-  return (
-    <AppShell>
-      <div className="page-content">
-        <section className="page-header-row">
-          <h1 className="page-title-text">Customers</h1>
-          <div className="header-actions-group">
-            <div className="search-field">
-              <Search size={16} />
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search customers or IDs"
-              />
-            </div>
-            <button className="filter-button">
-              <SlidersHorizontal size={16} /> Filters
-            </button>
-            <span className="result-count">{filtered.length} loaded</span>
-            <button className="primary-button" onClick={() => setShowForm(true)}>
-              <Plus size={17} /> Add customer
-            </button>
-          </div>
-        </section>
+  const topbarActions = (
+    <div className="topbar-actions-wrap">
+      <div className="search-field">
+        <Search size={16} />
+        <input
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Search customers or IDs"
+        />
+      </div>
+      <button className="filter-button">
+        <SlidersHorizontal size={16} /> Filters
+      </button>
+      <span className="result-count">{filtered.length} loaded</span>
+      <button className="primary-button" onClick={() => setShowForm(true)}>
+        <Plus size={17} /> Add customer
+      </button>
+    </div>
+  );
 
+  return (
+    <AppShell headerActions={topbarActions}>
+      <div className="page-content">
         {loading && (
           <div className="data-loading">
             <RefreshCw size={18} className="spin" />

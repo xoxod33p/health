@@ -33,3 +33,6 @@
 .page-header-row { align-items:center; display:flex; gap:16px; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; }
 .page-title-text { color:var(--ink); font:800 26px/1.1 'Manrope',sans-serif; letter-spacing:-.8px; margin:0; }
 .header-actions-group { align-items:center; display:flex; gap:10px; flex-wrap:wrap; }
+.topbar-left { align-items:center; display:flex; gap:12px; }
+.topbar-actions-wrap { align-items:center; display:flex; gap:10px; flex-wrap:wrap; }
+
