@@ -1,168 +1,124 @@
-# Production Deployment Guide (Ubuntu VPS)
+# 🚀 Production Deployment Guide (Ubuntu VPS & GitHub Actions CI/CD)
 
-This document provides complete operational instructions for configuring your private Ubuntu VPS and running the GitHub Actions CI/CD pipeline for the Healthcare Sensor Management Platform.
+Complete operational reference guide for deploying and maintaining the CareSignal Healthcare Sensor Platform on a private Ubuntu VPS with automated SSL and GitHub Actions CI/CD.
 
 ---
 
-## 1. Overview & Architecture
-
-The production environment runs containerized services orchestrated via Docker Compose behind an Nginx reverse proxy:
+## 1. System Architecture
 
 ```text
-User Browser / Clients (HTTPS 443 / HTTP 80)
-            |
-      [Nginx Reverse Proxy]
-       /                 \
-      /                   \
-[Next.js Web]       [NestJS API]
- (Port 3000)         (Port 3001)
-                         |
-      +------------------+------------------+
-      |                  |                  |
-  [MongoDB]           [Redis]            [MinIO]
- (Port 27017)       (Port 6379)        (Port 9000/9001)
+Browser / Client (Port 80 / Port 443 HTTPS)
+              │
+        [ Nginx 1.27 ]
+         /          \
+  (Port 3000)     (Port 3001)
+  Next.js Web      NestJS API
+                     │
+         ┌───────────┼───────────┐
+      [MongoDB 8] [Redis 7.4] [MinIO]
 ```
 
 ---
 
-## 2. Initial VPS Setup (One-Time Execution)
+## 2. One-Time VPS Initial Setup
 
-1. SSH into your newly provisioned Ubuntu 22.04 or 24.04 LTS VPS server as root or a user with sudo privileges:
-   ```bash
-   ssh root@YOUR_VPS_IP
-   ```
+SSH into your Ubuntu 22.04 or 24.04 LTS VPS:
+```bash
+ssh root@YOUR_VPS_IP
+```
 
-2. Clone or copy `infra/scripts/setup-vps.sh` to your server and run it:
-   ```bash
-   curl -fsSL https://raw.githubusercontent.com/YOUR_REPO/main/infra/scripts/setup-vps.sh | bash
-   ```
-   *This script automatically installs Docker Engine, Docker Compose Plugin, configures firewall rules (ports 22, 80, 443), creates `/opt/health`, and configures log rotation to prevent disk overflow.*
+Run initial setup:
+```bash
+curl -fsSL https://raw.githubusercontent.com/yashan223/health/main/infra/scripts/setup-vps.sh | bash
+```
 
 ---
 
-## 3. GitHub Secrets Setup
+## 3. Fresh Reset & Clean Pull Command
 
-Navigate to your GitHub repository: **Settings > Secrets and variables > Actions** and create the following Repository Secrets:
+To completely wipe all running containers, data volumes, local uncommitted modifications, and pull fresh code from `origin/main`:
 
-| Secret Name | Description | Example / Note |
+```bash
+cd ~/health && docker compose -f infra/docker-compose.prod.yml down -v --remove-orphans && git reset --hard HEAD && git clean -fd && git pull origin main
+```
+
+---
+
+## 4. 1-Click SSL Certificate Setup (Let's Encrypt)
+
+Run the automated SSL setup script on your VPS:
+
+```bash
+sudo bash infra/scripts/setup-ssl.sh test.xoxod33p.tech
+```
+
+### What `setup-ssl.sh` performs:
+1. Generates temporary self-signed fallback certificates in `/etc/letsencrypt/live/test.xoxod33p.tech/` so Nginx boots on Port 443 with zero crashes.
+2. Starts Nginx listening on both Port 80 and Port 443.
+3. Requests official Let's Encrypt SSL certificates via `certbot certonly --webroot`.
+4. Automatically reloads Nginx with production SSL certificates.
+
+---
+
+## 5. GitHub Secrets Configuration
+
+Add these Repository Secrets in **GitHub > Settings > Secrets and variables > Actions**:
+
+| Secret Name | Description | Example |
 |---|---|---|
-| `VPS_HOST` | IP address or domain name of your Ubuntu VPS | `192.0.2.1` or `api.yourdomain.com` |
-| `VPS_USERNAME` | SSH username on your server | `ubuntu` or `root` |
-| `VPS_SSH_KEY` | Private SSH Key for authentication | Ensure corresponding public key is in `~/.ssh/authorized_keys` |
-| `VPS_PORT` | SSH Port | `22` (default if omitted) |
-| `PROD_ENV_FILE` | Complete production environment variables | Copy from template in Section 4 below |
+| `VPS_HOST` | VPS Server IP address | `136.85.39.220` |
+| `VPS_USERNAME` | SSH Username | `root` |
+| `VPS_PASSWORD` | VPS Root Password | `YourRootPassword` |
+| `SUPABASE_URL` | Supabase URL | `https://iwgxcuwyioxvwegoofhv.supabase.co` |
+| `SUPABASE_ANON_KEY` | Supabase Anon / Publishable Key | `sb_publishable_...` |
+| `WEB_ORIGIN` | Production Domain Origin | `http://test.xoxod33p.tech` |
+| `PROD_ENV_FILE` | Complete `.env` file contents | Paste full `.env` |
 
 ---
 
-## 4. Production Environment Template (`PROD_ENV_FILE`)
+## 6. Production `.env` Template
 
-Paste the following environment template into the `PROD_ENV_FILE` secret in GitHub:
+Create or verify `~/health/.env` on your VPS:
 
 ```env
-# Application
 NODE_ENV=production
 PORT=3001
-DOMAIN_NAME=yourdomain.com
-WEB_ORIGIN=https://yourdomain.com
+DOMAIN_NAME=test.xoxod33p.tech
+WEB_ORIGIN=http://test.xoxod33p.tech
 
-# Database Secrets
-MONGO_ROOT_USERNAME=healthcare_admin
-MONGO_ROOT_PASSWORD=SUPER_SECRET_MONGO_PASSWORD_HERE
-MONGO_DATABASE=healthcare_prod
-MONGODB_URI=mongodb://healthcare_admin:SUPER_SECRET_MONGO_PASSWORD_HERE@mongodb:27017/healthcare_prod?authSource=admin
+MONGO_ROOT_USERNAME=healthcare
+MONGO_ROOT_PASSWORD=HealthcareSecurePassword123!
+MONGO_DATABASE=healthcare
+MONGODB_URI=mongodb://healthcare:HealthcareSecurePassword123!@mongodb:27017/healthcare?authSource=admin
 
-# Redis Secrets
-REDIS_PASSWORD=SUPER_SECRET_REDIS_PASSWORD_HERE
-REDIS_URL=redis://:SUPER_SECRET_REDIS_PASSWORD_HERE@redis:6379
+REDIS_PASSWORD=RedisSecurePassword123!
+REDIS_URL=redis://:RedisSecurePassword123!@redis:6379
 
-# MinIO Object Storage
 MINIO_ENDPOINT=minio
 MINIO_PORT=9000
-MINIO_ACCESS_KEY=SUPER_SECRET_MINIO_ACCESS_KEY
-MINIO_SECRET_KEY=SUPER_SECRET_MINIO_SECRET_KEY
+MINIO_ACCESS_KEY=minio_admin_key
+MINIO_SECRET_KEY=minio_secure_secret_123!
 MINIO_USE_SSL=false
 
-# Supabase Authentication
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
-SUPABASE_SECRET_KEY=your_supabase_secret_key
-SUPABASE_JWKS_URL=https://your-project.supabase.co/rest/v1/
-SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
-
-# Email & Monitoring
-RESEND_API_KEY=re_123456789
-SENTRY_DSN=https://examplePublicKey@o0.ingest.sentry.io/0
+SUPABASE_URL=https://iwgxcuwyioxvwegoofhv.supabase.co
+SUPABASE_PUBLISHABLE_KEY=sb_publishable_DtKmQBeutdxhWIUhdZ892g_-YTpnqMN
+SUPABASE_ANON_KEY=sb_publishable_DtKmQBeutdxhWIUhdZ892g_-YTpnqMN
 ```
 
 ---
 
-## 5. SSL / TLS Certificate Setup (Let's Encrypt)
+## 7. Manual Rebuild & Restart Commands
 
-Once your domain DNS `A record` points to your VPS IP:
-
-1. Ensure Nginx container is running and UFW firewall allows HTTP traffic:
-   ```bash
-   sudo ufw allow 80/tcp
-   sudo ufw allow 443/tcp
-   sudo mkdir -p /var/www/certbot
-   docker compose -f /opt/health/infra/docker-compose.prod.yml up -d nginx
-   ```
-
-2. Obtain a free Let's Encrypt SSL certificate using Certbot for your domain (omit `www` if you do not have a `www` DNS A-record):
-   ```bash
-   sudo certbot certonly --webroot -w /var/www/certbot -d test.xoxod33p.tech
-   ```
-
-3. Edit `/opt/health/infra/nginx/conf.d/app.conf` on your VPS and uncomment the HTTPS `server { ... }` block, replacing `yourdomain.com` with your actual domain name.
-
-4. Reload Nginx configuration:
-   ```bash
-   docker compose -f /opt/health/infra/docker-compose.prod.yml exec nginx nginx -s reload
-   ```
-
----
-
-## 6. Deployment Workflows
-
-### Automatic CI/CD Pipeline
-- **CI (`ci.yml`)**: Triggered on pull requests and pushes to `main`. Runs linting, typechecking, tests, and validates Docker buildability.
-- **CD (`cd.yml`)**: Triggered automatically on push to `main`. Builds multi-stage Docker images for `@healthcare/api` and `@healthcare/web`, pushes them to GitHub Container Registry (`ghcr.io`), connects to your VPS via SSH, updates container images, and executes zero-downtime container upgrades (`docker compose up -d`).
-
-### Manual CLI Command Deployment (On VPS)
-If you need to trigger a manual deployment directly on the VPS:
 ```bash
-cd /opt/health
-docker compose -f infra/docker-compose.prod.yml pull
-docker compose -f infra/docker-compose.prod.yml up -d
-```
+# Rebuild web image with build args
+docker compose -f infra/docker-compose.prod.yml build web --no-cache
 
----
+# Recreate all containers
+docker compose -f infra/docker-compose.prod.yml up -d --force-recreate
 
-## 7. Operations & Troubleshooting
+# Check status
+docker compose -f infra/docker-compose.prod.yml ps
 
-### View Container Logs
-```bash
-# View all container logs in real time
-docker compose -f /opt/health/infra/docker-compose.prod.yml logs -f
-
-# View API logs only
-docker compose -f /opt/health/infra/docker-compose.prod.yml logs -f api
-
-# View Nginx logs
-docker compose -f /opt/health/infra/docker-compose.prod.yml logs -f nginx
-```
-
-### Inspect Container Health
-```bash
-docker compose -f /opt/health/infra/docker-compose.prod.yml ps
-```
-
-### API Health Checks
-```bash
-# Liveness
-curl http://localhost:3001/api/v1/health/live
-
-# Readiness
-curl http://localhost:3001/api/v1/health/ready
+# View real-time logs
+docker compose -f infra/docker-compose.prod.yml logs -f
 ```

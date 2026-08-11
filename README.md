@@ -1,27 +1,103 @@
-# Healthcare Sensor Management Platform
+# 🏥 CareSignal — Healthcare Sensor Management Platform
 
-A modular-monolith healthcare sensor management SaaS foundation.
+CareSignal is an enterprise-grade, modular-monolith healthcare sensor telemetry & customer management SaaS platform built with **Next.js 16**, **React 19**, **NestJS 11**, **MongoDB 8**, **Redis 7.4**, **MinIO**, **Nginx**, and **Supabase Auth**.
 
-## Workspace
+---
 
-- `apps/api`: NestJS REST API. Authentication, tenant context, and domain modules belong here.
-- `apps/web`: Next.js frontend with Tailwind CSS. UI permissions are convenience only; API authorization is authoritative.
-- `infra`: Docker Compose, Nginx, backups, and deployment configuration.
-- `docs`: architecture, security, data model, and operational decisions.
+## ⚡ Tech Stack Architecture
 
-## Local start
+- **Frontend (`apps/web`)**: Next.js 16 (App Router), React 19, Tailwind CSS, Lucide Icons, Mobile-optimized responsive design system.
+- **Backend API (`apps/api`)**: NestJS 11 Modular Monolith with Mongoose, Throttler, WebSocket Gateway, and role-based permissions.
+- **Database & Cache**: MongoDB 8 (`employees`, `customers`, `sensors`, `assignments`, `audit_logs`) and Redis 7.4.
+- **Object Storage**: MinIO S3-compatible file storage.
+- **Reverse Proxy**: Nginx 1.27 with automated SSL (Let's Encrypt / Certbot) and WebSocket reverse proxying.
+- **Authentication**: Supabase Auth & JWT session management.
 
-1. Copy `.env.example` to `.env` and replace development-only values as needed.
-2. Install packages: `npm install`
-3. Start the data services: `docker compose -f infra/docker-compose.yml up -d mongodb redis minio`
-4. Start the API: `npm run dev:api`
+---
 
-To create or reset the local development admin in Supabase and MongoDB, run `npm --workspace apps/api run admin:bootstrap`. Use the `DEFAULT_ADMIN_EMAIL` and `DEFAULT_ADMIN_PASSWORD` values from your local `.env` to sign in at `/login`.
+## 🚀 Key Features
 
-On Windows, run `run-dev.cmd` from the repository folder to open separate PowerShell windows for infrastructure, API, and web.
+1. **Sensor & Telemetry Management**: Register devices, track models/serials, manage statuses (`AVAILABLE`, `ASSIGNED`, `DISABLED`), and inspect telemetry.
+2. **Instant Customer-Sensor Linking**: Link sensors to specific customers directly during registration or assign unassigned devices later.
+3. **User Management & Role Control**: User administration directory supporting `COMPANY_ADMIN`, `MANAGER`, `HEALTHCARE_EMPLOYEE`, and `AUDITOR` roles with live Supabase Auth session integration.
+4. **Customer Directory**: Customer records with optional address, contact info, and clinical description notes.
+5. **Mobile-First Responsive Layout**: Touch-optimized navigation drawer with dark backdrop blur, responsive data tables, mobile-friendly stat grids, and modal popups.
+6. **Zero-Downtime Deployment & 1-Click SSL**: Built-in scripts for self-signed fallback certs, automated Let's Encrypt certbot issuance, and GitHub Actions CI/CD.
 
-Docker services expose only local development ports: MongoDB on `27017`, Redis on `6379`, and MinIO on `9000` with its console on `9001`. Compose reads database credentials from `.env` and falls back to development-only defaults when variables are absent.
+---
 
-API health endpoints are available at `/api/v1/health`, `/api/v1/health/live`, and `/api/v1/health/ready`.
+## 💻 Local Development Setup
 
-Production secrets must come from the deployment secret manager. Never expose the Supabase service-role key, database credentials, Redis password, MinIO secret, or email API key to the browser.
+### Prerequisites
+- Node.js 22 LTS
+- Docker Desktop
+
+### Quick Start (Local)
+1. Clone the repository and install dependencies:
+   ```bash
+   npm install
+   ```
+2. Create `.env` files:
+   ```bash
+   cp .env.example .env
+   cp apps/web/.env.example apps/web/.env.local
+   ```
+3. Start infrastructure containers (MongoDB, Redis, MinIO):
+   ```bash
+   docker compose -f infra/docker-compose.yml up -d
+   ```
+4. Run development servers:
+   ```bash
+   # Terminal 1: API (Port 3001)
+   npm run dev:api
+
+   # Terminal 2: Web (Port 3000)
+   npm run dev:web
+   ```
+
+---
+
+## 🌐 Production VPS Deployment
+
+### 1. Single-Command Clean Pull & Reset (On VPS)
+To completely wipe stale containers/volumes and pull the latest production code:
+```bash
+cd ~/health && docker compose -f infra/docker-compose.prod.yml down -v --remove-orphans && git reset --hard HEAD && git clean -fd && git pull origin main
+```
+
+### 2. 1-Click SSL Certificate Setup (Let's Encrypt)
+To automatically issue Let's Encrypt SSL certificates for your domain and configure Nginx:
+```bash
+sudo bash infra/scripts/setup-ssl.sh test.xoxod33p.tech
+```
+
+### 3. Rebuild Containers
+```bash
+docker compose -f infra/docker-compose.prod.yml build --no-cache
+docker compose -f infra/docker-compose.prod.yml up -d --force-recreate
+```
+
+---
+
+## 🤖 GitHub Actions CI/CD Pipeline
+
+Required Secrets in **GitHub Repository > Settings > Secrets and variables > Actions**:
+
+| Secret Name | Description | Example |
+|---|---|---|
+| `VPS_HOST` | VPS Server IP address or domain | `136.85.39.220` |
+| `VPS_USERNAME` | SSH User | `root` |
+| `VPS_PASSWORD` | VPS Root Password | `YourSecureVpsPassword` |
+| `SUPABASE_URL` | Supabase Project URL | `https://your-project.supabase.co` |
+| `SUPABASE_ANON_KEY` | Supabase Publishable / Anon Key | `sb_publishable_...` |
+| `WEB_ORIGIN` | Production Web Origin URL | `http://test.xoxod33p.tech` |
+| `PROD_ENV_FILE` | Complete production `.env` contents | Paste full `.env` contents |
+
+---
+
+## 🛠️ Verification & Health Checks
+
+- **Web Frontend**: `http://test.xoxod33p.tech` / `https://test.xoxod33p.tech`
+- **API Liveness**: `curl http://test.xoxod33p.tech/api/v1/health/live`
+- **API Readiness**: `curl http://test.xoxod33p.tech/api/v1/health/ready`
+- **Container Status**: `docker compose -f infra/docker-compose.prod.yml ps`
