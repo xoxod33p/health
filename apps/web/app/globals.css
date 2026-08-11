@@ -40,6 +40,10 @@
 .topbar-center-wrap .select-control { flex:0 0 auto; white-space:nowrap; }
 .topbar-center-wrap .filter-button { flex:0 0 auto; white-space:nowrap; }
 .topbar-center-wrap .result-count { flex:0 0 auto; margin-left:0; white-space:nowrap; }
+.topbar-center-wrap .settings-tabs { border-bottom:0; margin-bottom:0; gap:4px; }
+.topbar-center-wrap .settings-tab { border-bottom:2px solid transparent; height:42px; padding:0 14px; border-radius:4px; }
+.topbar-center-wrap .settings-tab:hover { color:var(--ink); }
+.topbar-center-wrap .settings-tab-active { border-bottom-color:var(--teal); color:var(--teal); font-weight:600; }
 .topbar-right { align-items:center; display:flex; flex:0 0 auto; justify-content:flex-end; }
 @media (max-width:900px) { .topbar { gap:10px; flex-wrap:wrap; height:auto; padding:12px 20px; } .topbar-center { flex:1 0 100%; order:3; justify-content:stretch; padding:6px 0 0; } .topbar-center-wrap { max-width:none; } }
 
