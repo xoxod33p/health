@@ -4,4 +4,95 @@ import { BellRing, Building2, KeyRound, Save, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
 import { AppShell } from '../components/app-shell';
 
-export default function SettingsPage() { const [saved, setSaved] = useState(false); return <AppShell><div className="page-content narrow-content"><section className="form-heading"><p className="eyebrow">Workspace administration</p><h1>Settings</h1><p className="heading-copy">Configure company details, notification rules, and security preferences.</p></section><div className="settings-tabs"><button className="settings-tab settings-tab-active"><Building2 size={16} /> Company</button><button className="settings-tab"><BellRing size={16} /> Notifications</button><button className="settings-tab"><ShieldCheck size={16} /> Security</button><button className="settings-tab"><KeyRound size={16} /> API access</button></div><form className="panel form-panel" onSubmit={(event) => { event.preventDefault(); setSaved(true); }}><div className="form-section"><h2>Company profile</h2><p>This information appears in reports and notifications.</p><div className="form-grid"><label>Company name<input /></label><label>Customer-facing email<input type="email" /></label><label>Timezone<select defaultValue=""><option value="">Select a timezone</option><option value="America/New_York">Eastern Time (ET)</option><option value="America/Chicago">Central Time (CT)</option><option value="America/Denver">Mountain Time (MT)</option><option value="America/Los_Angeles">Pacific Time (PT)</option></select></label><label>Default expiration window<select defaultValue=""><option value="">Select a window</option><option value="30">30 days</option><option value="14">14 days</option><option value="7">7 days</option></select></label></div></div><div className="form-section"><h2>Notification preferences</h2><p>Choose which operational events reach your team.</p><label className="toggle-row"><span><strong>Sensor expiration alerts</strong><small>Configure this after notification preferences are loaded.</small></span><input type="checkbox" /></label><label className="toggle-row"><span><strong>Daily operational digest</strong><small>Configure this after notification preferences are loaded.</small></span><input type="checkbox" /></label></div><div className="form-actions"><span className="save-message">{saved ? 'Changes saved just now' : ''}</span><button className="primary-button"><Save size={16} /> Save changes</button></div></form></div></AppShell>; }
+export default function SettingsPage() {
+  const [saved, setSaved] = useState(false);
+
+  return (
+    <AppShell>
+      <div className="page-content narrow-content">
+        <section className="form-heading">
+          <h1>Settings</h1>
+        </section>
+        <div className="settings-tabs">
+          <button className="settings-tab settings-tab-active">
+            <Building2 size={16} /> Company
+          </button>
+          <button className="settings-tab">
+            <BellRing size={16} /> Notifications
+          </button>
+          <button className="settings-tab">
+            <ShieldCheck size={16} /> Security
+          </button>
+          <button className="settings-tab">
+            <KeyRound size={16} /> API access
+          </button>
+        </div>
+        <form
+          className="panel form-panel"
+          onSubmit={(event) => {
+            event.preventDefault();
+            setSaved(true);
+          }}
+        >
+          <div className="form-section">
+            <h2>Company profile</h2>
+            <p>This information appears in reports and notifications.</p>
+            <div className="form-grid">
+              <label>
+                Company name
+                <input />
+              </label>
+              <label>
+                Customer-facing email
+                <input type="email" />
+              </label>
+              <label>
+                Timezone
+                <select defaultValue="">
+                  <option value="">Select a timezone</option>
+                  <option value="America/New_York">Eastern Time (ET)</option>
+                  <option value="America/Chicago">Central Time (CT)</option>
+                  <option value="America/Denver">Mountain Time (MT)</option>
+                  <option value="America/Los_Angeles">Pacific Time (PT)</option>
+                </select>
+              </label>
+              <label>
+                Default expiration window
+                <select defaultValue="">
+                  <option value="">Select a window</option>
+                  <option value="30">30 days</option>
+                  <option value="14">14 days</option>
+                  <option value="7">7 days</option>
+                </select>
+              </label>
+            </div>
+          </div>
+          <div className="form-section">
+            <h2>Notification preferences</h2>
+            <p>Choose which operational events reach your team.</p>
+            <label className="toggle-row">
+              <span>
+                <strong>Sensor expiration alerts</strong>
+                <small>Configure this after notification preferences are loaded.</small>
+              </span>
+              <input type="checkbox" />
+            </label>
+            <label className="toggle-row">
+              <span>
+                <strong>Daily operational digest</strong>
+                <small>Configure this after notification preferences are loaded.</small>
+              </span>
+              <input type="checkbox" />
+            </label>
+          </div>
+          <div className="form-actions">
+            <span className="save-message">{saved ? 'Changes saved just now' : ''}</span>
+            <button className="primary-button">
+              <Save size={16} /> Save changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </AppShell>
+  );
+}

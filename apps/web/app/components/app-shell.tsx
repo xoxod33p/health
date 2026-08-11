@@ -21,7 +21,7 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
   const cachedSession = getCachedSession();
   const [authState, setAuthState] = useState<'loading' | 'ready' | 'error'>(cachedSession ? 'ready' : 'loading');
   const [email, setEmail] = useState(cachedSession?.user.email ?? '');
-  const activeLabel = navigation.find((item) => item.href === pathname)?.label ?? (pathname.startsWith('/team') ? 'Team' : pathname.startsWith('/settings') ? 'Settings' : pathname.startsWith('/notifications') ? 'Notifications' : 'Workspace');
+  const activeLabel = navigation.find((item) => item.href === pathname)?.label ?? (pathname.startsWith('/settings') ? 'Settings' : pathname.startsWith('/notifications') ? 'Notifications' : 'Workspace');
 
   useEffect(() => {
     let mounted = true;
@@ -43,7 +43,7 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
   return <div className="app-shell">
     <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
       <div className="brand-row"><div className="brand-mark"><Activity size={19} strokeWidth={2.5} /></div><span className="brand-name">care<span>signal</span></span></div>
-      <nav className="main-nav" aria-label="Main navigation"><span className="nav-label">Workspace</span>{navigation.map(({ label, href, icon: Icon }) => <Link key={label} href={href} className={`nav-item ${activeLabel === label ? 'nav-active' : ''}`} onClick={() => setSidebarOpen(false)}><Icon size={18} /><span>{label}</span></Link>)}<span className="nav-label nav-label-spaced">Manage</span><Link className={`nav-item ${activeLabel === 'Notifications' ? 'nav-active' : ''}`} href="/notifications" onClick={() => setSidebarOpen(false)}><Bell size={18} /><span>Notifications</span></Link><Link className={`nav-item ${activeLabel === 'Team' ? 'nav-active' : ''}`} href="/team" onClick={() => setSidebarOpen(false)}><Users size={18} /><span>Team</span></Link><Link className={`nav-item ${activeLabel === 'Settings' ? 'nav-active' : ''}`} href="/settings" onClick={() => setSidebarOpen(false)}><Settings size={18} /><span>Settings</span></Link></nav>
+      <nav className="main-nav" aria-label="Main navigation"><span className="nav-label">Workspace</span>{navigation.map(({ label, href, icon: Icon }) => <Link key={label} href={href} className={`nav-item ${activeLabel === label ? 'nav-active' : ''}`} onClick={() => setSidebarOpen(false)}><Icon size={18} /><span>{label}</span></Link>)}<span className="nav-label nav-label-spaced">Manage</span><Link className={`nav-item ${activeLabel === 'Notifications' ? 'nav-active' : ''}`} href="/notifications" onClick={() => setSidebarOpen(false)}><Bell size={18} /><span>Notifications</span></Link><Link className={`nav-item ${activeLabel === 'Settings' ? 'nav-active' : ''}`} href="/settings" onClick={() => setSidebarOpen(false)}><Settings size={18} /><span>Settings</span></Link></nav>
       <div className="sidebar-footer"><button className="profile-row" onClick={() => void signOut().then(() => router.replace('/login'))}><div className="profile-avatar">{email.slice(0, 2).toUpperCase() || 'ME'}</div><div><strong>{email || 'Signed-in user'}</strong><span>Sign out</span></div></button></div>
     </aside>
     <main className="content-shell">
