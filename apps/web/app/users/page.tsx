@@ -19,10 +19,11 @@ type UserMember = {
   firstName: string;
   lastName: string;
   email: string;
-  role: 'COMPANY_ADMIN' | 'MANAGER' | 'NURSE' | 'AUDITOR';
-  department: string;
-  status: 'ACTIVE' | 'INVITED' | 'DEACTIVATED';
-  createdAt: string;
+  authUserId: string;
+  role: 'COMPANY_ADMIN' | 'MANAGER' | 'HEALTHCARE_EMPLOYEE' | 'STAFF' | 'AUDITOR';
+  title?: string;
+  status: 'ACTIVE' | 'INVITED' | 'SUSPENDED';
+  createdAt?: string;
 };
 
 export default function UsersPage() {
@@ -32,69 +33,23 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   // New User Form State
   const [newFirstName, setNewFirstName] = useState('');
   const [newLastName, setNewLastName] = useState('');
   const [newEmail, setNewEmail] = useState('');
-  const [newRole, setNewRole] = useState<'COMPANY_ADMIN' | 'MANAGER' | 'NURSE' | 'AUDITOR'>('MANAGER');
-  const [newDepartment, setNewDepartment] = useState('Clinical Operations');
+  const [newRole, setNewRole] = useState<'COMPANY_ADMIN' | 'MANAGER' | 'HEALTHCARE_EMPLOYEE' | 'STAFF' | 'AUDITOR'>('MANAGER');
+  const [newTitle, setNewTitle] = useState('Clinical Operations');
 
   const load = async () => {
     setLoading(true);
     setError('');
     try {
-      // Fetch employees from API or initialize with workspace team
-      const result = await apiFetch<UserMember[]>('/employees').catch(() => []);
-      if (result && result.length > 0) {
-        setUsers(result);
-      } else {
-        // Initial fallback workspace team list
-        setUsers([
-          {
-            _id: 'usr-1',
-            firstName: 'Sarah',
-            lastName: 'Jenkins',
-            email: 'sarah.jenkins@caresignal.health',
-            role: 'COMPANY_ADMIN',
-            department: 'Executive',
-            status: 'ACTIVE',
-            createdAt: '2026-01-10',
-          },
-          {
-            _id: 'usr-2',
-            firstName: 'Dr. Marcus',
-            lastName: 'Vance',
-            email: 'marcus.vance@caresignal.health',
-            role: 'MANAGER',
-            department: 'Clinical Operations',
-            status: 'ACTIVE',
-            createdAt: '2026-01-15',
-          },
-          {
-            _id: 'usr-3',
-            firstName: 'Elena',
-            lastName: 'Rostova',
-            email: 'elena.rostova@caresignal.health',
-            role: 'NURSE',
-            department: 'Patient Monitoring',
-            status: 'ACTIVE',
-            createdAt: '2026-02-01',
-          },
-          {
-            _id: 'usr-4',
-            firstName: 'David',
-            lastName: 'Chen',
-            email: 'david.chen@caresignal.health',
-            role: 'AUDITOR',
-            department: 'Quality & Compliance',
-            status: 'ACTIVE',
-            createdAt: '2026-02-05',
-          },
-        ]);
-      }
+      const result = await apiFetch<UserMember[]>('/employees');
+      setUsers(Array.isArray(result) ? result : []);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to load user team');
+      setError(caught instanceof Error ? caught.message : 'Unable to load employees from API');
     } finally {
       setLoading(false);
     }
@@ -109,7 +64,7 @@ export default function UsersPage() {
       users.filter(
         (u) =>
           (roleFilter === 'All roles' || u.role === roleFilter) &&
-          `${u.firstName} ${u.lastName} ${u.email} ${u.department} ${u.role}`
+          `${u.firstName} ${u.lastName} ${u.email} ${u.title ?? ''} ${u.role}`
             .toLowerCase()
             .includes(query.toLowerCase())
       ),
@@ -118,41 +73,45 @@ export default function UsersPage() {
 
   const handleCreateUser = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!newFirstName || !newEmail) return;
+    if (!newFirstName || !newLastName || !newEmail) return;
 
-    const newUser: UserMember = {
-      _id: `usr-${Date.now()}`,
-      firstName: newFirstName,
-      lastName: newLastName,
-      email: newEmail,
-      role: newRole,
-      department: newDepartment || 'Operations',
-      status: 'INVITED',
-      createdAt: new Date().toISOString().split('T')[0] ?? '',
-    };
-
+    setSubmitting(true);
     try {
-      await apiFetch('/employees', {
+      const payload = {
+        firstName: newFirstName.trim(),
+        lastName: newLastName.trim(),
+        email: newEmail.trim().toLowerCase(),
+        authUserId: `user_${Date.now()}`,
+        role: newRole,
+        title: newTitle.trim() || 'Staff',
+      };
+      await apiFetch<UserMember>('/employees', {
         method: 'POST',
-        body: JSON.stringify(newUser),
-      }).catch(() => null);
-    } finally {
-      setUsers([newUser, ...users]);
+        body: JSON.stringify(payload),
+      });
       setModalOpen(false);
       setNewFirstName('');
       setNewLastName('');
       setNewEmail('');
+      await load();
+    } catch (caught) {
+      alert(caught instanceof Error ? caught.message : 'Failed to create user record');
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const handleToggleStatus = (id: string) => {
-    setUsers(
-      users.map((u) =>
-        u._id === id
-          ? { ...u, status: u.status === 'ACTIVE' ? 'DEACTIVATED' : 'ACTIVE' }
-          : u
-      )
-    );
+  const handleToggleStatus = async (id: string, currentStatus: string) => {
+    const nextStatus = currentStatus === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
+    try {
+      await apiFetch(`/employees/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      await load();
+    } catch (caught) {
+      alert(caught instanceof Error ? caught.message : 'Failed to update employee status');
+    }
   };
 
   const topbarCenter = (
@@ -162,7 +121,7 @@ export default function UsersPage() {
         <input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search by name, email, or department"
+          placeholder="Search name, email, or role"
         />
       </div>
       <select
@@ -173,7 +132,7 @@ export default function UsersPage() {
         <option>All roles</option>
         <option value="COMPANY_ADMIN">Company Admin</option>
         <option value="MANAGER">Manager</option>
-        <option value="NURSE">Nurse</option>
+        <option value="HEALTHCARE_EMPLOYEE">Healthcare Staff</option>
         <option value="AUDITOR">Auditor</option>
       </select>
       <span className="result-count">{filtered.length} loaded</span>
@@ -192,11 +151,11 @@ export default function UsersPage() {
         <section className="mini-stat-grid">
           <div className="mini-stat">
             <div className="mini-stat-top">
-              <span>Total members</span>
+              <span>Total employees</span>
               <UsersIcon size={18} />
             </div>
             <strong>{users.length}</strong>
-            <small>Active workspace</small>
+            <small>From API</small>
           </div>
           <div className="mini-stat mini-stat-teal">
             <div className="mini-stat-top">
@@ -212,22 +171,22 @@ export default function UsersPage() {
               <UserCheck size={18} />
             </div>
             <strong>{users.filter((u) => u.role === 'MANAGER').length}</strong>
-            <small>Team leads</small>
+            <small>Operations</small>
           </div>
           <div className="mini-stat mini-stat-amber">
             <div className="mini-stat-top">
-              <span>Pending invites</span>
+              <span>Invited / Suspended</span>
               <UserPlus size={18} />
             </div>
-            <strong>{users.filter((u) => u.status === 'INVITED').length}</strong>
-            <small>Awaiting login</small>
+            <strong>{users.filter((u) => u.status !== 'ACTIVE').length}</strong>
+            <small>Pending / Inactive</small>
           </div>
         </section>
 
         {loading && (
           <div className="data-loading">
             <RefreshCw size={18} className="spin" />
-            Loading workspace members...
+            Loading employees from API...
           </div>
         )}
 
@@ -251,18 +210,18 @@ export default function UsersPage() {
 
             {filtered.length === 0 ? (
               <div className="empty-panel">
-                <h2>No team members found</h2>
-                <p>Add a new user to invite them to this company workspace.</p>
+                <h2>No employee records found</h2>
+                <p>Add the first team member to populate this workspace.</p>
               </div>
             ) : (
               <div className="table-wrap">
                 <table className="rich-table">
                   <thead>
                     <tr>
-                      <th>User</th>
+                      <th>Employee</th>
                       <th>Email</th>
                       <th>Role</th>
-                      <th>Department</th>
+                      <th>Title</th>
                       <th>Status</th>
                       <th style={{ textAlign: 'right' }}>Actions</th>
                     </tr>
@@ -273,14 +232,18 @@ export default function UsersPage() {
                         <td>
                           <div className="entity-cell">
                             <div className="entity-avatar">
-                              {userItem.firstName.slice(0, 1)}
-                              {userItem.lastName.slice(0, 1)}
+                              {userItem.firstName.slice(0, 1).toUpperCase()}
+                              {userItem.lastName.slice(0, 1).toUpperCase()}
                             </div>
                             <div>
                               <strong>
                                 {userItem.firstName} {userItem.lastName}
                               </strong>
-                              <span>Joined {userItem.createdAt}</span>
+                              <span>
+                                {userItem.createdAt
+                                  ? `Added ${new Date(userItem.createdAt).toLocaleDateString()}`
+                                  : 'Active account'}
+                              </span>
                             </div>
                           </div>
                         </td>
@@ -311,7 +274,7 @@ export default function UsersPage() {
                             {userItem.role}
                           </span>
                         </td>
-                        <td>{userItem.department}</td>
+                        <td>{userItem.title ?? 'Staff'}</td>
                         <td>
                           <span
                             className={`status ${
@@ -330,10 +293,10 @@ export default function UsersPage() {
                           <button
                             className="secondary-button"
                             type="button"
-                            onClick={() => handleToggleStatus(userItem._id)}
+                            onClick={() => void handleToggleStatus(userItem._id, userItem.status)}
                             style={{ fontSize: '11px', padding: '6px 10px' }}
                           >
-                            {userItem.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
+                            {userItem.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
                           </button>
                         </td>
                       </tr>
@@ -350,7 +313,7 @@ export default function UsersPage() {
           <div className="modal-backdrop">
             <div className="modal-card">
               <div className="modal-heading">
-                <h2>Invite New Team Member</h2>
+                <h2>Add Team Member</h2>
                 <button
                   className="icon-button"
                   type="button"
@@ -373,6 +336,7 @@ export default function UsersPage() {
                   <label>
                     Last name
                     <input
+                      required
                       value={newLastName}
                       onChange={(e) => setNewLastName(e.target.value)}
                       placeholder="e.g. Connor"
@@ -394,21 +358,21 @@ export default function UsersPage() {
                       value={newRole}
                       onChange={(e) =>
                         setNewRole(
-                          e.target.value as 'COMPANY_ADMIN' | 'MANAGER' | 'NURSE' | 'AUDITOR'
+                          e.target.value as 'COMPANY_ADMIN' | 'MANAGER' | 'HEALTHCARE_EMPLOYEE' | 'STAFF' | 'AUDITOR'
                         )
                       }
                     >
                       <option value="COMPANY_ADMIN">Company Admin (Full permissions)</option>
                       <option value="MANAGER">Manager (Sensor & customer manager)</option>
-                      <option value="NURSE">Nurse (Clinical viewer)</option>
+                      <option value="HEALTHCARE_EMPLOYEE">Healthcare Employee (Clinical staff)</option>
                       <option value="AUDITOR">Auditor (Read-only compliance)</option>
                     </select>
                   </label>
                   <label>
-                    Department
+                    Title / Department
                     <input
-                      value={newDepartment}
-                      onChange={(e) => setNewDepartment(e.target.value)}
+                      value={newTitle}
+                      onChange={(e) => setNewTitle(e.target.value)}
                       placeholder="Clinical Operations"
                     />
                   </label>
@@ -421,8 +385,8 @@ export default function UsersPage() {
                   >
                     Cancel
                   </button>
-                  <button className="primary-button" type="submit">
-                    Send invitation
+                  <button className="primary-button" type="submit" disabled={submitting}>
+                    {submitting ? <RefreshCw size={16} className="spin" /> : 'Create user'}
                   </button>
                 </div>
               </form>
