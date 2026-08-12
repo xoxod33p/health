@@ -14,6 +14,7 @@ import { HealthModule } from './health/health.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { RealtimeModule } from './realtime/realtime.module';
 import { SensorsModule } from './sensors/sensors.module';
+import { SensorTypesModule } from './sensor-types/sensor-types.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -41,6 +42,7 @@ import { UsersModule } from './users/users.module';
     DashboardModule,
     EmployeesModule,
     SensorsModule,
+    SensorTypesModule,
     NotificationsModule,
     RealtimeModule,
     HealthModule,

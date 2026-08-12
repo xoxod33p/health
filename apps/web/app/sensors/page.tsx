@@ -372,7 +372,6 @@ export default function SensorsPage() {
                       required
                       value={formCustomerName}
                       onChange={(e) => setFormCustomerName(e.target.value)}
-                      placeholder="e.g. Dr. Gayan Dilruk"
                     />
                   </label>
                   <label>
@@ -381,7 +380,6 @@ export default function SensorsPage() {
                       required
                       value={formSerial}
                       onChange={(e) => setFormSerial(e.target.value.toUpperCase())}
-                      placeholder="e.g. 222226KNDU"
                       style={{ fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.05em' }}
                     />
                   </label>
@@ -400,7 +398,6 @@ export default function SensorsPage() {
                       required
                       value={formIssue}
                       onChange={(e) => setFormIssue(e.target.value)}
-                      placeholder="e.g. Damaged pin, Can't install"
                     />
                     <small style={{ color: '#94a3b8', fontSize: '11px', marginTop: '2px', display: 'block' }}>
                       Describe the issue clearly, e.g. &quot;App shows please replace the sensor error message&quot;
@@ -411,7 +408,6 @@ export default function SensorsPage() {
                     <textarea
                       value={formNotes}
                       onChange={(e) => setFormNotes(e.target.value)}
-                      placeholder="Additional context or remarks..."
                       rows={2}
                       style={{ resize: 'vertical' }}
                     />

@@ -1,6 +1,6 @@
 'use client';
 
-import { Activity, Bell, Boxes, ClipboardList, FileBarChart, LayoutDashboard, LogOut, Menu, Settings, ShieldCheck, Users } from 'lucide-react';
+import { Activity, Bell, Boxes, ClipboardList, FileBarChart, LayoutDashboard, LogOut, Menu, Settings, ShieldCheck, Tag, Users } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -10,6 +10,7 @@ const navigation = [
   { label: 'Overview', href: '/', icon: LayoutDashboard },
   { label: 'Customers', href: '/customers', icon: Users },
   { label: 'Sensors', href: '/sensors', icon: Boxes },
+  { label: 'Sensor Types', href: '/sensor-types', icon: Tag },
   { label: 'Audit log', href: '/audit', icon: ClipboardList },
   { label: 'Reports', href: '/reports', icon: FileBarChart },
 ];

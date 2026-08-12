@@ -33,9 +33,9 @@ export default function NewSensorPage() {
   // Form State
   const [serialNumber, setSerialNumber] = useState('');
   const [sensorTypeId, setSensorTypeId] = useState('');
-  const [manufacturer, setManufacturer] = useState('CareSignal Labs');
-  const [model, setModel] = useState('CS-100');
-  const [expiresAt, setExpiresAt] = useState('2028-12-31');
+  const [manufacturer, setManufacturer] = useState('');
+  const [model, setModel] = useState('');
+  const [expiresAt, setExpiresAt] = useState('');
   const [customerId, setCustomerId] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -114,7 +114,6 @@ export default function NewSensorPage() {
                     required
                     value={serialNumber}
                     onChange={(e) => setSerialNumber(e.target.value)}
-                    placeholder="e.g. SN-8840-X"
                   />
                 </label>
 
@@ -141,7 +140,6 @@ export default function NewSensorPage() {
                   <input
                     value={manufacturer}
                     onChange={(e) => setManufacturer(e.target.value)}
-                    placeholder="e.g. CareSignal Labs"
                   />
                 </label>
 
@@ -150,7 +148,6 @@ export default function NewSensorPage() {
                   <input
                     value={model}
                     onChange={(e) => setModel(e.target.value)}
-                    placeholder="e.g. VS-200"
                   />
                 </label>
 
@@ -206,15 +203,6 @@ export default function NewSensorPage() {
               </button>
             </div>
           </form>
-
-          <aside className="form-aside">
-            <div className="aside-number">01</div>
-            <strong>Register & Link</strong>
-            <p>You can link a sensor directly to a customer now or assign it later from inventory.</p>
-            <div className="aside-number">02</div>
-            <strong>Audit log</strong>
-            <p>Every sensor registration and customer assignment is permanently logged for compliance.</p>
-          </aside>
         </div>
       </div>
     </AppShell>

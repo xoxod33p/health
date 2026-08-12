@@ -217,18 +217,17 @@ function CustomerForm({ onClose, onCreated }: { onClose: () => void; onCreated: 
         </label>
         <label>
           Email (optional)
-          <input name="email" type="email" placeholder="patient@example.com" />
+          <input name="email" type="email" />
         </label>
         <label>
           Address (optional)
-          <input name="address" placeholder="123 Health Ave, Colombo" />
+          <input name="address" />
         </label>
         <label>
           Simple description (optional)
           <textarea
             name="description"
             rows={2}
-            placeholder="Brief clinical notes or description"
             style={{
               background: '#fff',
               border: '1px solid #dce5e5',
