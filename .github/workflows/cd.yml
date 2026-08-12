@@ -61,20 +61,20 @@ jobs:
             fi
 
             echo "==> Cleaning up any old/conflicting containers..."
-            docker compose -f infra/docker-compose.prod.yml down --remove-orphans || true
+            docker compose -f infra/docker-compose.yml down --remove-orphans || true
 
             echo "==> Building and starting container stack on VPS using local .env..."
-            if ! docker compose -f infra/docker-compose.prod.yml up -d --build --force-recreate --remove-orphans; then
+            if ! docker compose -f infra/docker-compose.yml up -d --build --force-recreate --remove-orphans; then
               echo "==> Startup failed. Resetting stale volumes and retrying..."
-              docker compose -f infra/docker-compose.prod.yml down -v --remove-orphans || true
-              docker compose -f infra/docker-compose.prod.yml up -d --build --force-recreate --remove-orphans
+              docker compose -f infra/docker-compose.yml down -v --remove-orphans || true
+              docker compose -f infra/docker-compose.yml up -d --build --force-recreate --remove-orphans
             fi
 
             echo "==> Running automated admin bootstrap..."
-            docker compose -f infra/docker-compose.prod.yml exec -T api npm run admin:bootstrap || true
+            docker compose -f infra/docker-compose.yml exec -T api npm run admin:bootstrap || true
 
             echo "==> Cleaning up unused Docker images..."
             docker image prune -af --filter "until=24h" || true
 
             echo "==> Service Status:"
-            docker compose -f infra/docker-compose.prod.yml ps
+            docker compose -f infra/docker-compose.yml ps

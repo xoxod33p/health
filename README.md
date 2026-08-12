@@ -62,7 +62,7 @@ CareSignal is an enterprise-grade, modular-monolith healthcare sensor telemetry 
 ### 1. Single-Command Clean Pull & Reset (On VPS)
 To completely wipe stale containers/volumes and pull the latest production code:
 ```bash
-cd ~/health && docker compose -f infra/docker-compose.prod.yml down -v --remove-orphans && git reset --hard HEAD && git clean -fd && git pull origin main
+cd ~/health && docker compose -f infra/docker-compose.yml down -v --remove-orphans && git reset --hard HEAD && git clean -fd && git pull origin main
 ```
 
 ### 2. 1-Click SSL Certificate Setup (Let's Encrypt)
@@ -73,8 +73,8 @@ sudo bash infra/scripts/setup-ssl.sh test.xoxod33p.tech
 
 ### 3. Rebuild Containers
 ```bash
-docker compose -f infra/docker-compose.prod.yml build --no-cache
-docker compose -f infra/docker-compose.prod.yml up -d --force-recreate
+docker compose -f infra/docker-compose.yml build --no-cache
+docker compose -f infra/docker-compose.yml up -d --force-recreate
 ```
 
 ---

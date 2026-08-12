@@ -3,12 +3,12 @@ import { CurrentUser } from '../auth/current-user.decorator';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { PermissionGuard } from '../auth/permission.guard';
 import { RequirePermissions } from '../auth/permissions';
-import { SupabaseAuthGuard } from '../auth/supabase-auth.guard';
+import { MongoJwtAuthGuard } from '../auth/jwt-auth.guard';
 import { NotificationQueryDto } from './notification.dto';
 import { NotificationsService } from './notifications.service';
 
 @Controller('notifications')
-@UseGuards(SupabaseAuthGuard, PermissionGuard)
+@UseGuards(MongoJwtAuthGuard, PermissionGuard)
 @RequirePermissions('notification.view')
 export class NotificationsController {
   constructor(private readonly notifications: NotificationsService) {}

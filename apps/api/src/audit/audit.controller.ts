@@ -3,12 +3,12 @@ import { CurrentUser } from '../auth/current-user.decorator';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { PermissionGuard } from '../auth/permission.guard';
 import { RequirePermissions } from '../auth/permissions';
-import { SupabaseAuthGuard } from '../auth/supabase-auth.guard';
+import { MongoJwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AuditQueryDto } from './audit.dto';
 import { AuditService } from './audit.service';
 
 @Controller('audit')
-@UseGuards(SupabaseAuthGuard, PermissionGuard)
+@UseGuards(MongoJwtAuthGuard, PermissionGuard)
 @RequirePermissions('audit.view')
 export class AuditController {
   constructor(private readonly audit: AuditService) {}

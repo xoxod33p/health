@@ -1,24 +1,32 @@
-import { createClient, type Session, type SupabaseClient } from '@supabase/supabase-js';
+export interface AuthUser {
+  id: string;
+  email: string;
+  role: string;
+  companyId: string;
+}
 
-let client: SupabaseClient | undefined;
-let cachedSession: Session | null | undefined;
+export interface AuthSession {
+  access_token: string;
+  user: AuthUser;
+}
+
+const TOKEN_KEY = 'healthcare_auth_token';
+let cachedToken: string | null = null;
+let cachedUser: AuthUser | null = null;
 
 export function getApiBaseUrl(): string {
   let url = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
 
-  // Handle relative paths (e.g. /api/v1 or /api)
   if (url.startsWith('/')) {
     url = url.replace(/\/+$/, '');
     if (!url.endsWith('/api/v1')) url = `${url}/api/v1`;
     return url;
   }
 
-  // Prepend https:// if protocol is missing (e.g. test.xoxod33p.tech/api/v1)
   if (!url.startsWith('http://') && !url.startsWith('https://')) {
     url = `https://${url}`;
   }
 
-  // Upgrade http to https when loaded in browser over HTTPS
   if (typeof window !== 'undefined' && window.location.protocol === 'https:' && url.startsWith('http:')) {
     url = url.replace(/^http:/, 'https:');
   }
@@ -31,36 +39,91 @@ export function getApiBaseUrl(): string {
   return url;
 }
 
-function getSupabaseClient(): SupabaseClient {
-  if (client) return client;
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  if (!url || !key) throw new Error('Supabase frontend configuration is missing');
-  client = createClient(url, key);
-  return client;
+export function getStoredToken(): string | null {
+  if (cachedToken) return cachedToken;
+  if (typeof window !== 'undefined') {
+    cachedToken = localStorage.getItem(TOKEN_KEY);
+    return cachedToken;
+  }
+  return null;
 }
 
-export async function getSession() {
-  if (cachedSession !== undefined) return { data: { session: cachedSession }, error: null };
-  const result = await getSupabaseClient().auth.getSession();
-  cachedSession = result.data.session;
-  return result;
+export async function getSession(): Promise<{ data: { session: AuthSession | null }; error: Error | null }> {
+  const token = getStoredToken();
+  if (!token) {
+    cachedUser = null;
+    return { data: { session: null }, error: null };
+  }
+
+  if (cachedUser) {
+    return { data: { session: { access_token: token, user: cachedUser } }, error: null };
+  }
+
+  try {
+    const baseUrl = getApiBaseUrl();
+    const response = await fetch(`${baseUrl}/auth/me`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      localStorage.removeItem(TOKEN_KEY);
+      cachedToken = null;
+      cachedUser = null;
+      return { data: { session: null }, error: null };
+    }
+
+    const user = (await response.json()) as AuthUser;
+    cachedUser = user;
+    return { data: { session: { access_token: token, user } }, error: null };
+  } catch (error) {
+    return { data: { session: null }, error: error instanceof Error ? error : new Error('Session fetch failed') };
+  }
 }
 
-export function getCachedSession(): Session | null | undefined {
-  return cachedSession;
+export function getCachedSession(): AuthSession | null {
+  const token = getStoredToken();
+  if (!token || !cachedUser) return null;
+  return { access_token: token, user: cachedUser };
 }
 
-export async function signIn(email: string, password: string) {
-  const result = await getSupabaseClient().auth.signInWithPassword({ email, password });
-  if (!result.error) cachedSession = result.data.session;
-  return result;
+export async function signIn(email: string, password: string): Promise<{ data: { session: AuthSession | null }; error: Error | null }> {
+  try {
+    const baseUrl = getApiBaseUrl();
+    const response = await fetch(`${baseUrl}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const body = await response.json();
+    if (!response.ok) {
+      return { data: { session: null }, error: new Error(body.message || 'Invalid email or password') };
+    }
+
+    const session = body as AuthSession;
+    cachedToken = session.access_token;
+    cachedUser = session.user;
+
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(TOKEN_KEY, session.access_token);
+    }
+
+    return { data: { session }, error: null };
+  } catch (error) {
+    return { data: { session: null }, error: error instanceof Error ? error : new Error('Login failed') };
+  }
 }
 
-export async function signOut() {
-  const result = await getSupabaseClient().auth.signOut();
-  cachedSession = null;
-  return result;
+export async function signOut(): Promise<{ error: Error | null }> {
+  cachedToken = null;
+  cachedUser = null;
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(TOKEN_KEY);
+  }
+  return { error: null };
 }
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {

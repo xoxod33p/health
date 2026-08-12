@@ -25,7 +25,7 @@ fi
 
 # 2. Reload Nginx so it picks up the certificate
 echo "==> Reloading Nginx..."
-docker compose -f /opt/health/infra/docker-compose.prod.yml exec nginx nginx -s reload || docker compose -f ~/health/infra/docker-compose.prod.yml exec nginx nginx -s reload || true
+docker compose -f /opt/health/infra/docker-compose.yml exec nginx nginx -s reload || docker compose -f ~/health/infra/docker-compose.yml exec nginx nginx -s reload || true
 
 # 3. Request real Let's Encrypt certificate
 echo "==> Requesting real Let's Encrypt certificate from Certbot..."
@@ -38,6 +38,6 @@ certbot certonly --webroot -w /var/www/certbot \
 
 # 4. Reload Nginx with real SSL certificate
 echo "==> Reloading Nginx with production SSL certificate..."
-docker compose -f /opt/health/infra/docker-compose.prod.yml exec nginx nginx -s reload || docker compose -f ~/health/infra/docker-compose.prod.yml exec nginx nginx -s reload
+docker compose -f /opt/health/infra/docker-compose.yml exec nginx nginx -s reload || docker compose -f ~/health/infra/docker-compose.yml exec nginx nginx -s reload
 
 echo "==> SSL Certificate successfully configured for https://$DOMAIN !"

@@ -1,0 +1,69 @@
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { InjectModel } from '@nestjs/mongoose';
+import type { Model } from 'mongoose';
+import { User, UserDocument } from '../users/user.schema';
+import { LoginDto } from './dto/login.dto';
+import { verifyPassword } from './password.util';
+
+@Injectable()
+export class AuthService {
+  constructor(
+    private readonly config: ConfigService,
+    @InjectModel(User.name) private readonly users: Model<UserDocument>,
+  ) {}
+
+  async login(dto: LoginDto) {
+    const email = dto.email.toLowerCase().trim();
+    const user = await this.users.findOne({ email, status: 'ACTIVE' }).exec();
+    if (!user || !user.passwordHash || !user.salt) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    const isValid = verifyPassword(dto.password, user.passwordHash, user.salt);
+    if (!isValid) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    const token = await this.signToken(user);
+    return {
+      access_token: token,
+      user: {
+        id: user.authUserId,
+        email: user.email,
+        role: user.role,
+        companyId: user.companyId,
+      },
+    };
+  }
+
+  async me(authUserId: string) {
+    const user = await this.users.findOne({ authUserId, status: 'ACTIVE' }).lean().exec();
+    if (!user) throw new UnauthorizedException('User profile not found');
+    return {
+      id: user.authUserId,
+      email: user.email,
+      role: user.role,
+      companyId: user.companyId,
+    };
+  }
+
+  private async signToken(user: UserDocument): Promise<string> {
+    const { SignJWT } = await import('jose');
+    const jwtSecret = this.config.get<string>('JWT_SECRET') ?? 'development_jwt_secret_32_chars_long!';
+    const secret = new TextEncoder().encode(jwtSecret);
+
+    return new SignJWT({
+      sub: user.authUserId,
+      email: user.email,
+      role: user.role,
+      companyId: user.companyId,
+    })
+      .setProtectedHeader({ alg: 'HS256' })
+      .setIssuedAt()
+      .setIssuer('healthcare-api')
+      .setAudience('authenticated')
+      .setExpirationTime('7d')
+      .sign(secret);
+  }
+}

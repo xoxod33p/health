@@ -58,24 +58,22 @@ export default function UsersPage() {
       // 3. Inject current Supabase user if not present
       if (currentUser?.email) {
         const exists = combinedList.some(
-          (u) => u.email.toLowerCase() === currentUser.email?.toLowerCase()
+          (u) => u.email.toLowerCase() === currentUser.email.toLowerCase()
         );
         if (!exists) {
           const emailName = currentUser.email.split('@')[0] ?? 'admin';
-          const supabaseUser: UserMember = {
+          const authUser: UserMember = {
             _id: currentUser.id,
-            firstName: currentUser.user_metadata?.first_name ?? emailName,
-            lastName: currentUser.user_metadata?.last_name ?? 'User',
+            firstName: emailName,
+            lastName: 'Admin',
             email: currentUser.email,
             authUserId: currentUser.id,
-            role: 'COMPANY_ADMIN',
-            title: 'Supabase Authenticated Admin',
+            role: (currentUser.role as UserMember['role']) ?? 'COMPANY_ADMIN',
+            title: 'Authenticated Admin',
             status: 'ACTIVE',
-            createdAt: currentUser.created_at
-              ? (new Date(currentUser.created_at).toISOString().split('T')[0] ?? '')
-              : (new Date().toISOString().split('T')[0] ?? ''),
+            createdAt: new Date().toISOString().split('T')[0] ?? '',
           };
-          combinedList = [supabaseUser, ...combinedList];
+          combinedList = [authUser, ...combinedList];
         }
       }
 

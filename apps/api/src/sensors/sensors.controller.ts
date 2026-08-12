@@ -3,12 +3,12 @@ import { CurrentUser } from '../auth/current-user.decorator';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { PermissionGuard } from '../auth/permission.guard';
 import { RequirePermissions } from '../auth/permissions';
-import { SupabaseAuthGuard } from '../auth/supabase-auth.guard';
+import { MongoJwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AssignSensorDto, CreateSensorDto, SensorQueryDto } from './sensor.dto';
 import { SensorsService } from './sensors.service';
 
 @Controller('sensors')
-@UseGuards(SupabaseAuthGuard, PermissionGuard)
+@UseGuards(MongoJwtAuthGuard, PermissionGuard)
 @RequirePermissions('sensor.view')
 export class SensorsController {
   constructor(private readonly sensors: SensorsService) {}

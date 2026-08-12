@@ -3,12 +3,12 @@ import { CurrentUser } from '../auth/current-user.decorator';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { PermissionGuard } from '../auth/permission.guard';
 import { RequirePermissions } from '../auth/permissions';
-import { SupabaseAuthGuard } from '../auth/supabase-auth.guard';
+import { MongoJwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateEmployeeDto, UpdateEmployeeDto } from './employee.dto';
 import { EmployeesService } from './employees.service';
 
 @Controller('employees')
-@UseGuards(SupabaseAuthGuard, PermissionGuard)
+@UseGuards(MongoJwtAuthGuard, PermissionGuard)
 export class EmployeesController {
   constructor(private readonly employees: EmployeesService) {}
 

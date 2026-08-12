@@ -26,7 +26,7 @@ import { UsersModule } from './users/users.module';
         PORT: Joi.number().port().default(3001),
         WEB_ORIGIN: Joi.string().default('http://localhost:3000'),
         MONGODB_URI: Joi.string().uri().required(),
-        SUPABASE_URL: Joi.string().uri().allow('').default(''),
+        JWT_SECRET: Joi.string().min(16).default('development_jwt_secret_32_chars_long!'),
       }),
     }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 120 }]),
