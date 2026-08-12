@@ -43,6 +43,19 @@ jobs:
               cp "$DEPLOY_DIR/.env.production" "$DEPLOY_DIR/.env"
             fi
 
+            DOMAIN=$(grep ^DOMAIN_NAME "$DEPLOY_DIR/.env" | cut -d '=' -f 2 | tr -d '\r' || echo "test.xoxod33p.tech")
+            if [ -z "$DOMAIN" ]; then DOMAIN="test.xoxod33p.tech"; fi
+
+            echo "==> Ensuring SSL certificate directory exists for $DOMAIN..."
+            mkdir -p "/etc/letsencrypt/live/$DOMAIN" "/var/www/certbot"
+            if [ ! -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then
+              echo "==> Generating SSL certificate for $DOMAIN..."
+              openssl req -x509 -nodes -newkey rsa:2048 -days 365 \
+                -keyout "/etc/letsencrypt/live/$DOMAIN/privkey.pem" \
+                -out "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" \
+                -subj "/CN=$DOMAIN" || true
+            fi
+
             echo "==> Cleaning up any old/conflicting containers..."
             docker compose -f infra/docker-compose.prod.yml down --remove-orphans || true
 
