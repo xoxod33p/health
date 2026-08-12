@@ -28,8 +28,10 @@ fi
 
 # 2. Ensure Nginx container is running
 echo "[2/4] Starting Nginx container..."
-cd ~/health
-docker compose -f infra/docker-compose.prod.yml up -d nginx
+DEPLOY_DIR="/opt/health"
+if [ ! -d "$DEPLOY_DIR" ] && [ -d "$HOME/health" ]; then DEPLOY_DIR="$HOME/health"; fi
+cd "$DEPLOY_DIR"
+docker compose -f infra/docker-compose.yml up -d nginx
 
 # 3. Request official Let's Encrypt certificate from Certbot
 echo "[3/4] Requesting official Let's Encrypt SSL certificate..."
@@ -43,7 +45,7 @@ sudo certbot certonly --webroot \
 
 # 4. Reload Nginx with production SSL certificate
 echo "[4/4] Reloading Nginx with production SSL certificate..."
-docker compose -f infra/docker-compose.prod.yml exec nginx nginx -s reload
+docker compose -f infra/docker-compose.yml exec nginx nginx -s reload
 
 echo "============================================================"
 echo " SUCCESS! SSL setup complete: https://$DOMAIN"
