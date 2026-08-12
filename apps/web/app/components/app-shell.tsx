@@ -125,27 +125,7 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
             <h1 className="topbar-title">{title ?? activeLabel}</h1>
           </div>
           {headerCenter && <div className="topbar-center">{headerCenter}</div>}
-          <div className="topbar-right" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            {headerActions}
-            <button
-              type="button"
-              className="secondary-button"
-              onClick={handleSignOut}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '7px 12px',
-                fontSize: '12px',
-                fontWeight: 600,
-                color: '#e11d48',
-                borderColor: '#fecdd3',
-                background: '#fff1f2',
-              }}
-            >
-              <LogOut size={14} /> Sign out
-            </button>
-          </div>
+          {headerActions && <div className="topbar-right">{headerActions}</div>}
         </header>
         {children}
       </main>
