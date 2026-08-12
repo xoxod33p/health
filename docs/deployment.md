@@ -1,6 +1,6 @@
-# 🚀 Production Deployment Guide (Ubuntu VPS & GitHub Actions CI/CD)
+# 🚀 Production Deployment Guide (Ubuntu VPS Manual Deployment)
 
-Complete operational reference guide for deploying and maintaining the CareSignal Healthcare Sensor Platform on a private Ubuntu VPS with automated SSL and GitHub Actions CI/CD.
+Operational reference guide for deploying and maintaining the CareSignal Healthcare Sensor Platform on a private Ubuntu VPS.
 
 ---
 
@@ -39,7 +39,7 @@ curl -fsSL https://raw.githubusercontent.com/yashan223/health/main/infra/scripts
 To completely wipe all running containers, data volumes, local uncommitted modifications, and pull fresh code from `origin/main`:
 
 ```bash
-cd ~/health && docker compose -f infra/docker-compose.prod.yml down -v --remove-orphans && git reset --hard HEAD && git clean -fd && git pull origin main
+cd /opt/health && docker compose -f infra/docker-compose.yml down -v --remove-orphans && git reset --hard HEAD && git clean -fd && git pull origin main
 ```
 
 ---
@@ -60,31 +60,18 @@ sudo bash infra/scripts/setup-ssl.sh test.xoxod33p.tech
 
 ---
 
-## 5. GitHub Secrets Configuration
+## 5. Production `.env` Template
 
-Add these Repository Secrets in **GitHub > Settings > Secrets and variables > Actions**:
-
-| Secret Name | Description | Example |
-|---|---|---|
-| `VPS_HOST` | VPS Server IP address | `136.85.39.220` |
-| `VPS_USERNAME` | SSH Username | `root` |
-| `VPS_PASSWORD` | VPS Root Password | `YourRootPassword` |
-| `SUPABASE_URL` | Supabase URL | `https://iwgxcuwyioxvwegoofhv.supabase.co` |
-| `SUPABASE_ANON_KEY` | Supabase Anon / Publishable Key | `sb_publishable_...` |
-| `WEB_ORIGIN` | Production Domain Origin | `http://test.xoxod33p.tech` |
-| `PROD_ENV_FILE` | Complete `.env` file contents | Paste full `.env` |
-
----
-
-## 6. Production `.env` Template
-
-Create or verify `~/health/.env` on your VPS:
+Create or verify `/opt/health/.env` on your VPS:
 
 ```env
 NODE_ENV=production
 PORT=3001
 DOMAIN_NAME=test.xoxod33p.tech
-WEB_ORIGIN=http://test.xoxod33p.tech
+WEB_ORIGIN=https://test.xoxod33p.tech
+JWT_SECRET=care_signal_secure_prod_jwt_secret_99812_key!
+
+NEXT_PUBLIC_API_URL=https://test.xoxod33p.tech/api/v1
 
 MONGO_ROOT_USERNAME=healthcare
 MONGO_ROOT_PASSWORD=HealthcareSecurePassword123!
@@ -99,26 +86,27 @@ MINIO_PORT=9000
 MINIO_ACCESS_KEY=minio_admin_key
 MINIO_SECRET_KEY=minio_secure_secret_123!
 MINIO_USE_SSL=false
-
-SUPABASE_URL=https://iwgxcuwyioxvwegoofhv.supabase.co
-SUPABASE_PUBLISHABLE_KEY=sb_publishable_DtKmQBeutdxhWIUhdZ892g_-YTpnqMN
-SUPABASE_ANON_KEY=sb_publishable_DtKmQBeutdxhWIUhdZ892g_-YTpnqMN
 ```
 
 ---
 
-## 7. Manual Rebuild & Restart Commands
+## 6. Manual Rebuild & Restart Commands
 
 ```bash
-# Rebuild web image with build args
-docker compose -f infra/docker-compose.prod.yml build web --no-cache
+cd /opt/health
+
+# Rebuild images
+docker compose -f infra/docker-compose.yml build --no-cache
 
 # Recreate all containers
-docker compose -f infra/docker-compose.prod.yml up -d --force-recreate
+docker compose -f infra/docker-compose.yml up -d --force-recreate
+
+# Bootstrap admin account in MongoDB
+docker compose -f infra/docker-compose.yml exec api npm run admin:bootstrap
 
 # Check status
-docker compose -f infra/docker-compose.prod.yml ps
+docker compose -f infra/docker-compose.yml ps
 
 # View real-time logs
-docker compose -f infra/docker-compose.prod.yml logs -f
+docker compose -f infra/docker-compose.yml logs -f
 ```
