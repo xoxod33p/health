@@ -4,7 +4,7 @@
 .sidebar { padding:20px 16px 12px; }
 .brand-row { padding-bottom:20px; }
 .workspace-select { margin-bottom:20px; }
-.nav-item { padding-bottom:8px; padding-top:8px; }
+.nav-item { padding-bottom:9px; padding-top:9px; color:#c8dfe0 !important; font-size:13.5px !important; }
 .nav-label-spaced { margin-top:16px; }
 .secure-note { margin-bottom:10px; padding-top:12px; }
 .profile-row { padding-top:10px; }

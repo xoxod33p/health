@@ -10,9 +10,12 @@ const navigation = [
   { label: 'Overview', href: '/', icon: LayoutDashboard },
   { label: 'Customers', href: '/customers', icon: Users },
   { label: 'Sensors', href: '/sensors', icon: Boxes },
-  { label: 'Sensor Types', href: '/sensor-types', icon: Tag },
   { label: 'Audit log', href: '/audit', icon: ClipboardList },
   { label: 'Reports', href: '/reports', icon: FileBarChart },
+];
+
+const catalog = [
+  { label: 'Sensor Types', href: '/sensor-types', icon: Tag },
 ];
 
 export function AppShell({ children, title, headerCenter, headerActions }: Readonly<{ children: React.ReactNode; title?: string; headerCenter?: React.ReactNode; headerActions?: React.ReactNode }>) {
@@ -59,22 +62,29 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
           <span className="nav-label">Workspace</span>
           {navigation.map(({ label, href, icon: Icon }) => (
             <Link key={label} href={href} className={`nav-item ${activeLabel === label ? 'nav-active' : ''}`} onClick={() => setSidebarOpen(false)}>
-              <Icon size={18} />
-              <span>{label}</span>
+              <Icon size={17} strokeWidth={1.8} />
+              <span style={{ fontWeight: 500, letterSpacing: '-0.1px' }}>{label}</span>
+            </Link>
+          ))}
+          <span className="nav-label nav-label-spaced">Catalog</span>
+          {catalog.map(({ label, href, icon: Icon }) => (
+            <Link key={label} href={href} className={`nav-item ${activeLabel === label ? 'nav-active' : ''}`} onClick={() => setSidebarOpen(false)}>
+              <Icon size={17} strokeWidth={1.8} />
+              <span style={{ fontWeight: 500, letterSpacing: '-0.1px' }}>{label}</span>
             </Link>
           ))}
           <span className="nav-label nav-label-spaced">Manage</span>
           <Link className={`nav-item ${activeLabel === 'User management' ? 'nav-active' : ''}`} href="/users" onClick={() => setSidebarOpen(false)}>
-            <Users size={18} />
-            <span>User management</span>
+            <Users size={17} strokeWidth={1.8} />
+            <span style={{ fontWeight: 500 }}>User management</span>
           </Link>
           <Link className={`nav-item ${activeLabel === 'Notifications' ? 'nav-active' : ''}`} href="/notifications" onClick={() => setSidebarOpen(false)}>
-            <Bell size={18} />
-            <span>Notifications</span>
+            <Bell size={17} strokeWidth={1.8} />
+            <span style={{ fontWeight: 500 }}>Notifications</span>
           </Link>
           <Link className={`nav-item ${activeLabel === 'Settings' ? 'nav-active' : ''}`} href="/settings" onClick={() => setSidebarOpen(false)}>
-            <Settings size={18} />
-            <span>Settings</span>
+            <Settings size={17} strokeWidth={1.8} />
+            <span style={{ fontWeight: 500 }}>Settings</span>
           </Link>
         </nav>
 
