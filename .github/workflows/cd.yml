@@ -47,7 +47,14 @@ jobs:
             docker compose -f infra/docker-compose.prod.yml down --remove-orphans || true
 
             echo "==> Building and starting container stack on VPS using local .env..."
-            docker compose -f infra/docker-compose.prod.yml up -d --build --force-recreate --remove-orphans
+            if ! docker compose -f infra/docker-compose.prod.yml up -d --build --force-recreate --remove-orphans; then
+              echo "==> Startup failed. Resetting stale volumes and retrying..."
+              docker compose -f infra/docker-compose.prod.yml down -v --remove-orphans || true
+              docker compose -f infra/docker-compose.prod.yml up -d --build --force-recreate --remove-orphans
+            fi
+
+            echo "==> Running automated admin bootstrap..."
+            docker compose -f infra/docker-compose.prod.yml exec -T api npm run admin:bootstrap || true
 
             echo "==> Cleaning up unused Docker images..."
             docker image prune -af --filter "until=24h" || true
