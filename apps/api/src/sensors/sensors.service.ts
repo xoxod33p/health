@@ -3,9 +3,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { Customer, CustomerDocument } from '../customers/customer.schema';
-import { AssignSensorDto, CreateSensorDto, SensorQueryDto } from './sensor.dto';
+import { AssignSensorDto, CreateSensorDto, CreateSensorReplacementDto, SensorQueryDto } from './sensor.dto';
 import { Sensor, SensorDocument } from './sensor.schema';
 import { SensorAssignment, SensorAssignmentDocument } from './sensor-assignment.schema';
+import { SensorReplacement, SensorReplacementDocument } from './sensor-replacement.schema';
 import { RealtimeGateway } from '../realtime/realtime.gateway';
 
 @Injectable()
@@ -13,6 +14,7 @@ export class SensorsService {
   constructor(
     @InjectModel(Sensor.name) private readonly sensors: Model<SensorDocument>,
     @InjectModel(SensorAssignment.name) private readonly assignments: Model<SensorAssignmentDocument>,
+    @InjectModel(SensorReplacement.name) private readonly replacements: Model<SensorReplacementDocument>,
     @InjectModel(Customer.name) private readonly customers: Model<CustomerDocument>,
     private readonly realtime: RealtimeGateway,
   ) {}
@@ -56,5 +58,41 @@ export class SensorsService {
   async history(user: AuthenticatedUser, sensorId: string): Promise<SensorAssignment[]> {
     if (!Types.ObjectId.isValid(sensorId)) throw new BadRequestException('Invalid sensor id');
     return this.assignments.find({ companyId: user.companyId, sensorId }).sort({ assignedAt: -1 }).lean().exec();
+  }
+
+  async logReplacement(user: AuthenticatedUser, dto: CreateSensorReplacementDto): Promise<SensorReplacement> {
+    const record = await this.replacements.create({
+      companyId: user.companyId,
+      customerName: dto.customerName.trim(),
+      serialNumber: dto.serialNumber.trim().toUpperCase(),
+      replacedDate: new Date(dto.replacedDate),
+      issueType: dto.issueType.trim(),
+      notes: dto.notes?.trim(),
+      replacedBy: user.authUserId,
+    });
+    this.realtime.broadcastCompany(user.companyId, 'sensor.changed', { action: 'replacement_logged', serialNumber: dto.serialNumber });
+    return record;
+  }
+
+  async listReplacements(
+    user: AuthenticatedUser,
+    query: { search?: string; page?: number; limit?: number },
+  ): Promise<{ data: SensorReplacement[]; total: number; page: number; limit: number }> {
+    const page = Math.max(1, Number(query.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(query.limit) || 50));
+    const filter: FilterQuery<SensorReplacementDocument> = { companyId: user.companyId };
+    if (query.search) {
+      const escaped = query.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      filter.$or = [
+        { customerName: new RegExp(escaped, 'i') },
+        { serialNumber: new RegExp(escaped, 'i') },
+        { issueType: new RegExp(escaped, 'i') },
+      ];
+    }
+    const [data, total] = await Promise.all([
+      this.replacements.find(filter).sort({ replacedDate: -1 }).skip((page - 1) * limit).limit(limit).lean().exec(),
+      this.replacements.countDocuments(filter).exec(),
+    ]);
+    return { data, total, page, limit };
   }
 }

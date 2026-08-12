@@ -19,3 +19,11 @@ export class AssignSensorDto {
   @IsString() customerId!: string;
   @IsOptional() @IsString() @MaxLength(500) reason?: string;
 }
+
+export class CreateSensorReplacementDto {
+  @IsString() @MinLength(1) @MaxLength(150) customerName!: string;
+  @IsString() @MinLength(1) @MaxLength(100) serialNumber!: string;
+  @IsString() @MinLength(1) replacedDate!: string;
+  @IsString() @MinLength(1) @MaxLength(1000) issueType!: string;
+  @IsOptional() @IsString() @MaxLength(500) notes?: string;
+}
