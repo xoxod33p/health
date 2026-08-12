@@ -56,6 +56,11 @@ services:
       context: ..
       dockerfile: apps/api/Dockerfile
     restart: unless-stopped
+    env_file:
+      - path: ../.env.production
+        required: false
+      - path: ../.env
+        required: false
     environment:
       NODE_ENV: production
       PORT: 3001
@@ -102,6 +107,11 @@ services:
         NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY:-${SUPABASE_ANON_KEY:-}}
         NEXT_PUBLIC_API_URL: ${WEB_ORIGIN:-https://${DOMAIN_NAME:-test.xoxod33p.tech}}/api/v1
     restart: unless-stopped
+    env_file:
+      - path: ../.env.production
+        required: false
+      - path: ../.env
+        required: false
     environment:
       NODE_ENV: production
       PORT: 3000

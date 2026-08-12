@@ -16,7 +16,12 @@ export class SupabaseAuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const token = this.extractBearerToken(request.headers.authorization);
     const supabaseUrl = this.config.get<string>('SUPABASE_URL');
-    if (!token || !supabaseUrl) throw new UnauthorizedException('Authentication is not configured');
+    if (!supabaseUrl) {
+      throw new UnauthorizedException('Authentication is not configured on server');
+    }
+    if (!token) {
+      throw new UnauthorizedException('Authentication token is missing. Please sign in to access this resource.');
+    }
 
     try {
       const { createRemoteJWKSet, jwtVerify } = await import('jose');
