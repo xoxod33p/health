@@ -24,8 +24,8 @@ import { UsersModule } from './users/users.module';
       validationSchema: Joi.object({
         NODE_ENV: Joi.string().valid('development', 'test', 'staging', 'production').default('development'),
         PORT: Joi.number().port().default(3001),
-        WEB_ORIGIN: Joi.string().default('http://localhost:3000'),
-        MONGODB_URI: Joi.string().uri().default('mongodb://healthcare:healthcare_prod_secret_123!@mongodb:27017/healthcare?authSource=admin'),
+        WEB_ORIGIN: Joi.string().allow('').optional(),
+        MONGODB_URI: Joi.string().uri().required(),
         SUPABASE_URL: Joi.string().uri().allow('').default(''),
       }),
     }),
