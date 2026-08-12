@@ -18,9 +18,9 @@ if errorlevel 1 (
 echo Bootstrapping initial MongoDB admin account...
 call npx tsx "%ROOT%apps\api\src\scripts\bootstrap-admin.ts"
 
-echo Opening local development windows for API and Web...
-start "Healthcare API" powershell.exe -NoExit -ExecutionPolicy Bypass -Command "Set-Location -LiteralPath '%ROOT%'; npm run dev:api"
-start "Healthcare Web" powershell.exe -NoExit -ExecutionPolicy Bypass -Command "Set-Location -LiteralPath '%ROOT%'; npm run dev:web"
+echo Opening local development CMD windows for API and Web...
+start "Healthcare API" cmd.exe /k "cd /d "%ROOT%" && npm run dev:api"
+start "Healthcare Web" cmd.exe /k "cd /d "%ROOT%" && npm run dev:web"
 
 echo ============================================================
 echo Development environment ready!
