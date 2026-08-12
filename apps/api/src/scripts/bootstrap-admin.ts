@@ -11,6 +11,8 @@ interface BootstrapUser {
   email: string;
 }
 
+config();
+config({ path: resolve(process.cwd(), '.env') });
 config({ path: resolve(__dirname, '../../../../.env') });
 
 async function bootstrap(): Promise<void> {

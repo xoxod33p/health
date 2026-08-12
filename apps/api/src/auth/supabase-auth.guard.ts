@@ -35,7 +35,9 @@ export class SupabaseAuthGuard implements CanActivate {
         const email = (payload.email as string | undefined) ?? `${payload.sub}@user.local`;
         const userMeta = payload.user_metadata as Record<string, unknown> | undefined;
         const companyId = (userMeta?.companyId as string | undefined) ?? 'development-company';
-        const role = (userMeta?.role as string | undefined) ?? 'COMPANY_ADMIN';
+        const rawRole = (userMeta?.role as string | undefined) ?? 'COMPANY_ADMIN';
+        const validRoles = ['SUPER_ADMIN', 'COMPANY_ADMIN', 'MANAGER', 'HEALTHCARE_EMPLOYEE', 'STAFF', 'AUDITOR'];
+        const role = validRoles.includes(rawRole) ? rawRole : 'COMPANY_ADMIN';
         user = await this.users.findOneAndUpdate(
           { authUserId: payload.sub },
           { authUserId: payload.sub, companyId, role, status: 'ACTIVE', email },
