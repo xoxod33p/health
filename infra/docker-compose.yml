@@ -11,6 +11,8 @@ services:
       MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
     volumes:
       - mongodb_data:/data/db
+    ports:
+      - "127.0.0.1:27017:27017"
     networks:
       - health-network
     healthcheck:
@@ -31,6 +33,8 @@ services:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
     volumes:
       - redis_data:/data
+    ports:
+      - "127.0.0.1:6379:6379"
     networks:
       - health-network
     healthcheck:
@@ -51,6 +55,9 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
     volumes:
       - minio_data:/data
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
     networks:
       - health-network
     healthcheck:
