@@ -8,16 +8,23 @@ if not exist "%ROOT%.env" (
   copy /Y "%ROOT%.env.example" "%ROOT%.env" > nul
 )
 
-echo Starting Docker dependencies and waiting for them to become ready...
+echo Starting Docker infrastructure dependencies (MongoDB, Redis, MinIO)...
 docker compose -f "%ROOT%infra\docker-compose.yml" up -d --wait
 if errorlevel 1 (
   echo Docker dependencies failed to start. API and web windows were not opened.
   exit /b 1
 )
 
-start "Healthcare Infrastructure Logs" powershell.exe -NoExit -ExecutionPolicy Bypass -Command "Set-Location -LiteralPath '%ROOT%'; docker compose -f infra/docker-compose.yml logs -f"
+echo Bootstrapping initial MongoDB admin account...
+call npx tsx "%ROOT%apps\api\src\scripts\bootstrap-admin.ts"
+
+echo Opening local development windows for API and Web...
 start "Healthcare API" powershell.exe -NoExit -ExecutionPolicy Bypass -Command "Set-Location -LiteralPath '%ROOT%'; npm run dev:api"
 start "Healthcare Web" powershell.exe -NoExit -ExecutionPolicy Bypass -Command "Set-Location -LiteralPath '%ROOT%'; npm run dev:web"
 
-echo Docker dependencies are ready. Opened separate windows for infrastructure logs, API, and web.
+echo ============================================================
+echo Development environment ready!
+echo  - Web UI: http://localhost:3000
+echo  - API:    http://localhost:3001/api/v1
+echo ============================================================
 endlocal
