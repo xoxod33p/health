@@ -15,7 +15,7 @@ export class SupabaseAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const token = this.extractBearerToken(request.headers.authorization);
-    const supabaseUrl = this.config.get<string>('SUPABASE_URL');
+    const supabaseUrl = this.config.get<string>('SUPABASE_URL') || 'https://iwgxcuwyioxvwegoofhv.supabase.co';
     if (!supabaseUrl) {
       throw new UnauthorizedException('Authentication is not configured on server');
     }
@@ -26,7 +26,7 @@ export class SupabaseAuthGuard implements CanActivate {
     try {
       const { createRemoteJWKSet, jwtVerify } = await import('jose');
       const jwks = createRemoteJWKSet(new URL(`${supabaseUrl}/auth/v1/.well-known/jwks.json`));
-      const issuer = `${this.config.getOrThrow<string>('SUPABASE_URL')}/auth/v1`;
+      const issuer = `${supabaseUrl}/auth/v1`;
       const { payload } = await jwtVerify(token, jwks, { issuer, audience: 'authenticated' });
       if (typeof payload.sub !== 'string') throw new UnauthorizedException('Invalid identity');
 

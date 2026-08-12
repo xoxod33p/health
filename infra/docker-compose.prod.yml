@@ -72,12 +72,12 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minio_admin}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minio_secure_password}
       MINIO_USE_SSL: ${MINIO_USE_SSL:-false}
-      SUPABASE_URL: ${SUPABASE_URL:-}
-      SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY:-}
-      SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY:-}
-      SUPABASE_JWKS_URL: ${SUPABASE_JWKS_URL:-}
-      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
-      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
+      SUPABASE_URL: ${SUPABASE_URL:-https://iwgxcuwyioxvwegoofhv.supabase.co}
+      SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY:-sb_publishable_DtKmQBeutdxhWIUhdZ892g_-YTpnqMN}
+      SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY:-sb_secret_UC9OHPp2IBFCjKb_Fnk9Og_IRXIODox}
+      SUPABASE_JWKS_URL: ${SUPABASE_JWKS_URL:-https://iwgxcuwyioxvwegoofhv.supabase.co/auth/v1/.well-known/jwks.json}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-sb_publishable_DtKmQBeutdxhWIUhdZ892g_-YTpnqMN}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-sb_secret_UC9OHPp2IBFCjKb_Fnk9Og_IRXIODox}
       RESEND_API_KEY: ${RESEND_API_KEY:-}
       SENTRY_DSN: ${SENTRY_DSN:-}
     depends_on:
@@ -102,9 +102,9 @@ services:
       context: ..
       dockerfile: apps/web/Dockerfile
       args:
-        NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_URL:-}
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-${SUPABASE_PUBLISHABLE_KEY:-}}
-        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY:-${SUPABASE_ANON_KEY:-}}
+        NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_URL:-https://iwgxcuwyioxvwegoofhv.supabase.co}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-${SUPABASE_PUBLISHABLE_KEY:-sb_publishable_DtKmQBeutdxhWIUhdZ892g_-YTpnqMN}}
+        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY:-${SUPABASE_ANON_KEY:-sb_publishable_DtKmQBeutdxhWIUhdZ892g_-YTpnqMN}}
         NEXT_PUBLIC_API_URL: ${WEB_ORIGIN:-https://${DOMAIN_NAME:-test.xoxod33p.tech}}/api/v1
     restart: unless-stopped
     env_file:
@@ -115,9 +115,9 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_URL:-}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-${SUPABASE_PUBLISHABLE_KEY:-}}
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY:-${SUPABASE_ANON_KEY:-}}
+      NEXT_PUBLIC_SUPABASE_URL: ${SUPABASE_URL:-https://iwgxcuwyioxvwegoofhv.supabase.co}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-${SUPABASE_PUBLISHABLE_KEY:-sb_publishable_DtKmQBeutdxhWIUhdZ892g_-YTpnqMN}}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY:-${SUPABASE_ANON_KEY:-sb_publishable_DtKmQBeutdxhWIUhdZ892g_-YTpnqMN}}
       NEXT_PUBLIC_API_URL: ${WEB_ORIGIN:-https://${DOMAIN_NAME:-test.xoxod33p.tech}}/api/v1
     depends_on:
       api:
