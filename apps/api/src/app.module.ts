@@ -24,9 +24,9 @@ import { UsersModule } from './users/users.module';
       validationSchema: Joi.object({
         NODE_ENV: Joi.string().valid('development', 'test', 'staging', 'production').default('development'),
         PORT: Joi.number().port().default(3001),
-        WEB_ORIGIN: Joi.string().default('http://localhost:3000'),
+        WEB_ORIGIN: Joi.string().required(),
         MONGODB_URI: Joi.string().uri().required(),
-        JWT_SECRET: Joi.string().min(16).default('development_jwt_secret_32_chars_long!'),
+        JWT_SECRET: Joi.string().min(16).required(),
       }),
     }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 120 }]),

@@ -24,7 +24,7 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           password: ${{ secrets.VPS_PASSWORD }}
           port: ${{ secrets.VPS_PORT || 22 }}
-          source: "apps/,infra/,package.json,package-lock.json,tsconfig.base.json"
+          source: "apps/,infra/,.env.example,package.json,package-lock.json,tsconfig.base.json"
           target: "/opt/health"
 
       - name: Build & Start Services on VPS
@@ -39,8 +39,23 @@ jobs:
             DEPLOY_DIR="/opt/health"
             cd "$DEPLOY_DIR"
 
-            if [ ! -f "$DEPLOY_DIR/.env" ] && [ -f "$DEPLOY_DIR/.env.production" ]; then
-              cp "$DEPLOY_DIR/.env.production" "$DEPLOY_DIR/.env"
+            if [ ! -f "$DEPLOY_DIR/.env" ]; then
+              echo "==> Creating initial VPS .env from .env.example..."
+              cp "$DEPLOY_DIR/.env.example" "$DEPLOY_DIR/.env"
+            fi
+
+            # Auto-sync missing keys into VPS .env without overwriting existing settings
+            if ! grep -q "^JWT_SECRET=" "$DEPLOY_DIR/.env" 2>/dev/null; then
+              echo "JWT_SECRET=care_signal_secure_prod_jwt_secret_99812_key!" >> "$DEPLOY_DIR/.env"
+            fi
+            if ! grep -q "^NEXT_PUBLIC_API_URL=" "$DEPLOY_DIR/.env" 2>/dev/null; then
+              echo "NEXT_PUBLIC_API_URL=https://test.xoxod33p.tech/api/v1" >> "$DEPLOY_DIR/.env"
+            fi
+            if ! grep -q "^WEB_ORIGIN=" "$DEPLOY_DIR/.env" 2>/dev/null; then
+              echo "WEB_ORIGIN=https://test.xoxod33p.tech" >> "$DEPLOY_DIR/.env"
+            fi
+            if ! grep -q "^MONGODB_URI=" "$DEPLOY_DIR/.env" 2>/dev/null; then
+              echo "MONGODB_URI=mongodb://healthcare:healthcare_prod_secret_123!@mongodb:27017/healthcare?authSource=admin" >> "$DEPLOY_DIR/.env"
             fi
 
             DOMAIN=$(grep ^DOMAIN_NAME "$DEPLOY_DIR/.env" | cut -d '=' -f 2 | tr -d '\r' || echo "test.xoxod33p.tech")
