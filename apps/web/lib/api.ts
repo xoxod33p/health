@@ -24,10 +24,16 @@ export function getApiBaseUrl(): string {
   }
 
   if (!url.startsWith('http://') && !url.startsWith('https://')) {
-    url = `https://${url}`;
+    url = url.includes('localhost') || url.includes('127.0.0.1') ? `http://${url}` : `https://${url}`;
   }
 
-  if (typeof window !== 'undefined' && window.location.protocol === 'https:' && url.startsWith('http:')) {
+  if (
+    typeof window !== 'undefined' &&
+    window.location.protocol === 'https:' &&
+    url.startsWith('http:') &&
+    !url.includes('localhost') &&
+    !url.includes('127.0.0.1')
+  ) {
     url = url.replace(/^http:/, 'https:');
   }
 
