@@ -180,7 +180,6 @@ function CustomerForm({ onClose, onCreated }: { onClose: () => void; onCreated: 
       await apiFetch('/customers', {
         method: 'POST',
         body: JSON.stringify({
-          customerNumber: form.get('customerNumber'),
           firstName: form.get('firstName'),
           lastName: form.get('lastName'),
           email: form.get('email') || undefined,
@@ -208,10 +207,6 @@ function CustomerForm({ onClose, onCreated }: { onClose: () => void; onCreated: 
             <X size={19} />
           </button>
         </div>
-        <label>
-          Customer number
-          <input name="customerNumber" placeholder="CUS-10500" required />
-        </label>
         <label>
           First name
           <input name="firstName" required />

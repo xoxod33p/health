@@ -11,7 +11,9 @@ export class CustomersService {
   constructor(@InjectModel(Customer.name) private readonly customers: Model<CustomerDocument>, private readonly realtime: RealtimeGateway) {}
 
   async create(user: AuthenticatedUser, dto: CreateCustomerDto): Promise<Customer> {
-    const customer = await this.customers.create({ ...dto, dateOfBirth: dto.dateOfBirth ? new Date(dto.dateOfBirth) : undefined, companyId: user.companyId, createdBy: user.authUserId, updatedBy: user.authUserId });
+    const count = await this.customers.countDocuments({ companyId: user.companyId }).exec();
+    const customerNumber = `CUS-${String(count + 1).padStart(5, '0')}`;
+    const customer = await this.customers.create({ ...dto, customerNumber, dateOfBirth: dto.dateOfBirth ? new Date(dto.dateOfBirth) : undefined, companyId: user.companyId, createdBy: user.authUserId, updatedBy: user.authUserId });
     this.realtime.broadcastCompany(user.companyId, 'customer.changed', { action: 'created', customerId: customer._id.toString() });
     return customer;
   }

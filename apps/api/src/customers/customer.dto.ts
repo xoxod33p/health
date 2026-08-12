@@ -1,7 +1,6 @@
 import { IsDateString, IsEmail, IsEnum, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class CreateCustomerDto {
-  @IsString() @MinLength(1) @MaxLength(40) customerNumber!: string;
   @IsString() @MinLength(1) @MaxLength(100) firstName!: string;
   @IsString() @MinLength(1) @MaxLength(100) lastName!: string;
   @IsOptional() @IsDateString() dateOfBirth?: string;

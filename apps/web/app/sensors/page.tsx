@@ -185,19 +185,9 @@ export default function SensorsPage() {
   );
 
   const topbarRight = (
-    <div style={{ display: 'flex', gap: '8px' }}>
-      <button
-        type="button"
-        className="primary-button"
-        onClick={() => setModalOpen(true)}
-        style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#d97706', borderColor: '#d97706' }}
-      >
-        <AlertTriangle size={16} /> Log Replacement
-      </button>
-      <Link className="primary-button" href="/sensors/new">
-        <Plus size={17} /> Add sensor
-      </Link>
-    </div>
+    <Link className="primary-button" href="/sensors/new">
+      <Plus size={17} /> Add sensor
+    </Link>
   );
 
   return (
@@ -306,9 +296,6 @@ export default function SensorsPage() {
                   <div>
                     <p className="eyebrow">Issue & Replacement Log</p>
                     <h2>Sensor Replacement Records</h2>
-                    <p style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>
-                      Track every sensor replaced by customer name, serial number, date and issue description.
-                    </p>
                   </div>
                   <button
                     type="button"
@@ -321,7 +308,6 @@ export default function SensorsPage() {
                 </div>
                 {filteredReplacements.length === 0 ? (
                   <div className="empty-panel">
-                    <AlertTriangle size={32} style={{ color: '#d97706', marginBottom: '8px' }} />
                     <h2>No replacement records</h2>
                     <p>Use the &quot;Log Replacement&quot; button to record a sensor issue or replacement.</p>
                   </div>
