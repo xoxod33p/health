@@ -30,8 +30,20 @@ export class SupabaseAuthGuard implements CanActivate {
       const { payload } = await jwtVerify(token, jwks, { issuer, audience: 'authenticated' });
       if (typeof payload.sub !== 'string') throw new UnauthorizedException('Invalid identity');
 
-      const user = await this.users.findOne({ authUserId: payload.sub, status: 'ACTIVE' }).lean().exec();
-      if (!user) throw new UnauthorizedException('Application profile not found');
+      let user = await this.users.findOne({ authUserId: payload.sub, status: 'ACTIVE' }).lean().exec();
+      if (!user) {
+        const email = (payload.email as string | undefined) ?? `${payload.sub}@user.local`;
+        const userMeta = payload.user_metadata as Record<string, unknown> | undefined;
+        const companyId = (userMeta?.companyId as string | undefined) ?? 'development-company';
+        const role = (userMeta?.role as string | undefined) ?? 'COMPANY_ADMIN';
+        user = await this.users.findOneAndUpdate(
+          { authUserId: payload.sub },
+          { authUserId: payload.sub, companyId, role, status: 'ACTIVE', email },
+          { upsert: true, new: true, setDefaultsOnInsert: true }
+        ).lean().exec();
+      }
+
+      if (!user) throw new UnauthorizedException('Application profile could not be initialized');
 
       request.user = { authUserId: user.authUserId, companyId: user.companyId, role: user.role, email: user.email };
       return true;
