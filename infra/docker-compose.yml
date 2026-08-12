@@ -91,11 +91,11 @@ services:
     networks:
       - health-network
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/api/v1/health/live').then(r => r.status < 400 ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"]
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3001/api/v1/health/live', res => process.exit(res.statusCode < 400 ? 0 : 1)).on('error', () => process.exit(1))"]
       interval: 10s
       timeout: 5s
       retries: 10
-      start_period: 30s
+      start_period: 40s
 
   web:
     build:
@@ -117,7 +117,7 @@ services:
     networks:
       - health-network
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r => r.status < 400 ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"]
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3000/', res => process.exit(res.statusCode < 400 ? 0 : 1)).on('error', () => process.exit(1))"]
       interval: 10s
       timeout: 5s
       retries: 10
