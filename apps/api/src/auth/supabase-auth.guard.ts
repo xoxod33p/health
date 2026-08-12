@@ -15,9 +15,9 @@ export class SupabaseAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const token = this.extractBearerToken(request.headers.authorization);
-    const supabaseUrl = this.config.get<string>('SUPABASE_URL') || 'https://iwgxcuwyioxvwegoofhv.supabase.co';
+    const supabaseUrl = this.config.get<string>('SUPABASE_URL');
     if (!supabaseUrl) {
-      throw new UnauthorizedException('Authentication is not configured on server');
+      throw new UnauthorizedException('Authentication is not configured on server (SUPABASE_URL environment variable is missing)');
     }
     if (!token) {
       throw new UnauthorizedException('Authentication token is missing. Please sign in to access this resource.');
