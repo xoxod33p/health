@@ -114,7 +114,7 @@ export default function NewSensorPage() {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                gridTemplateColumns: '1fr 1fr',
                 gap: '16px',
                 padding: '0 0 20px',
               }}
@@ -137,9 +137,9 @@ export default function NewSensorPage() {
                     disabled={loading}
                   >
                     {loading ? (
-                      <option value="">Loading types...</option>
+                      <option value="">Loading...</option>
                     ) : sensorTypes.length === 0 ? (
-                      <option value="">No types defined — create one first</option>
+                      <option value="">No types defined</option>
                     ) : (
                       sensorTypes.map((st) => (
                         <option key={st._id} value={st._id}>
@@ -150,11 +150,6 @@ export default function NewSensorPage() {
                   </select>
                   <ChevronDown size={15} />
                 </div>
-                {!loading && sensorTypes.length === 0 && (
-                  <small style={{ color: '#d97706', fontSize: '11px', marginTop: '4px', display: 'block' }}>
-                    <Link href="/sensor-types" style={{ color: '#d97706' }}>Manage sensor types →</Link>
-                  </small>
-                )}
               </label>
 
               <label>
