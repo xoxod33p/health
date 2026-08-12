@@ -14,6 +14,9 @@ export class User {
   @Prop({ required: true, enum: ['SUPER_ADMIN', 'COMPANY_ADMIN', 'MANAGER', 'HEALTHCARE_EMPLOYEE', 'STAFF', 'AUDITOR'] })
   role!: string;
 
+  @Prop({ type: [String], default: [] })
+  permissions!: string[];
+
   @Prop({ required: true, enum: ['ACTIVE', 'SUSPENDED', 'INVITED'], default: 'ACTIVE' })
   status!: string;
 
