@@ -22,6 +22,7 @@ type SensorTypeItem = {
   _id: string;
   name: string;
   code: string;
+  status: string;
 };
 
 export default function NewSensorPage() {
@@ -46,13 +47,14 @@ export default function NewSensorPage() {
       try {
         const [cRes, stRes] = await Promise.all([
           apiFetch<CustomerResponse>('/customers?limit=100').catch(() => ({ data: [] })),
-          apiFetch<SensorTypeItem[]>('/sensors/types').catch(() => []),
+          apiFetch<SensorTypeItem[]>('/sensor-types').catch(() => []),
         ]);
         if (mounted) {
           setCustomers(cRes.data || []);
-          setSensorTypes(Array.isArray(stRes) ? stRes : []);
-          if (stRes.length > 0 && stRes[0]?._id) {
-            setSensorTypeId(stRes[0]._id);
+          const activeTypes = Array.isArray(stRes) ? stRes.filter((t) => t.status === 'ACTIVE') : [];
+          setSensorTypes(activeTypes);
+          if (activeTypes.length > 0 && activeTypes[0]?._id) {
+            setSensorTypeId(activeTypes[0]._id);
           }
         }
       } finally {
@@ -60,9 +62,7 @@ export default function NewSensorPage() {
       }
     }
     void loadData();
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, []);
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -73,19 +73,17 @@ export default function NewSensorPage() {
     setError('');
 
     try {
-      // 1. Create the Sensor
       const createdSensor = await apiFetch<{ _id: string }>('/sensors', {
         method: 'POST',
         body: JSON.stringify({
           serialNumber: serialNumber.trim(),
-          sensorTypeId: sensorTypeId || 'vitalsense_pro',
-          manufacturer: manufacturer.trim(),
-          model: model.trim(),
+          sensorTypeId: sensorTypeId || 'default',
+          manufacturer: manufacturer.trim() || 'Unknown',
+          model: model.trim() || 'Unknown',
           expiresAt: expiresAt ? new Date(expiresAt).toISOString() : new Date('2028-12-31').toISOString(),
         }),
       });
 
-      // 2. If Customer is selected, assign sensor to customer immediately
       if (customerId && createdSensor?._id) {
         await apiFetch(`/sensors/${createdSensor._id}/assign`, {
           method: 'POST',
@@ -103,107 +101,120 @@ export default function NewSensorPage() {
 
   return (
     <AppShell title="Add a sensor">
-      <div className="page-content narrow-content" style={{ paddingTop: '16px' }}>
-        <div className="form-layout">
-          <form className="panel form-panel" onSubmit={handleSubmit}>
-            <div className="form-section" style={{ borderBottom: 'none', paddingBottom: '0' }}>
-              <div className="form-grid">
-                <label>
-                  Serial number
-                  <input
-                    required
-                    value={serialNumber}
-                    onChange={(e) => setSerialNumber(e.target.value)}
-                  />
-                </label>
+      <div className="page-content" style={{ paddingTop: '16px' }}>
+        <section className="panel" style={{ maxWidth: '100%' }}>
+          <div className="panel-heading">
+            <div>
+              <p className="eyebrow">New record</p>
+              <h2>Add sensor</h2>
+            </div>
+          </div>
 
-                <label>
-                  Sensor type
-                  <div className="select-wrap">
-                    <select
-                      value={sensorTypeId}
-                      onChange={(e) => setSensorTypeId(e.target.value)}
-                    >
-                      <option value="">Default (VitalSense Pro)</option>
-                      {sensorTypes.map((st) => (
+          <form onSubmit={handleSubmit}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                gap: '16px',
+                padding: '0 0 20px',
+              }}
+            >
+              <label>
+                Serial number <span style={{ color: '#ef4444' }}>*</span>
+                <input
+                  required
+                  value={serialNumber}
+                  onChange={(e) => setSerialNumber(e.target.value)}
+                />
+              </label>
+
+              <label>
+                Sensor type
+                <div className="select-wrap">
+                  <select
+                    value={sensorTypeId}
+                    onChange={(e) => setSensorTypeId(e.target.value)}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <option value="">Loading types...</option>
+                    ) : sensorTypes.length === 0 ? (
+                      <option value="">No types defined — create one first</option>
+                    ) : (
+                      sensorTypes.map((st) => (
                         <option key={st._id} value={st._id}>
                           {st.name} ({st.code})
                         </option>
-                      ))}
-                    </select>
-                    <ChevronDown size={15} />
-                  </div>
-                </label>
-
-                <label>
-                  Manufacturer
-                  <input
-                    value={manufacturer}
-                    onChange={(e) => setManufacturer(e.target.value)}
-                  />
-                </label>
-
-                <label>
-                  Model
-                  <input
-                    value={model}
-                    onChange={(e) => setModel(e.target.value)}
-                  />
-                </label>
-
-                <label>
-                  Expiration date
-                  <input
-                    type="date"
-                    required
-                    value={expiresAt}
-                    onChange={(e) => setExpiresAt(e.target.value)}
-                  />
-                </label>
-
-                <label>
-                  Link to customer (optional)
-                  <div className="select-wrap">
-                    <select
-                      value={customerId}
-                      onChange={(e) => setCustomerId(e.target.value)}
-                      disabled={loading}
-                    >
-                      <option value="">None (Keep as unassigned inventory)</option>
-                      {customers.map((c) => (
-                        <option key={c._id} value={c._id}>
-                          {c.firstName} {c.lastName} ({c.customerNumber})
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown size={15} />
-                  </div>
-                </label>
-              </div>
-
-              {error && (
-                <div className="form-error" style={{ marginTop: '16px' }}>
-                  {error}
+                      ))
+                    )}
+                  </select>
+                  <ChevronDown size={15} />
                 </div>
-              )}
+                {!loading && sensorTypes.length === 0 && (
+                  <small style={{ color: '#d97706', fontSize: '11px', marginTop: '4px', display: 'block' }}>
+                    <Link href="/sensor-types" style={{ color: '#d97706' }}>Manage sensor types →</Link>
+                  </small>
+                )}
+              </label>
+
+              <label>
+                Manufacturer
+                <input
+                  value={manufacturer}
+                  onChange={(e) => setManufacturer(e.target.value)}
+                />
+              </label>
+
+              <label>
+                Model
+                <input
+                  value={model}
+                  onChange={(e) => setModel(e.target.value)}
+                />
+              </label>
+
+              <label>
+                Expiration date <span style={{ color: '#ef4444' }}>*</span>
+                <input
+                  type="date"
+                  required
+                  value={expiresAt}
+                  onChange={(e) => setExpiresAt(e.target.value)}
+                />
+              </label>
+
+              <label>
+                Link to customer (optional)
+                <div className="select-wrap">
+                  <select
+                    value={customerId}
+                    onChange={(e) => setCustomerId(e.target.value)}
+                    disabled={loading}
+                  >
+                    <option value="">None — keep as unassigned inventory</option>
+                    {customers.map((c) => (
+                      <option key={c._id} value={c._id}>
+                        {c.firstName} {c.lastName} ({c.customerNumber})
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown size={15} />
+                </div>
+              </label>
             </div>
 
-            <div className="form-actions" style={{ marginTop: '20px' }}>
-              <Link className="ghost-button" href="/sensors">
-                Cancel
-              </Link>
+            {error && (
+              <div className="form-error" style={{ marginBottom: '16px' }}>{error}</div>
+            )}
+
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', borderTop: '1px solid #e2e8f0', paddingTop: '20px' }}>
+              <Link className="ghost-button" href="/sensors">Cancel</Link>
               <button className="primary-button" type="submit" disabled={saving}>
-                {saving ? (
-                  <RefreshCw size={16} className="spin" />
-                ) : (
-                  <>
-                    <Check size={16} /> Save sensor
-                  </>
-                )}
+                {saving ? <RefreshCw size={16} className="spin" /> : <><Check size={16} /> Save sensor</>}
               </button>
             </div>
           </form>
-        </div>
+        </section>
       </div>
     </AppShell>
   );

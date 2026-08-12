@@ -184,12 +184,8 @@ export default function SensorTypesPage() {
 
             {filtered.length === 0 ? (
               <div className="empty-panel">
-                <Tag size={32} style={{ color: '#94a3b8', marginBottom: '8px' }} />
                 <h2>No sensor types yet</h2>
                 <p>Create your first sensor type to categorise devices in the inventory.</p>
-                <button className="primary-button" style={{ marginTop: '12px' }} onClick={() => { resetCreate(); setCreateOpen(true); }}>
-                  <Plus size={16} /> Create sensor type
-                </button>
               </div>
             ) : (
               <div className="table-wrap">
