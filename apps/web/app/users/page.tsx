@@ -17,7 +17,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { AppShell } from '../components/app-shell';
 import { apiFetch, getSession } from '../../lib/api';
 
-type UserRole = 'SUPER_ADMIN' | 'COMPANY_ADMIN' | 'MANAGER' | 'HEALTHCARE_EMPLOYEE' | 'STAFF' | 'AUDITOR';
+export type UserRole = 'SYSTEM_ADMIN' | 'MANAGER' | 'INHOUSE_STAFF' | 'OUT_EMPLOYEE';
+
+export const ROLE_LABELS: Record<UserRole, { label: string; description: string; badgeColor: string; textColor: string; bg: string }> = {
+  SYSTEM_ADMIN: { label: 'System Admin', description: 'Full System Administration & Security Controls', badgeColor: '#32776d', textColor: '#32776d', bg: '#e0efeb' },
+  MANAGER: { label: 'Manager', description: 'Operations, Sensor Fleet & Customer Management', badgeColor: '#3d5c99', textColor: '#3d5c99', bg: '#e0e9fa' },
+  INHOUSE_STAFF: { label: 'Inhouse Employee', description: 'Internal Clinical & In-House Healthcare Staff', badgeColor: '#0f766e', textColor: '#0f766e', bg: '#ccfbf1' },
+  OUT_EMPLOYEE: { label: 'Out Employee', description: 'Field Operators & External Field Technicians', badgeColor: '#d97706', textColor: '#d97706', bg: '#fef3c7' },
+};
 
 type UserMember = {
   _id: string;
@@ -45,12 +52,10 @@ export const PERMISSION_LEVELS: { id: string; name: string; category: string; de
 ];
 
 export const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, string[]> = {
-  SUPER_ADMIN: PERMISSION_LEVELS.map((p) => p.id),
-  COMPANY_ADMIN: PERMISSION_LEVELS.map((p) => p.id),
+  SYSTEM_ADMIN: PERMISSION_LEVELS.map((p) => p.id),
   MANAGER: ['users.manage', 'dashboard.view', 'dashboard.edit', 'sensors.view', 'sensors.manage', 'customers.view', 'customers.manage'],
-  HEALTHCARE_EMPLOYEE: ['dashboard.view', 'sensors.view', 'sensors.manage', 'customers.view'],
-  STAFF: ['dashboard.view', 'sensors.view', 'customers.view'],
-  AUDITOR: ['dashboard.view', 'sensors.view', 'audit.view'],
+  INHOUSE_STAFF: ['dashboard.view', 'sensors.view', 'sensors.manage', 'customers.view'],
+  OUT_EMPLOYEE: ['dashboard.view', 'sensors.view', 'customers.view'],
 };
 
 export default function UsersPage() {
@@ -60,7 +65,7 @@ export default function UsersPage() {
   const [roleFilter, setRoleFilter] = useState('All roles');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
+
   // Modals
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -71,11 +76,11 @@ export default function UsersPage() {
   const [newFirstName, setNewFirstName] = useState('');
   const [newLastName, setNewLastName] = useState('');
   const [newEmail, setNewEmail] = useState('');
-  const [newRole, setNewRole] = useState<UserRole>('MANAGER');
-  const [newTitle, setNewTitle] = useState('Clinical Operations');
+  const [newRole, setNewRole] = useState<UserRole>('INHOUSE_STAFF');
+  const [newTitle, setNewTitle] = useState('Inhouse Clinical Operations');
 
   // Edit Role & Permissions Form State
-  const [editRole, setEditRole] = useState<UserRole>('MANAGER');
+  const [editRole, setEditRole] = useState<UserRole>('INHOUSE_STAFF');
   const [editPermissions, setEditPermissions] = useState<string[]>([]);
 
   // Role Matrix Custom Defaults State
@@ -97,15 +102,16 @@ export default function UsersPage() {
         );
         if (!exists) {
           const emailName = currentUser.email.split('@')[0] ?? 'admin';
+          const userRole = (currentUser.role as UserRole) || 'SYSTEM_ADMIN';
           const authUser: UserMember = {
             _id: currentUser.id,
             firstName: emailName,
             lastName: 'Admin',
             email: currentUser.email,
             authUserId: currentUser.id,
-            role: (currentUser.role as UserRole) ?? 'COMPANY_ADMIN',
-            permissions: DEFAULT_ROLE_PERMISSIONS[(currentUser.role as UserRole) ?? 'COMPANY_ADMIN'],
-            title: 'Authenticated Admin',
+            role: userRole,
+            permissions: DEFAULT_ROLE_PERMISSIONS[userRole] ?? DEFAULT_ROLE_PERMISSIONS.SYSTEM_ADMIN,
+            title: 'Authenticated Administrator',
             status: 'ACTIVE',
             createdAt: new Date().toISOString().split('T')[0] ?? '',
           };
@@ -113,15 +119,14 @@ export default function UsersPage() {
         }
       }
 
-      // Ensure every user has valid permissions populated
       const enrichedUsers = combinedList.map((u) => ({
         ...u,
-        permissions: u.permissions && u.permissions.length > 0 ? u.permissions : DEFAULT_ROLE_PERMISSIONS[u.role] ?? DEFAULT_ROLE_PERMISSIONS.STAFF,
+        permissions: u.permissions && u.permissions.length > 0 ? u.permissions : DEFAULT_ROLE_PERMISSIONS[u.role] ?? DEFAULT_ROLE_PERMISSIONS.INHOUSE_STAFF,
       }));
 
       setUsers(enrichedUsers);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to load users and role configurations');
+      setError(caught instanceof Error ? caught.message : 'Unable to load accounts and permissions');
     } finally {
       setLoading(false);
     }
@@ -136,7 +141,7 @@ export default function UsersPage() {
       users.filter(
         (u) =>
           (roleFilter === 'All roles' || u.role === roleFilter) &&
-          `${u.firstName} ${u.lastName} ${u.email} ${u.title ?? ''} ${u.role}`
+          `${u.firstName} ${u.lastName} ${u.email} ${u.title ?? ''} ${ROLE_LABELS[u.role]?.label || u.role}`
             .toLowerCase()
             .includes(query.toLowerCase())
       ),
@@ -156,7 +161,7 @@ export default function UsersPage() {
         authUserId: `user_${Date.now()}`,
         role: newRole,
         permissions: roleMatrixDefaults[newRole] ?? DEFAULT_ROLE_PERMISSIONS[newRole],
-        title: newTitle.trim() || 'Staff',
+        title: newTitle.trim() || ROLE_LABELS[newRole].label,
       };
       await apiFetch<UserMember>('/employees', {
         method: 'POST',
@@ -168,7 +173,7 @@ export default function UsersPage() {
       setNewEmail('');
       await load();
     } catch (caught) {
-      alert(caught instanceof Error ? caught.message : 'Failed to create user record');
+      alert(caught instanceof Error ? caught.message : 'Failed to create user account');
     } finally {
       setSubmitting(false);
     }
@@ -203,9 +208,7 @@ export default function UsersPage() {
       await apiFetch(`/employees/${editingUser._id}`, {
         method: 'PATCH',
         body: JSON.stringify({ role: editRole, permissions: editPermissions }),
-      }).catch(() => {
-        // Fallback update in state if employee record is synthetic session user
-      });
+      }).catch(() => {});
 
       setUsers((prev) =>
         prev.map((u) => (u._id === editingUser._id ? { ...u, role: editRole, permissions: editPermissions } : u))
@@ -250,7 +253,7 @@ export default function UsersPage() {
         <input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search accounts & permissions..."
+          placeholder="Search accounts & roles..."
         />
       </div>
       <select
@@ -259,12 +262,10 @@ export default function UsersPage() {
         onChange={(event) => setRoleFilter(event.target.value)}
       >
         <option>All roles</option>
-        <option value="SUPER_ADMIN">Super Admin</option>
-        <option value="COMPANY_ADMIN">Company Admin</option>
+        <option value="SYSTEM_ADMIN">System Admin</option>
         <option value="MANAGER">Manager</option>
-        <option value="HEALTHCARE_EMPLOYEE">Healthcare Staff</option>
-        <option value="STAFF">Staff</option>
-        <option value="AUDITOR">Auditor</option>
+        <option value="INHOUSE_STAFF">Inhouse Employee</option>
+        <option value="OUT_EMPLOYEE">Out Employee</option>
       </select>
       <span className="result-count">{filtered.length} users</span>
     </div>
@@ -295,7 +296,7 @@ export default function UsersPage() {
             onClick={() => setActiveTab('roles')}
             style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
           >
-            <ShieldCheck size={16} /> Role & Permission Levels Matrix
+            <ShieldCheck size={16} /> Role Authorization Matrix
           </button>
         </div>
 
@@ -308,15 +309,15 @@ export default function UsersPage() {
                   <UsersIcon size={18} />
                 </div>
                 <strong>{users.length}</strong>
-                <small>Workspace users</small>
+                <small>Registered users</small>
               </div>
               <div className="mini-stat mini-stat-teal">
                 <div className="mini-stat-top">
-                  <span>Administrators</span>
+                  <span>System Admins</span>
                   <ShieldCheck size={18} />
                 </div>
-                <strong>{users.filter((u) => u.role === 'COMPANY_ADMIN' || u.role === 'SUPER_ADMIN').length}</strong>
-                <small>Full system access</small>
+                <strong>{users.filter((u) => u.role === 'SYSTEM_ADMIN').length}</strong>
+                <small>Full platform control</small>
               </div>
               <div className="mini-stat mini-stat-blue">
                 <div className="mini-stat-top">
@@ -324,22 +325,22 @@ export default function UsersPage() {
                   <UserCheck size={18} />
                 </div>
                 <strong>{users.filter((u) => u.role === 'MANAGER').length}</strong>
-                <small>Operational managers</small>
+                <small>Operations management</small>
               </div>
               <div className="mini-stat mini-stat-amber">
                 <div className="mini-stat-top">
-                  <span>Pending / Suspended</span>
+                  <span>Inhouse & Out Staff</span>
                   <UserPlus size={18} />
                 </div>
-                <strong>{users.filter((u) => u.status !== 'ACTIVE').length}</strong>
-                <small>Account status</small>
+                <strong>{users.filter((u) => u.role === 'INHOUSE_STAFF' || u.role === 'OUT_EMPLOYEE').length}</strong>
+                <small>Clinical & Field team</small>
               </div>
             </section>
 
             {loading && (
               <div className="data-loading">
                 <RefreshCw size={18} className="spin" />
-                Loading users and role permissions...
+                Loading accounts and assigned roles...
               </div>
             )}
 
@@ -357,7 +358,7 @@ export default function UsersPage() {
                 <div className="panel-heading">
                   <div>
                     <p className="eyebrow">User Directory</p>
-                    <h2>User Accounts & Assigned Permissions</h2>
+                    <h2>System Users & Assigned Permissions</h2>
                   </div>
                 </div>
 
@@ -374,7 +375,7 @@ export default function UsersPage() {
                           <th>Account</th>
                           <th>Email</th>
                           <th>Role</th>
-                          <th>Assigned Permissions</th>
+                          <th>Permissions</th>
                           <th>Status</th>
                           <th style={{ textAlign: 'right' }}>Actions</th>
                         </tr>
@@ -382,6 +383,7 @@ export default function UsersPage() {
                       <tbody>
                         {filtered.map((userItem) => {
                           const activePermCount = userItem.permissions?.length ?? 0;
+                          const roleMeta = ROLE_LABELS[userItem.role] || { label: userItem.role, bg: '#f1f5f9', textColor: '#475569' };
                           return (
                             <tr key={userItem._id}>
                               <td>
@@ -394,7 +396,7 @@ export default function UsersPage() {
                                     <strong>
                                       {userItem.firstName} {userItem.lastName}
                                     </strong>
-                                    <span>{userItem.title ?? 'Staff Member'}</span>
+                                    <span>{userItem.title ?? roleMeta.label}</span>
                                   </div>
                                 </div>
                               </td>
@@ -404,25 +406,15 @@ export default function UsersPage() {
                                   style={{
                                     display: 'inline-block',
                                     fontSize: '11px',
-                                    fontFamily: 'DM Mono, monospace',
-                                    padding: '4px 8px',
-                                    borderRadius: '4px',
-                                    background:
-                                      userItem.role === 'SUPER_ADMIN' || userItem.role === 'COMPANY_ADMIN'
-                                        ? '#e0efeb'
-                                        : userItem.role === 'MANAGER'
-                                        ? '#e0e9fa'
-                                        : '#f4f7f7',
-                                    color:
-                                      userItem.role === 'SUPER_ADMIN' || userItem.role === 'COMPANY_ADMIN'
-                                        ? '#32776d'
-                                        : userItem.role === 'MANAGER'
-                                        ? '#3d5c99'
-                                        : '#5b6b6e',
-                                    fontWeight: 600,
+                                    fontFamily: 'DM Sans, sans-serif',
+                                    padding: '4px 10px',
+                                    borderRadius: '6px',
+                                    background: roleMeta.bg,
+                                    color: roleMeta.textColor,
+                                    fontWeight: 700,
                                   }}
                                 >
-                                  {userItem.role}
+                                  {roleMeta.label}
                                 </span>
                               </td>
                               <td>
@@ -484,9 +476,9 @@ export default function UsersPage() {
             <div className="panel-heading">
               <div>
                 <p className="eyebrow">Role Authorization Matrix</p>
-                <h2>Permission Levels & Role Controls</h2>
+                <h2>Role Configurations & Permission Levels</h2>
                 <p style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>
-                  Configure standard permission levels assigned to workspace roles across features.
+                  Configure standard permission levels assigned across System Admin, Manager, Inhouse Employee, and Out Employee.
                 </p>
               </div>
             </div>
@@ -496,12 +488,10 @@ export default function UsersPage() {
                 <thead>
                   <tr>
                     <th style={{ minWidth: '220px' }}>Permission Level</th>
-                    <th>Super Admin</th>
-                    <th>Company Admin</th>
+                    <th>System Admin</th>
                     <th>Manager</th>
-                    <th>Healthcare Employee</th>
-                    <th>Staff</th>
-                    <th>Auditor</th>
+                    <th>Inhouse Employee</th>
+                    <th>Out Employee</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -513,7 +503,7 @@ export default function UsersPage() {
                           <small style={{ color: '#64748b', fontSize: '11px' }}>{perm.description}</small>
                         </div>
                       </td>
-                      {(['SUPER_ADMIN', 'COMPANY_ADMIN', 'MANAGER', 'HEALTHCARE_EMPLOYEE', 'STAFF', 'AUDITOR'] as UserRole[]).map((rKey) => {
+                      {(['SYSTEM_ADMIN', 'MANAGER', 'INHOUSE_STAFF', 'OUT_EMPLOYEE'] as UserRole[]).map((rKey) => {
                         const isGranted = (roleMatrixDefaults[rKey] ?? []).includes(perm.id);
                         return (
                           <td key={rKey} style={{ textAlign: 'center' }}>
@@ -598,12 +588,10 @@ export default function UsersPage() {
                       value={newRole}
                       onChange={(e) => setNewRole(e.target.value as UserRole)}
                     >
-                      <option value="SUPER_ADMIN">Super Admin (Full platform permissions)</option>
-                      <option value="COMPANY_ADMIN">Company Admin (Full workspace permissions)</option>
-                      <option value="MANAGER">Manager (Sensors & customer management)</option>
-                      <option value="HEALTHCARE_EMPLOYEE">Healthcare Employee (Clinical staff)</option>
-                      <option value="STAFF">Staff (Standard view access)</option>
-                      <option value="AUDITOR">Auditor (Read-only compliance)</option>
+                      <option value="SYSTEM_ADMIN">System Admin (Full system control)</option>
+                      <option value="MANAGER">Manager (Operations & fleet management)</option>
+                      <option value="INHOUSE_STAFF">Inhouse Employee (Clinical in-house staff)</option>
+                      <option value="OUT_EMPLOYEE">Out Employee (Field technician & external operator)</option>
                     </select>
                   </label>
                   <label>
@@ -611,7 +599,7 @@ export default function UsersPage() {
                     <input
                       value={newTitle}
                       onChange={(e) => setNewTitle(e.target.value)}
-                      placeholder="Clinical Operations"
+                      placeholder="e.g. Clinical Operations"
                     />
                   </label>
                 </div>
@@ -661,12 +649,10 @@ export default function UsersPage() {
                       onChange={(e) => handleRoleChangeInEdit(e.target.value as UserRole)}
                       style={{ width: '100%', marginTop: '4px' }}
                     >
-                      <option value="SUPER_ADMIN">Super Admin (All permissions)</option>
-                      <option value="COMPANY_ADMIN">Company Admin (Full permissions)</option>
-                      <option value="MANAGER">Manager (Sensors, customers, operations)</option>
-                      <option value="HEALTHCARE_EMPLOYEE">Healthcare Employee (Clinical staff)</option>
-                      <option value="STAFF">Staff (Standard access)</option>
-                      <option value="AUDITOR">Auditor (Compliance audit)</option>
+                      <option value="SYSTEM_ADMIN">System Admin (Full system control)</option>
+                      <option value="MANAGER">Manager (Operations & fleet management)</option>
+                      <option value="INHOUSE_STAFF">Inhouse Employee (Clinical in-house staff)</option>
+                      <option value="OUT_EMPLOYEE">Out Employee (Field technician & external operator)</option>
                     </select>
                   </label>
 

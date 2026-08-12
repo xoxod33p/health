@@ -10,7 +10,7 @@ export class Employee {
   @Prop({ required: true }) lastName!: string;
   @Prop({ required: true, unique: true }) authUserId!: string;
   @Prop({ required: true, unique: false }) email!: string;
-  @Prop({ required: true, enum: ['SUPER_ADMIN', 'COMPANY_ADMIN', 'MANAGER', 'HEALTHCARE_EMPLOYEE', 'STAFF', 'AUDITOR'] }) role!: string;
+  @Prop({ required: true, enum: ['SYSTEM_ADMIN', 'MANAGER', 'INHOUSE_STAFF', 'OUT_EMPLOYEE'] }) role!: string;
   @Prop({ type: [String], default: [] }) permissions!: string[];
   @Prop({ required: true, enum: ['ACTIVE', 'INVITED', 'SUSPENDED'], default: 'INVITED' }) status!: string;
   @Prop() phone?: string;

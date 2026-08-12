@@ -10,6 +10,10 @@
     "lint": "npm run lint --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "dev:api": "npm --workspace apps/api run start:dev",
-    "dev:web": "npm --workspace apps/web run dev"
+    "dev:web": "npm --workspace apps/web run dev",
+    "user:list": "npx tsx apps/api/src/scripts/manage-roles.ts list",
+    "user:set-role": "npx tsx apps/api/src/scripts/manage-roles.ts set-role",
+    "user:set-permissions": "npx tsx apps/api/src/scripts/manage-roles.ts set-permissions",
+    "user:create": "npx tsx apps/api/src/scripts/manage-roles.ts create"
   }
 }

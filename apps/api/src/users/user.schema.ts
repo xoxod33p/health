@@ -11,7 +11,7 @@ export class User {
   @Prop({ required: true, index: true })
   companyId!: string;
 
-  @Prop({ required: true, enum: ['SUPER_ADMIN', 'COMPANY_ADMIN', 'MANAGER', 'HEALTHCARE_EMPLOYEE', 'STAFF', 'AUDITOR'] })
+  @Prop({ required: true, enum: ['SYSTEM_ADMIN', 'MANAGER', 'INHOUSE_STAFF', 'OUT_EMPLOYEE'] })
   role!: string;
 
   @Prop({ type: [String], default: [] })
