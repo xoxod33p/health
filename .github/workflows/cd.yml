@@ -94,12 +94,12 @@ jobs:
             export GITHUB_REPOSITORY_OWNER="${{ steps.repo_owner.outputs.owner }}"
 
             # Write production .env file on VPS if secret provided
-            cat << 'EOF' > "$DEPLOY_DIR/.env"
+            if [ -n "${{ secrets.PROD_ENV_FILE }}" ]; then
+              cat << 'EOF' > "$DEPLOY_DIR/.env"
             ${{ secrets.PROD_ENV_FILE }}
             EOF
-            
-            # Set ownership/permissions on .env
-            chmod 600 "$DEPLOY_DIR/.env"
+              chmod 600 "$DEPLOY_DIR/.env"
+            fi
 
             # Create compose stack directory and pull latest images
             cd "$DEPLOY_DIR"
