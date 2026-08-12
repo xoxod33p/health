@@ -43,8 +43,11 @@ jobs:
               cp "$DEPLOY_DIR/.env.production" "$DEPLOY_DIR/.env"
             fi
 
+            echo "==> Cleaning up any old/conflicting containers..."
+            docker compose -f infra/docker-compose.prod.yml down --remove-orphans || true
+
             echo "==> Building and starting container stack on VPS using local .env..."
-            docker compose -f infra/docker-compose.prod.yml up -d --build --remove-orphans
+            docker compose -f infra/docker-compose.prod.yml up -d --build --force-recreate --remove-orphans
 
             echo "==> Cleaning up unused Docker images..."
             docker image prune -af --filter "until=24h" || true
