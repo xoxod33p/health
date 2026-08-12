@@ -19,8 +19,8 @@ echo Bootstrapping initial MongoDB admin account...
 call npx tsx "%ROOT%apps\api\src\scripts\bootstrap-admin.ts"
 
 echo Opening local development CMD windows for API and Web in DEV mode...
-start "Healthcare API" cmd.exe /k "cd /d "%ROOT%" && set NODE_ENV=development && npm run dev:api"
-start "Healthcare Web" cmd.exe /k "cd /d "%ROOT%" && set NODE_ENV=development && npm run dev:web"
+start "Healthcare API" cmd.exe /k "cd /d "%ROOT%" && set "NODE_ENV=development" && npm run dev:api"
+start "Healthcare Web" cmd.exe /k "cd /d "%ROOT%" && npm run dev:web"
 
 echo ============================================================
 echo Development environment ready!
