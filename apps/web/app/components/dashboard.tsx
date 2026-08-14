@@ -103,7 +103,7 @@ export function Dashboard() {
     return () => disconnect?.();
   }, []);
 
-  // Split sensors into "About to Expire / Expired" and "General Live Inventory"
+  // Filter sensors into "About to Expire / Expired"
   const expiringSensors = useMemo(() => {
     return allSensors
       .filter((s) => {
@@ -111,10 +111,6 @@ export function Dashboard() {
         return s.status === 'EXPIRING_SOON' || s.status === 'EXPIRED' || days <= 30;
       })
       .sort((a, b) => new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime());
-  }, [allSensors]);
-
-  const recentSensors = useMemo(() => {
-    return allSensors.slice(0, 6);
   }, [allSensors]);
 
   if (loading) {
@@ -362,109 +358,6 @@ export function Dashboard() {
                         >
                           Replace <ExternalLink size={11} />
                         </Link>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
-
-      {/* 3. SECTION: Recent Live Sensor Inventory */}
-      <section className="panel">
-        <div className="panel-heading">
-          <div>
-            <p className="eyebrow">Live inventory</p>
-            <h2 style={{ fontSize: '18px', margin: 0 }}>Recent Sensor Records</h2>
-          </div>
-          <Link className="ghost-button" href="/sensors">
-            View all inventory <ArrowRight size={14} />
-          </Link>
-        </div>
-
-        {recentSensors.length === 0 ? (
-          <div className="empty-panel">
-            <h2>No sensors yet</h2>
-            <p>Add a sensor to see live inventory here.</p>
-          </div>
-        ) : (
-          <div className="table-wrap">
-            <table className="rich-table">
-              <thead>
-                <tr>
-                  <th>Serial Number</th>
-                  <th>Sensor Type</th>
-                  <th>Assigned Patient</th>
-                  <th>Manufacturer & Model</th>
-                  <th>Expires</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentSensors.map((sensor) => {
-                  const days = getDaysRemaining(sensor.expiresAt);
-                  const badge = getStatusBadge(sensor.status, days);
-
-                  return (
-                    <tr key={sensor._id}>
-                      <td>
-                        <strong className="serial" style={{ fontFamily: 'monospace', fontSize: '13px' }}>
-                          {sensor.serialNumber}
-                        </strong>
-                      </td>
-                      <td>
-                        <span
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '5px',
-                            background: '#f1f5f9',
-                            color: '#334155',
-                            padding: '3px 8px',
-                            borderRadius: '4px',
-                            fontSize: '12px',
-                            fontWeight: 600,
-                          }}
-                        >
-                          <Tag size={12} style={{ color: '#0f766e' }} />
-                          {sensor.sensorTypeName || sensor.sensorTypeCode || sensor.sensorTypeId}
-                        </span>
-                      </td>
-                      <td>
-                        {sensor.customerName ? (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <User size={13} style={{ color: '#64748b' }} />
-                            <div>
-                              <strong>{sensor.customerName}</strong>
-                              {sensor.customerNumber && (
-                                <span style={{ fontSize: '11px', color: '#94a3b8', marginLeft: '4px' }}>
-                                  ({sensor.customerNumber})
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        ) : (
-                          <span style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '12px' }}>
-                            Unassigned
-                          </span>
-                        )}
-                      </td>
-                      <td className="muted-cell" style={{ fontSize: '12px' }}>
-                        {sensor.manufacturer} · {sensor.model}
-                      </td>
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span>{formatDate(sensor.expiresAt)}</span>
-                          <small style={{ color: '#64748b', fontSize: '11px' }}>({days}d)</small>
-                        </div>
-                      </td>
-                      <td>
-                        <span className={badge.className}>
-                          <i />
-                          {badge.label}
-                        </span>
                       </td>
                     </tr>
                   );
