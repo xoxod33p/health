@@ -13,8 +13,10 @@ import { EmployeesModule } from './employees/employees.module';
 import { HealthModule } from './health/health.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { RealtimeModule } from './realtime/realtime.module';
+import { ReportsModule } from './reports/reports.module';
 import { SensorsModule } from './sensors/sensors.module';
 import { SensorTypesModule } from './sensor-types/sensor-types.module';
+import { StorageModule } from './storage/storage.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -35,6 +37,7 @@ import { UsersModule } from './users/users.module';
       useFactory: (config: ConfigService) => ({ uri: config.getOrThrow<string>('MONGODB_URI') }),
       inject: [ConfigService],
     }),
+    StorageModule,
     UsersModule,
     AuthModule,
     AuditModule,
@@ -45,6 +48,7 @@ import { UsersModule } from './users/users.module';
     SensorTypesModule,
     NotificationsModule,
     RealtimeModule,
+    ReportsModule,
     HealthModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

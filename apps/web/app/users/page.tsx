@@ -4,6 +4,7 @@ import {
   Check,
   Edit2,
   KeyRound,
+  Lock,
   Plus,
   RefreshCw,
   Search,
@@ -36,6 +37,7 @@ type UserMember = {
   permissions?: string[];
   title?: string;
   status: 'ACTIVE' | 'INVITED' | 'SUSPENDED';
+  isProtected?: boolean;
   createdAt?: string;
 };
 
@@ -111,8 +113,9 @@ export default function UsersPage() {
             authUserId: currentUser.id,
             role: userRole,
             permissions: DEFAULT_ROLE_PERMISSIONS[userRole] ?? DEFAULT_ROLE_PERMISSIONS.SYSTEM_ADMIN,
-            title: 'Authenticated Administrator',
+            title: 'Primary Administrator',
             status: 'ACTIVE',
+            isProtected: true,
             createdAt: new Date().toISOString().split('T')[0] ?? '',
           };
           combinedList = [authUser, ...combinedList];
@@ -121,6 +124,11 @@ export default function UsersPage() {
 
       const enrichedUsers = combinedList.map((u) => ({
         ...u,
+        isProtected: Boolean(
+          u.isProtected ||
+          (currentUser?.email && u.email.toLowerCase() === currentUser.email.toLowerCase() && u.role === 'SYSTEM_ADMIN') ||
+          (u.email.toLowerCase() === 'admin@localhost.test' && u.role === 'SYSTEM_ADMIN')
+        ),
         permissions: u.permissions && u.permissions.length > 0 ? u.permissions : DEFAULT_ROLE_PERMISSIONS[u.role] ?? DEFAULT_ROLE_PERMISSIONS.INHOUSE_STAFF,
       }));
 
@@ -180,6 +188,10 @@ export default function UsersPage() {
   };
 
   const handleOpenEditUser = (userItem: UserMember) => {
+    if (userItem.isProtected) {
+      alert('The default environment administrator account is protected and cannot be edited or modified.');
+      return;
+    }
     setEditingUser(userItem);
     setEditRole(userItem.role);
     setEditPermissions(userItem.permissions ?? DEFAULT_ROLE_PERMISSIONS[userItem.role]);
@@ -203,12 +215,17 @@ export default function UsersPage() {
     event.preventDefault();
     if (!editingUser) return;
 
+    if (editingUser.isProtected) {
+      alert('The default environment administrator account is protected and cannot be edited or modified.');
+      return;
+    }
+
     setSubmitting(true);
     try {
       await apiFetch(`/employees/${editingUser._id}`, {
         method: 'PATCH',
         body: JSON.stringify({ role: editRole, permissions: editPermissions }),
-      }).catch(() => {});
+      });
 
       setUsers((prev) =>
         prev.map((u) => (u._id === editingUser._id ? { ...u, role: editRole, permissions: editPermissions } : u))
@@ -224,6 +241,12 @@ export default function UsersPage() {
   };
 
   const handleToggleStatus = async (id: string, currentStatus: string) => {
+    const target = users.find((u) => u._id === id);
+    if (target?.isProtected) {
+      alert('The default environment administrator account is protected and cannot be suspended.');
+      return;
+    }
+
     const nextStatus = currentStatus === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
     try {
       await apiFetch(`/employees/${id}`, {
@@ -231,8 +254,8 @@ export default function UsersPage() {
         body: JSON.stringify({ status: nextStatus }),
       });
       await load();
-    } catch {
-      setUsers(users.map((u) => (u._id === id ? { ...u, status: nextStatus } : u)));
+    } catch (caught) {
+      alert(caught instanceof Error ? caught.message : 'Failed to update account status');
     }
   };
 
@@ -393,9 +416,27 @@ export default function UsersPage() {
                                     {userItem.lastName.slice(0, 1).toUpperCase()}
                                   </div>
                                   <div>
-                                    <strong>
-                                      {userItem.firstName} {userItem.lastName}
-                                    </strong>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                      <strong>
+                                        {userItem.firstName} {userItem.lastName}
+                                      </strong>
+                                      {userItem.isProtected && (
+                                        <span
+                                          style={{
+                                            fontSize: '9px',
+                                            background: '#e0efeb',
+                                            color: '#0f766e',
+                                            fontWeight: 700,
+                                            padding: '1px 5px',
+                                            borderRadius: '4px',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '0.5px',
+                                          }}
+                                        >
+                                          Protected
+                                        </span>
+                                      )}
+                                    </div>
                                     <span>{userItem.title ?? roleMeta.label}</span>
                                   </div>
                                 </div>
@@ -440,22 +481,45 @@ export default function UsersPage() {
                               </td>
                               <td style={{ textAlign: 'right' }}>
                                 <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
-                                  <button
-                                    className="secondary-button"
-                                    type="button"
-                                    onClick={() => handleOpenEditUser(userItem)}
-                                    style={{ fontSize: '11px', padding: '6px 10px', display: 'flex', alignItems: 'center', gap: '4px' }}
-                                  >
-                                    <Edit2 size={12} /> Edit Role & Permissions
-                                  </button>
-                                  <button
-                                    className="secondary-button"
-                                    type="button"
-                                    onClick={() => void handleToggleStatus(userItem._id, userItem.status)}
-                                    style={{ fontSize: '11px', padding: '6px 10px' }}
-                                  >
-                                    {userItem.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
-                                  </button>
+                                  {userItem.isProtected ? (
+                                    <span
+                                      style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '5px',
+                                        fontSize: '11px',
+                                        padding: '6px 12px',
+                                        borderRadius: '6px',
+                                        background: '#f8fafc',
+                                        color: '#64748b',
+                                        fontWeight: 600,
+                                        border: '1px solid #e2e8f0',
+                                        cursor: 'not-allowed',
+                                      }}
+                                      title="This primary administrator account is configured in the environment and is protected from modification or deletion."
+                                    >
+                                      <Lock size={12} /> Protected (Root Admin)
+                                    </span>
+                                  ) : (
+                                    <>
+                                      <button
+                                        className="secondary-button"
+                                        type="button"
+                                        onClick={() => handleOpenEditUser(userItem)}
+                                        style={{ fontSize: '11px', padding: '6px 10px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                      >
+                                        <Edit2 size={12} /> Edit Role & Permissions
+                                      </button>
+                                      <button
+                                        className="secondary-button"
+                                        type="button"
+                                        onClick={() => void handleToggleStatus(userItem._id, userItem.status)}
+                                        style={{ fontSize: '11px', padding: '6px 10px' }}
+                                      >
+                                        {userItem.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
+                                      </button>
+                                    </>
+                                  )}
                                 </div>
                               </td>
                             </tr>

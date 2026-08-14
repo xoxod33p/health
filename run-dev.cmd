@@ -8,7 +8,7 @@ if not exist "%ROOT%.env" (
   copy /Y "%ROOT%.env.example" "%ROOT%.env" > nul
 )
 
-echo Starting Docker infrastructure dependencies (MongoDB, Redis, MinIO)...
+echo Starting Docker infrastructure dependencies (MongoDB, Redis)...
 docker compose -f "%ROOT%infra\docker-compose.yml" up -d --wait
 if errorlevel 1 (
   echo Docker dependencies failed to start. API and web windows were not opened.

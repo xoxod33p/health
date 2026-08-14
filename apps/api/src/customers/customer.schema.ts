@@ -19,6 +19,8 @@ export class Customer {
   @Prop() notes?: string;
   @Prop({ required: true }) createdBy!: string;
   @Prop({ required: true }) updatedBy!: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export const CustomerSchema = SchemaFactory.createForClass(Customer);

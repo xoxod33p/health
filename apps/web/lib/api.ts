@@ -160,3 +160,41 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
 
   return response.json() as Promise<T>;
 }
+
+export async function apiDownload(path: string, defaultFilename: string): Promise<void> {
+  const { data, error } = await getSession();
+  if (error) throw error;
+  if (!data.session) throw new Error('Your session has expired. Please sign in again.');
+
+  const baseUrl = getApiBaseUrl();
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  const targetUrl = `${baseUrl}${cleanPath}`;
+
+  const response = await fetch(targetUrl, {
+    headers: {
+      Authorization: `Bearer ${data.session.access_token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || `Download failed with status ${response.status}`);
+  }
+
+  const disposition = response.headers.get('Content-Disposition');
+  let filename = defaultFilename;
+  if (disposition && disposition.includes('filename=')) {
+    const match = disposition.match(/filename="?([^";]+)"?/);
+    if (match && match[1]) filename = match[1];
+  }
+
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url);
+}

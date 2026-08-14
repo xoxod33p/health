@@ -152,7 +152,7 @@ export default function SensorTypesPage() {
       <div className="page-content">
 
         {/* Stats */}
-        <section className="mini-stat-grid">
+        <section className="mini-stat-grid mini-stat-grid-3">
           <div className="mini-stat">
             <div className="mini-stat-top"><span>Total types</span><Tag size={18} /></div>
             <strong>{types.length}</strong>
