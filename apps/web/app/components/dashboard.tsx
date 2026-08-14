@@ -164,13 +164,6 @@ export function Dashboard() {
       note: 'Requires clinical action',
       tone: 'amber',
     },
-    {
-      label: 'Unread notifications',
-      value: summary.unreadNotifications,
-      delta: 'Live inbox',
-      note: 'Account action items',
-      tone: 'coral',
-    },
   ];
 
   return (
