@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  AlertTriangle,
   Check,
   Edit2,
   KeyRound,
@@ -86,6 +87,10 @@ export default function UsersPage() {
   // Edit Role & Permissions Form State
   const [editRole, setEditRole] = useState<UserRole>('INHOUSE_STAFF');
   const [editPermissions, setEditPermissions] = useState<string[]>([]);
+
+  // Delete Confirmation Modal State
+  const [deleteTarget, setDeleteTarget] = useState<UserMember | null>(null);
+  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
 
   // Role Matrix Custom Defaults State
   const [roleMatrixDefaults, setRoleMatrixDefaults] = useState<Record<UserRole, string[]>>(DEFAULT_ROLE_PERMISSIONS);
@@ -264,24 +269,27 @@ export default function UsersPage() {
     }
   };
 
-  const handleDeleteUser = async (id: string, name: string) => {
-    const target = users.find((u) => u._id === id);
-    if (target?.isProtected) {
+  const handleOpenDelete = (user: UserMember) => {
+    if (user.isProtected) {
       alert('The default environment administrator account is protected and cannot be deleted.');
       return;
     }
+    setDeleteTarget(user);
+  };
 
-    if (!confirm(`Are you sure you want to permanently delete user "${name}"? This action cannot be undone.`)) {
-      return;
-    }
-
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleteSubmitting(true);
     try {
-      await apiFetch(`/employees/${id}`, {
+      await apiFetch(`/employees/${deleteTarget._id}`, {
         method: 'DELETE',
       });
+      setDeleteTarget(null);
       await load();
     } catch (caught) {
       alert(caught instanceof Error ? caught.message : 'Failed to delete user account');
+    } finally {
+      setDeleteSubmitting(false);
     }
   };
 
@@ -547,7 +555,7 @@ export default function UsersPage() {
                                       <button
                                         className="secondary-button"
                                         type="button"
-                                        onClick={() => void handleDeleteUser(userItem._id, `${userItem.firstName} ${userItem.lastName}`)}
+                                        onClick={() => handleOpenDelete(userItem)}
                                         style={{ fontSize: '11px', padding: '6px 10px', display: 'flex', alignItems: 'center', gap: '4px', color: '#ef4444', borderColor: '#fecaca' }}
                                       >
                                         <Trash2 size={12} /> Delete
@@ -812,10 +820,10 @@ export default function UsersPage() {
                       type="button"
                       className="secondary-button"
                       onClick={() => {
-                        const targetId = editingUser._id;
-                        const targetName = `${editingUser.firstName} ${editingUser.lastName}`;
+                        const target = editingUser;
                         setEditModalOpen(false);
-                        void handleDeleteUser(targetId, targetName);
+                        setEditingUser(null);
+                        handleOpenDelete(target);
                       }}
                       style={{ color: '#ef4444', borderColor: '#fecaca', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}
                     >
@@ -836,6 +844,77 @@ export default function UsersPage() {
                   </div>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Modal: Delete User Confirmation */}
+        {deleteTarget && (
+          <div className="modal-backdrop" onClick={() => !deleteSubmitting && setDeleteTarget(null)}>
+            <div className="modal-card" style={{ maxWidth: '440px' }} onClick={(e) => e.stopPropagation()}>
+              <div className="modal-heading" style={{ borderBottom: 'none', paddingBottom: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444', flexShrink: 0 }}>
+                    <AlertTriangle size={20} />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '18px', color: '#1e293b', margin: 0 }}>Delete User Account</h2>
+                    <p style={{ fontSize: '12px', color: '#64748b', margin: '2px 0 0 0' }}>Permanent account removal</p>
+                  </div>
+                </div>
+                <button
+                  className="icon-button"
+                  type="button"
+                  disabled={deleteSubmitting}
+                  onClick={() => setDeleteTarget(null)}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div style={{ padding: '16px 0 8px 0', fontSize: '13px', color: '#334155', lineHeight: 1.5 }}>
+                <p style={{ margin: '0 0 12px 0' }}>
+                  Are you sure you want to permanently delete this user account?
+                </p>
+
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px', marginBottom: '14px' }}>
+                  <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '14px' }}>
+                    {deleteTarget.firstName} {deleteTarget.lastName}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                    {deleteTarget.email}
+                  </div>
+                  <div style={{ marginTop: '8px', display: 'flex', gap: '6px' }}>
+                    <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '4px', background: ROLE_LABELS[deleteTarget.role]?.bg || '#f1f5f9', color: ROLE_LABELS[deleteTarget.role]?.textColor || '#334155', fontWeight: 600 }}>
+                      {ROLE_LABELS[deleteTarget.role]?.label || deleteTarget.role}
+                    </span>
+                  </div>
+                </div>
+
+                <p style={{ margin: 0, fontSize: '12px', color: '#dc2626', background: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '6px', padding: '8px 10px' }}>
+                  This action cannot be undone. The user will immediately lose system access and their login credentials will be permanently deleted.
+                </p>
+              </div>
+
+              <div className="modal-actions" style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  disabled={deleteSubmitting}
+                  onClick={() => setDeleteTarget(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="primary-button"
+                  disabled={deleteSubmitting}
+                  onClick={() => void handleConfirmDelete()}
+                  style={{ background: '#ef4444', borderColor: '#ef4444', color: '#ffffff' }}
+                >
+                  {deleteSubmitting ? <RefreshCw size={16} className="spin" /> : <><Trash2 size={14} /> Permanently delete</>}
+                </button>
+              </div>
             </div>
           </div>
         )}
