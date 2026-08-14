@@ -21,7 +21,13 @@ type Sensor = {
   _id: string;
   serialNumber: string;
   sensorTypeId: string;
+  sensorTypeName?: string;
+  sensorTypeCode?: string;
+  manufacturer?: string;
+  model?: string;
   customerId?: string;
+  customerName?: string;
+  customerNumber?: string;
   status: string;
   expiresAt: string;
 };
@@ -257,7 +263,7 @@ export default function SensorsPage() {
                         <tr>
                           <th>Serial number</th>
                           <th>Sensor type</th>
-                          <th>Customer ID</th>
+                          <th>Assigned patient</th>
                           <th>Expires</th>
                           <th>Status</th>
                         </tr>
@@ -266,8 +272,16 @@ export default function SensorsPage() {
                         {filteredSensors.map((sensor) => (
                           <tr key={sensor._id}>
                             <td><strong className="serial">{sensor.serialNumber}</strong></td>
-                            <td>{sensor.sensorTypeId}</td>
-                            <td className="muted-cell">{sensor.customerId ?? 'Unassigned'}</td>
+                            <td>
+                              <span style={{ fontWeight: 600, color: '#334155' }}>
+                                {sensor.sensorTypeName || sensor.sensorTypeCode || sensor.sensorTypeId}
+                              </span>
+                            </td>
+                            <td className="muted-cell">
+                              {sensor.customerName
+                                ? `${sensor.customerName} (${sensor.customerNumber || 'ID'})`
+                                : 'Unassigned'}
+                            </td>
                             <td>{new Date(sensor.expiresAt).toLocaleDateString()}</td>
                             <td>
                               <span className={`status ${sensor.status === 'ACTIVE' || sensor.status === 'ASSIGNED' ? 'status-healthy' : sensor.status === 'EXPIRING_SOON' ? 'status-warning' : sensor.status === 'EXPIRED' || sensor.status === 'DISABLED' || sensor.status === 'REPLACED' ? 'status-critical' : 'status-healthy'}`}>

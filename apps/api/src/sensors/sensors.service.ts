@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { Customer, CustomerDocument } from '../customers/customer.schema';
+import { SensorType, SensorTypeDocument } from '../sensor-types/sensor-type.schema';
 import { AssignSensorDto, CreateSensorDto, CreateSensorReplacementDto, SensorQueryDto } from './sensor.dto';
 import { Sensor, SensorDocument } from './sensor.schema';
 import { SensorAssignment, SensorAssignmentDocument } from './sensor-assignment.schema';
@@ -16,6 +17,7 @@ export class SensorsService {
     @InjectModel(SensorAssignment.name) private readonly assignments: Model<SensorAssignmentDocument>,
     @InjectModel(SensorReplacement.name) private readonly replacements: Model<SensorReplacementDocument>,
     @InjectModel(Customer.name) private readonly customers: Model<CustomerDocument>,
+    @InjectModel(SensorType.name) private readonly sensorTypes: Model<SensorTypeDocument>,
     private readonly realtime: RealtimeGateway,
   ) {}
 
@@ -25,7 +27,7 @@ export class SensorsService {
     return sensor;
   }
 
-  async findAll(user: AuthenticatedUser, query: SensorQueryDto): Promise<{ data: Sensor[]; total: number; page: number; limit: number }> {
+  async findAll(user: AuthenticatedUser, query: SensorQueryDto): Promise<{ data: any[]; total: number; page: number; limit: number }> {
     const page = Math.max(1, Number(query.page) || 1);
     const limit = Math.min(100, Math.max(1, Number(query.limit) || 25));
     const filter: FilterQuery<SensorDocument> = { companyId: user.companyId };
@@ -34,7 +36,54 @@ export class SensorsService {
       const search = query.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       filter.$or = [{ serialNumber: new RegExp(search, 'i') }, { manufacturer: new RegExp(search, 'i') }, { model: new RegExp(search, 'i') }];
     }
-    const [data, total] = await Promise.all([this.sensors.find(filter).sort({ expiresAt: 1 }).skip((page - 1) * limit).limit(limit).lean().exec(), this.sensors.countDocuments(filter).exec()]);
+
+    const [rawSensors, total] = await Promise.all([
+      this.sensors.find(filter).sort({ expiresAt: 1 }).skip((page - 1) * limit).limit(limit).lean().exec(),
+      this.sensors.countDocuments(filter).exec(),
+    ]);
+
+    // Collect customer IDs and sensor type IDs to enrich response
+    const customerIds = rawSensors
+      .map((s) => s.customerId)
+      .filter((id): id is Types.ObjectId => !!id && Types.ObjectId.isValid(id as any));
+
+    const sensorTypeIds = Array.from(new Set(rawSensors.map((s) => s.sensorTypeId).filter(Boolean)));
+
+    const validObjectIds = sensorTypeIds.filter((id) => Types.ObjectId.isValid(id));
+
+    const [customerDocs, sensorTypeDocs] = await Promise.all([
+      customerIds.length > 0
+        ? this.customers.find({ _id: { $in: customerIds } }).lean().exec()
+        : [],
+      sensorTypeIds.length > 0
+        ? this.sensorTypes.find({
+            $or: [
+              ...(validObjectIds.length > 0 ? [{ _id: { $in: validObjectIds } }] : []),
+              { code: { $in: sensorTypeIds } },
+            ],
+          }).lean().exec()
+        : [],
+    ]);
+
+    const customerMap = new Map<string, any>(customerDocs.map((c) => [c._id.toString(), c]));
+    const sensorTypeMap = new Map<string, any>();
+    sensorTypeDocs.forEach((st) => {
+      sensorTypeMap.set(st._id.toString(), st);
+      sensorTypeMap.set(st.code, st);
+    });
+
+    const data = rawSensors.map((s) => {
+      const cust = s.customerId ? customerMap.get(s.customerId.toString()) : undefined;
+      const st = sensorTypeMap.get(s.sensorTypeId);
+      return {
+        ...s,
+        customerName: cust ? `${cust.firstName} ${cust.lastName}` : undefined,
+        customerNumber: cust?.customerNumber,
+        sensorTypeName: st?.name || s.sensorTypeId,
+        sensorTypeCode: st?.code,
+      };
+    });
+
     return { data, total, page, limit };
   }
 
