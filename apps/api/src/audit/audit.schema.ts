@@ -7,6 +7,8 @@ export type AuditLogDocument = HydratedDocument<AuditLog>;
 export class AuditLog {
   @Prop({ required: true, index: true }) companyId!: string;
   @Prop({ required: true, index: true }) actorUserId!: string;
+  @Prop() actorName?: string;
+  @Prop() actorEmail?: string;
   @Prop({ required: true }) action!: string;
   @Prop({ required: true }) entityType!: string;
   @Prop({ type: Types.ObjectId }) entityId?: Types.ObjectId;
