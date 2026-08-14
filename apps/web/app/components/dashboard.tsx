@@ -368,13 +368,6 @@ export function Dashboard() {
         )}
       </section>
 
-      {/* Footer */}
-      <footer className="page-footer">
-        <span>Live telemetry · Synchronized in real-time</span>
-        <a href="http://localhost:3001/api/v1/health" target="_blank" rel="noreferrer">
-          API status <i />
-        </a>
-      </footer>
     </div>
   );
 }
