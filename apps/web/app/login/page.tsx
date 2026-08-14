@@ -1,6 +1,6 @@
 'use client';
 
-import { Activity, ArrowRight } from 'lucide-react';
+import { Activity, ArrowRight, Lock, Mail } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from '../../lib/api';
@@ -21,7 +21,7 @@ export default function LoginPage() {
       if (result.error) throw result.error;
       router.replace('/');
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to sign in');
+      setError(caught instanceof Error ? caught.message : 'Invalid email or password');
     } finally {
       setSubmitting(false);
     }
@@ -29,56 +29,67 @@ export default function LoginPage() {
 
   return (
     <main className="login-page">
-      <div className="login-brand">
-        <div className="brand-mark">
-          <Activity size={19} strokeWidth={2.5} />
+      <div className="login-container">
+        {/* Centered Brand Header */}
+        <div className="login-brand">
+          <div className="brand-mark">
+            <Activity size={22} strokeWidth={2.5} />
+          </div>
+          <span className="brand-name">
+            care<span>signal</span>
+          </span>
         </div>
-        <span className="brand-name">
-          care<span>signal</span>
-        </span>
+
+        {/* Card */}
+        <section className="login-card">
+          <div className="login-heading">
+            <p className="eyebrow">Protected Workspace</p>
+            <h1>Welcome back</h1>
+            <p className="login-subtitle">Sign in to manage your healthcare telemetry and sensor network.</p>
+          </div>
+
+          <form onSubmit={submit} className="login-form">
+            <label>
+              <span>Email address</span>
+              <div className="input-with-icon">
+                <Mail size={16} className="input-icon" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  autoComplete="email"
+                  placeholder="Enter your email"
+                  required
+                />
+              </div>
+            </label>
+
+            <label>
+              <span>Password</span>
+              <div className="input-with-icon">
+                <Lock size={16} className="input-icon" />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  autoComplete="current-password"
+                  placeholder="Enter your password"
+                  required
+                />
+              </div>
+            </label>
+
+            {error && <div className="form-error">{error}</div>}
+
+            <button type="submit" className="primary-button login-submit" disabled={submitting}>
+              {submitting ? 'Signing in...' : 'Sign in'}
+              <ArrowRight size={16} />
+            </button>
+          </form>
+        </section>
+
+        <p className="login-footer">CareSignal Platform · Secure Clinical Operations</p>
       </div>
-
-      <section className="login-card">
-        <div className="login-heading">
-          <p className="eyebrow">Protected workspace</p>
-          <h1>Welcome back</h1>
-          <p>Sign in to manage your healthcare sensor network.</p>
-        </div>
-
-        <form onSubmit={submit} className="login-form">
-          <label>
-            Email address
-            <input
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              autoComplete="email"
-              placeholder="Enter your email"
-              required
-            />
-          </label>
-          <label>
-            Password
-            <input
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              autoComplete="current-password"
-              placeholder="Enter your password"
-              required
-            />
-          </label>
-
-          {error && <div className="form-error">{error}</div>}
-
-          <button className="primary-button login-submit" disabled={submitting}>
-            {submitting ? 'Signing in...' : 'Sign in'}
-            <ArrowRight size={16} />
-          </button>
-        </form>
-      </section>
-
-      <p className="login-footer">CareSignal · Secure clinical operations</p>
     </main>
   );
 }
