@@ -82,7 +82,6 @@ export default function UsersPage() {
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('ChangeMe123!');
   const [newRole, setNewRole] = useState<UserRole>('INHOUSE_STAFF');
-  const [newTitle, setNewTitle] = useState('Inhouse Clinical Operations');
 
   // Edit Role & Permissions Form State
   const [editRole, setEditRole] = useState<UserRole>('INHOUSE_STAFF');
@@ -178,7 +177,7 @@ export default function UsersPage() {
         status: 'ACTIVE',
         password: newPassword.trim() || 'ChangeMe123!',
         permissions: roleMatrixDefaults[newRole] ?? DEFAULT_ROLE_PERMISSIONS[newRole],
-        title: newTitle.trim() || ROLE_LABELS[newRole].label,
+        title: ROLE_LABELS[newRole].label,
       };
       await apiFetch<UserMember>('/employees', {
         method: 'POST',
@@ -715,14 +714,6 @@ export default function UsersPage() {
                       <option value="INHOUSE_STAFF">Inhouse Employee (Clinical in-house staff)</option>
                       <option value="OUT_EMPLOYEE">Out Employee (Field technician & external operator)</option>
                     </select>
-                  </label>
-                  <label>
-                    <span>Title / Department</span>
-                    <input
-                      value={newTitle}
-                      onChange={(e) => setNewTitle(e.target.value)}
-                      placeholder="Job title or department"
-                    />
                   </label>
                 </div>
                 <div className="modal-actions">
