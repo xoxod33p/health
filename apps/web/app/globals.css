@@ -695,6 +695,66 @@ td {
   color: var(--ink);
 }
 
+/* Modal form controls */
+.modal-card form {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-card label,
+.form-grid label {
+  color: #334155;
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  font-weight: 600;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+}
+
+.modal-card input:not([type="checkbox"]):not([type="radio"]),
+.modal-card select,
+.modal-card textarea,
+.form-grid input:not([type="checkbox"]):not([type="radio"]),
+.form-grid select,
+.form-grid textarea {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  color: var(--ink);
+  font-size: 13px;
+  font-family: inherit;
+  outline: 0;
+  padding: 10px 12px;
+  width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.modal-card input:focus,
+.modal-card select:focus,
+.modal-card textarea:focus,
+.form-grid input:focus,
+.form-grid select:focus,
+.form-grid textarea:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(27, 139, 131, 0.15);
+}
+
+.modal-card select,
+.form-grid select {
+  appearance: auto;
+  cursor: pointer;
+}
+
+.modal-card input::placeholder,
+.form-grid input::placeholder,
+.modal-card textarea::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
 .modal-actions {
   align-items: center;
   display: flex;

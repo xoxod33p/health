@@ -660,26 +660,28 @@ export default function UsersPage() {
               </div>
               <form onSubmit={handleCreateUser}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <label>
+                      <span>First name</span>
+                      <input
+                        required
+                        value={newFirstName}
+                        onChange={(e) => setNewFirstName(e.target.value)}
+                        placeholder="First name"
+                      />
+                    </label>
+                    <label>
+                      <span>Last name</span>
+                      <input
+                        required
+                        value={newLastName}
+                        onChange={(e) => setNewLastName(e.target.value)}
+                        placeholder="Last name"
+                      />
+                    </label>
+                  </div>
                   <label>
-                    First name
-                    <input
-                      required
-                      value={newFirstName}
-                      onChange={(e) => setNewFirstName(e.target.value)}
-                      placeholder="First name"
-                    />
-                  </label>
-                  <label>
-                    Last name
-                    <input
-                      required
-                      value={newLastName}
-                      onChange={(e) => setNewLastName(e.target.value)}
-                      placeholder="Last name"
-                    />
-                  </label>
-                  <label>
-                    Email address
+                    <span>Email address</span>
                     <input
                       required
                       type="email"
@@ -689,7 +691,7 @@ export default function UsersPage() {
                     />
                   </label>
                   <label>
-                    Temporary Login Password
+                    <span>Temporary Login Password</span>
                     <input
                       required
                       type="password"
@@ -703,7 +705,7 @@ export default function UsersPage() {
                     </small>
                   </label>
                   <label>
-                    Role
+                    <span>Role</span>
                     <select
                       value={newRole}
                       onChange={(e) => setNewRole(e.target.value as UserRole)}
@@ -715,7 +717,7 @@ export default function UsersPage() {
                     </select>
                   </label>
                   <label>
-                    Title / Department
+                    <span>Title / Department</span>
                     <input
                       value={newTitle}
                       onChange={(e) => setNewTitle(e.target.value)}
