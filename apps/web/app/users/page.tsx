@@ -44,22 +44,52 @@ type UserMember = {
 };
 
 export const PERMISSION_LEVELS: { id: string; name: string; category: string; description: string }[] = [
-  { id: 'users.manage', name: 'User Management', category: 'Administration', description: 'Create, update, suspend, and configure user accounts' },
-  { id: 'roles.manage', name: 'Role & Permission Config', category: 'Administration', description: 'Modify workspace roles and permission levels' },
-  { id: 'dashboard.view', name: 'View Dashboard', category: 'Analytics', description: 'Access real-time operational health telemetry' },
-  { id: 'dashboard.edit', name: 'Customize Dashboard', category: 'Analytics', description: 'Modify dashboard widgets and alert thresholds' },
-  { id: 'sensors.view', name: 'View Sensors', category: 'Sensors', description: 'Monitor live sensor readings and hardware status' },
-  { id: 'sensors.manage', name: 'Manage Sensors', category: 'Sensors', description: 'Provision, calibrate, and command sensor devices' },
-  { id: 'customers.view', name: 'View Customers', category: 'Customers', description: 'View customer accounts and patient assignment records' },
-  { id: 'customers.manage', name: 'Manage Customers', category: 'Customers', description: 'Add, update, and manage customer accounts' },
-  { id: 'audit.view', name: 'Security Audit Logs', category: 'Compliance', description: 'View system access and security compliance logs' },
+  { id: 'dashboard.view', name: 'View Dashboard Telemetry', category: 'Analytics', description: 'Access real-time operational health telemetry & alerts' },
+  { id: 'dashboard.edit', name: 'Customize Dashboard', category: 'Analytics', description: 'Modify dashboard widgets, parameters, and thresholds' },
+  { id: 'sensors.view', name: 'View Sensor Fleet', category: 'Sensors', description: 'Monitor live sensor readings and hardware battery levels' },
+  { id: 'sensors.manage', name: 'Manage Sensors & Replacements', category: 'Sensors', description: 'Provision, assign, command, and replace sensors' },
+  { id: 'sensor_types.manage', name: 'Sensor Types Catalog', category: 'Sensors', description: 'Create and manage sensor specifications and categories' },
+  { id: 'customers.view', name: 'View Patient Directory', category: 'Patients', description: 'View customer accounts and clinical assignment records' },
+  { id: 'customers.manage', name: 'Manage Patient Records', category: 'Patients', description: 'Add, update, and manage customer patient records' },
+  { id: 'reports.view', name: 'View & Generate Reports', category: 'Reports', description: 'Generate clinical telemetry, compliance, and battery reports' },
+  { id: 'reports.export', name: 'Export Reports (PDF / CSV)', category: 'Reports', description: 'Download generated reports, telemetry data, and audit files' },
+  { id: 'users.manage', name: 'User & Staff Management', category: 'Administration', description: 'Create, update, suspend, and configure team member logins' },
+  { id: 'roles.manage', name: 'Role & Permission Controls', category: 'Administration', description: 'Modify workspace roles and permission matrix levels' },
+  { id: 'audit.view', name: 'Security Audit Trail', category: 'Compliance', description: 'Access immutable system compliance and security activity logs' },
+  { id: 'settings.manage', name: 'Workspace Configuration', category: 'Administration', description: 'Configure company profile, security policies, and defaults' },
 ];
 
 export const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, string[]> = {
   SYSTEM_ADMIN: PERMISSION_LEVELS.map((p) => p.id),
-  MANAGER: ['users.manage', 'dashboard.view', 'dashboard.edit', 'sensors.view', 'sensors.manage', 'customers.view', 'customers.manage'],
-  INHOUSE_STAFF: ['dashboard.view', 'sensors.view', 'sensors.manage', 'customers.view'],
-  OUT_EMPLOYEE: ['dashboard.view', 'sensors.view', 'customers.view'],
+  MANAGER: [
+    'dashboard.view',
+    'dashboard.edit',
+    'sensors.view',
+    'sensors.manage',
+    'sensor_types.manage',
+    'customers.view',
+    'customers.manage',
+    'reports.view',
+    'reports.export',
+    'users.manage',
+    'audit.view',
+  ],
+  INHOUSE_STAFF: [
+    'dashboard.view',
+    'sensors.view',
+    'sensors.manage',
+    'sensor_types.manage',
+    'customers.view',
+    'customers.manage',
+    'reports.view',
+    'reports.export',
+  ],
+  OUT_EMPLOYEE: [
+    'dashboard.view',
+    'sensors.view',
+    'sensors.manage',
+    'customers.view',
+  ],
 };
 
 export default function UsersPage() {
@@ -493,9 +523,28 @@ export default function UsersPage() {
                               </td>
                               <td>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                  <span className="status status-healthy" style={{ fontSize: '11px' }}>
-                                    <KeyRound size={12} /> {activePermCount} level{activePermCount === 1 ? '' : 's'}
-                                  </span>
+                                  {userItem.role === 'SYSTEM_ADMIN' || userItem.isProtected ? (
+                                    <span
+                                      style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '5px',
+                                        fontSize: '11px',
+                                        padding: '3px 8px',
+                                        borderRadius: '6px',
+                                        background: '#ecfdf5',
+                                        color: '#065f46',
+                                        fontWeight: 700,
+                                        border: '1px solid #a7f3d0',
+                                      }}
+                                    >
+                                      <ShieldCheck size={12} /> All ({PERMISSION_LEVELS.length} levels)
+                                    </span>
+                                  ) : (
+                                    <span className="status status-healthy" style={{ fontSize: '11px' }}>
+                                      <KeyRound size={12} /> {activePermCount} of {PERMISSION_LEVELS.length} levels
+                                    </span>
+                                  )}
                                 </div>
                               </td>
                               <td>
