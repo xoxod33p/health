@@ -72,7 +72,7 @@ export default function SettingsPage() {
     setSaving(true);
     setTimeout(() => {
       setSaving(false);
-      setSavedMessage('Settings saved successfully!');
+      setSavedMessage('Settings updated successfully!');
       setTimeout(() => setSavedMessage(''), 3000);
     }, 400);
   };
@@ -106,64 +106,76 @@ export default function SettingsPage() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const topbarCenter = (
-    <div className="topbar-center-wrap">
-      <div className="settings-tabs">
-        <button
-          className={`settings-tab ${activeTab === 'company' ? 'settings-tab-active' : ''}`}
-          onClick={() => setActiveTab('company')}
-        >
-          <Building2 size={16} /> Company
-        </button>
-        <button
-          className={`settings-tab ${activeTab === 'notifications' ? 'settings-tab-active' : ''}`}
-          onClick={() => setActiveTab('notifications')}
-        >
-          <BellRing size={16} /> Notifications
-        </button>
-        <button
-          className={`settings-tab ${activeTab === 'security' ? 'settings-tab-active' : ''}`}
-          onClick={() => setActiveTab('security')}
-        >
-          <ShieldCheck size={16} /> Security
-        </button>
-        <button
-          className={`settings-tab ${activeTab === 'api' ? 'settings-tab-active' : ''}`}
-          onClick={() => setActiveTab('api')}
-        >
-          <KeyRound size={16} /> API access
-        </button>
-      </div>
-    </div>
-  );
-
   return (
-    <AppShell headerCenter={topbarCenter}>
-      <div className="page-content narrow-content">
+    <AppShell>
+      <div className="page-content">
+        <div className="page-header-row">
+          <div>
+            <p className="eyebrow">Workspace Configuration</p>
+            <h1 className="page-title-text">Platform Settings</h1>
+          </div>
+        </div>
+
+        {/* In-Page Clean Tabs Bar */}
+        <div className="settings-tabs-bar">
+          <button
+            type="button"
+            className={activeTab === 'company' ? 'primary-button' : 'secondary-button'}
+            onClick={() => setActiveTab('company')}
+          >
+            <Building2 size={16} /> Company Profile
+          </button>
+          <button
+            type="button"
+            className={activeTab === 'notifications' ? 'primary-button' : 'secondary-button'}
+            onClick={() => setActiveTab('notifications')}
+          >
+            <BellRing size={16} /> Notifications & Alerts
+          </button>
+          <button
+            type="button"
+            className={activeTab === 'security' ? 'primary-button' : 'secondary-button'}
+            onClick={() => setActiveTab('security')}
+          >
+            <ShieldCheck size={16} /> Security & Access
+          </button>
+          <button
+            type="button"
+            className={activeTab === 'api' ? 'primary-button' : 'secondary-button'}
+            onClick={() => setActiveTab('api')}
+          >
+            <KeyRound size={16} /> API Keys & Access
+          </button>
+        </div>
+
         {savedMessage && (
           <div className="toast">
+            <Check size={16} color="#34d399" />
             <span>{savedMessage}</span>
           </div>
         )}
 
-        {/* Tab 1: Company */}
+        {/* Tab 1: Company Profile */}
         {activeTab === 'company' && (
           <form className="panel form-panel" onSubmit={handleSave}>
             <div className="form-section">
-              <h2>Company profile</h2>
-              <p>This information appears in reports and notifications sent to your customers.</p>
+              <h2>Company Profile</h2>
+              <p>This information appears in reports, telemetry summaries, and patient documentation.</p>
+
               <div className="form-grid">
                 <label>
-                  Company name
+                  <span>Company name</span>
                   <input
+                    required
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
                     placeholder="Enter company name"
                   />
                 </label>
                 <label>
-                  Customer-facing email
+                  <span>Customer-facing email</span>
                   <input
+                    required
                     type="email"
                     value={contactEmail}
                     onChange={(e) => setContactEmail(e.target.value)}
@@ -171,7 +183,7 @@ export default function SettingsPage() {
                   />
                 </label>
                 <label>
-                  Support hotline
+                  <span>Support hotline</span>
                   <input
                     value={supportPhone}
                     onChange={(e) => setSupportPhone(e.target.value)}
@@ -179,7 +191,7 @@ export default function SettingsPage() {
                   />
                 </label>
                 <label>
-                  Timezone
+                  <span>Timezone</span>
                   <select value={timezone} onChange={(e) => setTimezone(e.target.value)}>
                     <option value="Asia/Colombo">Sri Lanka Time (SLST / UTC+5:30)</option>
                     <option value="America/New_York">Eastern Time (ET)</option>
@@ -190,115 +202,128 @@ export default function SettingsPage() {
                     <option value="Asia/Tokyo">Tokyo (JST)</option>
                   </select>
                 </label>
-                <label>
-                  Default sensor expiration window
+                <label style={{ gridColumn: 'span 2' }}>
+                  <span>Default sensor expiration alert window</span>
                   <select value={expirationWindow} onChange={(e) => setExpirationWindow(e.target.value)}>
-                    <option value="60">60 days prior</option>
-                    <option value="30">30 days prior</option>
-                    <option value="14">14 days prior</option>
-                    <option value="7">7 days prior</option>
+                    <option value="60">60 days prior to expiration</option>
+                    <option value="30">30 days prior to expiration (Recommended)</option>
+                    <option value="14">14 days prior to expiration</option>
+                    <option value="7">7 days prior to expiration</option>
                   </select>
                 </label>
               </div>
             </div>
+
             <div className="form-actions">
-              <button className="primary-button" disabled={saving}>
+              <button className="primary-button" type="submit" disabled={saving}>
                 {saving ? <RefreshCw size={16} className="spin" /> : <Save size={16} />} Save changes
               </button>
             </div>
           </form>
         )}
 
-        {/* Tab 2: Notifications */}
+        {/* Tab 2: Notifications & Alerts */}
         {activeTab === 'notifications' && (
           <form className="panel form-panel" onSubmit={handleSave}>
             <div className="form-section">
-              <h2>Notification preferences</h2>
-              <p>Configure automated email and operational alerts for your workspace.</p>
-              <label className="toggle-row">
-                <span>
-                  <strong>Sensor expiration alerts</strong>
-                  <small>Receive warnings when sensors enter the 30-day expiration window.</small>
-                </span>
-                <input
-                  type="checkbox"
-                  checked={expirationAlerts}
-                  onChange={(e) => setExpirationAlerts(e.target.checked)}
-                />
-              </label>
-              <label className="toggle-row">
-                <span>
-                  <strong>Critical device status alerts</strong>
-                  <small>Immediate notification when a sensor status shifts to EXPIRED or DISABLED.</small>
-                </span>
-                <input
-                  type="checkbox"
-                  checked={criticalAlerts}
-                  onChange={(e) => setCriticalAlerts(e.target.checked)}
-                />
-              </label>
-              <label className="toggle-row">
-                <span>
-                  <strong>Daily operational digest</strong>
-                  <small>Receive a morning email summary of active inventory and new customers.</small>
-                </span>
-                <input
-                  type="checkbox"
-                  checked={dailyDigest}
-                  onChange={(e) => setDailyDigest(e.target.checked)}
-                />
-              </label>
-              <label className="toggle-row">
-                <span>
-                  <strong>Weekly PDF executive report</strong>
-                  <small>Automated weekly export attached directly to account administrators.</small>
-                </span>
-                <input
-                  type="checkbox"
-                  checked={weeklyReport}
-                  onChange={(e) => setWeeklyReport(e.target.checked)}
-                />
-              </label>
+              <h2>Notification Preferences</h2>
+              <p>Configure automated email and operational alerts for clinical telemetry events.</p>
+
+              <div className="toggle-list">
+                <label className="toggle-card">
+                  <div className="toggle-info">
+                    <strong>Sensor expiration alerts</strong>
+                    <small>Receive warnings when sensors enter the configured expiration window.</small>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={expirationAlerts}
+                    onChange={(e) => setExpirationAlerts(e.target.checked)}
+                  />
+                </label>
+
+                <label className="toggle-card">
+                  <div className="toggle-info">
+                    <strong>Critical device status alerts</strong>
+                    <small>Immediate notification when a sensor status shifts to EXPIRED or DISABLED.</small>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={criticalAlerts}
+                    onChange={(e) => setCriticalAlerts(e.target.checked)}
+                  />
+                </label>
+
+                <label className="toggle-card">
+                  <div className="toggle-info">
+                    <strong>Daily operational digest</strong>
+                    <small>Receive a morning email summary of active telemetry inventory and new patients.</small>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={dailyDigest}
+                    onChange={(e) => setDailyDigest(e.target.checked)}
+                  />
+                </label>
+
+                <label className="toggle-card">
+                  <div className="toggle-info">
+                    <strong>Weekly PDF executive report</strong>
+                    <small>Automated weekly summary report delivered directly to administrators.</small>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={weeklyReport}
+                    onChange={(e) => setWeeklyReport(e.target.checked)}
+                  />
+                </label>
+              </div>
             </div>
+
             <div className="form-actions">
-              <button className="primary-button" disabled={saving}>
+              <button className="primary-button" type="submit" disabled={saving}>
                 {saving ? <RefreshCw size={16} className="spin" /> : <Save size={16} />} Save preferences
               </button>
             </div>
           </form>
         )}
 
-        {/* Tab 3: Security */}
+        {/* Tab 3: Security & Access */}
         {activeTab === 'security' && (
           <form className="panel form-panel" onSubmit={handleSave}>
             <div className="form-section">
-              <h2>Security & authentication</h2>
-              <p>Manage workspace access controls and compliance policies.</p>
-              <label className="toggle-row">
-                <span>
-                  <strong>Enforce Two-Factor Authentication (2FA)</strong>
-                  <small>Require all workspace team members to use TOTP / Authenticator app login.</small>
-                </span>
-                <input
-                  type="checkbox"
-                  checked={enforceTwoFactor}
-                  onChange={(e) => setEnforceTwoFactor(e.target.checked)}
-                />
-              </label>
-              <label className="toggle-row">
-                <span>
-                  <strong>Restrict login by IP range</strong>
-                  <small>Limit admin portal access strictly to trusted company IP subnets.</small>
-                </span>
-                <input
-                  type="checkbox"
-                  checked={ipRestriction}
-                  onChange={(e) => setIpRestriction(e.target.checked)}
-                />
-              </label>
-              <div className="form-grid" style={{ marginTop: '16px' }}>
+              <h2>Security & Authentication</h2>
+              <p>Manage workspace access controls, session timeouts, and compliance policies.</p>
+
+              <div className="toggle-list">
+                <label className="toggle-card">
+                  <div className="toggle-info">
+                    <strong>Enforce Two-Factor Authentication (2FA)</strong>
+                    <small>Require all workspace team members to authenticate with 2FA / Authenticator app.</small>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={enforceTwoFactor}
+                    onChange={(e) => setEnforceTwoFactor(e.target.checked)}
+                  />
+                </label>
+
+                <label className="toggle-card">
+                  <div className="toggle-info">
+                    <strong>Restrict login by IP range</strong>
+                    <small>Limit workspace portal access strictly to authorized corporate IP subnets.</small>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={ipRestriction}
+                    onChange={(e) => setIpRestriction(e.target.checked)}
+                  />
+                </label>
+              </div>
+
+              <div className="form-grid">
                 <label>
-                  Inactivity session timeout
+                  <span>Inactivity session timeout</span>
                   <select value={sessionTimeout} onChange={(e) => setSessionTimeout(e.target.value)}>
                     <option value="15">15 minutes</option>
                     <option value="30">30 minutes</option>
@@ -307,7 +332,7 @@ export default function SettingsPage() {
                   </select>
                 </label>
                 <label>
-                  Audit log retention period
+                  <span>Audit log retention period</span>
                   <select value={auditRetention} onChange={(e) => setAuditRetention(e.target.value)}>
                     <option value="30">30 days</option>
                     <option value="90">90 days</option>
@@ -317,35 +342,37 @@ export default function SettingsPage() {
                 </label>
               </div>
             </div>
+
             <div className="form-actions">
-              <button className="primary-button" disabled={saving}>
+              <button className="primary-button" type="submit" disabled={saving}>
                 {saving ? <RefreshCw size={16} className="spin" /> : <Save size={16} />} Save security settings
               </button>
             </div>
           </form>
         )}
 
-        {/* Tab 4: API Access */}
+        {/* Tab 4: API Keys & Webhooks */}
         {activeTab === 'api' && (
           <div className="panel form-panel">
             <div className="form-section">
-              <h2>API keys & webhooks</h2>
-              <p>Manage programmatic access keys for automated sensor ingestion and system integrations.</p>
+              <h2>API Keys & Ingestion Webhooks</h2>
+              <p>Manage programmatic credentials for automated sensor telemetry ingestion and EHR integrations.</p>
 
-              <form onSubmit={handleGenerateKey} style={{ display: 'flex', gap: '10px', margin: '18px 0 24px' }}>
+              <form onSubmit={handleGenerateKey} style={{ display: 'flex', gap: '10px', margin: '20px 0 24px', flexWrap: 'wrap' }}>
                 <input
+                  required
                   value={newKeyName}
                   onChange={(e) => setNewKeyName(e.target.value)}
-                  placeholder="Key description"
+                  placeholder="Key description (e.g. Production Telemetry Service)"
                   style={{
-                    flex: 1,
+                    flex: '1 1 260px',
                     padding: '10px 12px',
-                    borderRadius: '6px',
-                    border: '1px solid var(--line)',
-                    fontSize: '12px',
+                    borderRadius: '7px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '13px',
                   }}
                 />
-                <button className="primary-button" type="submit">
+                <button className="primary-button" type="submit" style={{ flexShrink: 0 }}>
                   <Plus size={16} /> Generate API key
                 </button>
               </form>
@@ -372,9 +399,11 @@ export default function SettingsPage() {
                             style={{
                               fontFamily: 'DM Mono, monospace',
                               fontSize: '11px',
-                              background: '#f4f7f7',
-                              padding: '3px 7px',
+                              background: '#f1f5f9',
+                              color: '#334155',
+                              padding: '3px 8px',
                               borderRadius: '4px',
+                              border: '1px solid #e2e8f0',
                             }}
                           >
                             {item.key.slice(0, 12)}...{item.key.slice(-4)}
@@ -383,24 +412,25 @@ export default function SettingsPage() {
                         <td className="muted-cell">{item.createdAt}</td>
                         <td className="muted-cell">{item.lastUsed}</td>
                         <td style={{ textAlign: 'right' }}>
-                          <div style={{ display: 'inline-flex', gap: '8px' }}>
+                          <div style={{ display: 'inline-flex', gap: '6px' }}>
                             <button
                               className="secondary-button"
                               type="button"
                               onClick={() => handleCopyKey(item.id, item.key)}
                               title="Copy full key"
+                              style={{ fontSize: '11px', padding: '5px 9px' }}
                             >
-                              {copiedId === item.id ? <Check size={14} color="var(--teal)" /> : <Copy size={14} />}
+                              {copiedId === item.id ? <Check size={13} color="#059669" /> : <Copy size={13} />}
                               {copiedId === item.id ? 'Copied' : 'Copy'}
                             </button>
                             <button
                               className="secondary-button"
                               type="button"
                               onClick={() => handleRevokeKey(item.id)}
-                              style={{ color: 'var(--coral)', borderColor: '#f7d8d2' }}
+                              style={{ color: '#ef4444', borderColor: '#fecaca', fontSize: '11px', padding: '5px 9px' }}
                               title="Revoke key"
                             >
-                              <Trash2 size={14} /> Revoke
+                              <Trash2 size={13} /> Revoke
                             </button>
                           </div>
                         </td>
