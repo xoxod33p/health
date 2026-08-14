@@ -186,13 +186,13 @@ export function Dashboard() {
       </section>
 
       {/* 2. SECTION: Sensors About to Expire (Urgent Attention) */}
-      <section className="panel" style={{ borderLeft: '4px solid #d97706', marginBottom: '24px' }}>
-        <div className="panel-heading">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <section className="panel" style={{ padding: '24px 26px 36px', marginBottom: '28px' }}>
+        <div className="panel-heading" style={{ marginBottom: '22px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div
               style={{
-                width: '36px',
-                height: '36px',
+                width: '38px',
+                height: '38px',
                 borderRadius: '8px',
                 background: '#fef3c7',
                 display: 'flex',
@@ -201,7 +201,7 @@ export function Dashboard() {
                 color: '#d97706',
               }}
             >
-              <AlertTriangle size={19} />
+              <AlertTriangle size={20} />
             </div>
             <div>
               <p className="eyebrow" style={{ color: '#d97706', fontWeight: 700 }}>
@@ -218,18 +218,18 @@ export function Dashboard() {
         {expiringSensors.length === 0 ? (
           <div
             style={{
-              padding: '32px 20px',
+              padding: '48px 20px',
               textAlign: 'center',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '8px',
+              gap: '10px',
             }}
           >
             <div
               style={{
-                width: '44px',
-                height: '44px',
+                width: '48px',
+                height: '48px',
                 borderRadius: '50%',
                 background: '#ecfdf5',
                 color: '#059669',
@@ -238,12 +238,12 @@ export function Dashboard() {
                 justifyContent: 'center',
               }}
             >
-              <CheckCircle2 size={24} />
+              <CheckCircle2 size={26} />
             </div>
-            <h3 style={{ fontSize: '15px', color: '#0f172a', margin: '4px 0 0 0' }}>
+            <h3 style={{ fontSize: '16px', color: '#0f172a', margin: '6px 0 0 0' }}>
               All Active Sensors are Healthy
             </h3>
-            <p style={{ fontSize: '13px', color: '#64748b', margin: 0, maxWidth: '420px' }}>
+            <p style={{ fontSize: '13px', color: '#64748b', margin: 0, maxWidth: '440px' }}>
               No sensors in service are expiring within the next 30 days. Operating telemetry devices are within standard lifecycles.
             </p>
           </div>
@@ -252,13 +252,13 @@ export function Dashboard() {
             <table className="rich-table">
               <thead>
                 <tr>
-                  <th>Serial Number</th>
-                  <th>Sensor Type</th>
-                  <th>Assigned Patient</th>
-                  <th>Manufacturer & Model</th>
-                  <th>Expiration Date</th>
-                  <th>Status</th>
-                  <th style={{ textAlign: 'right' }}>Action</th>
+                  <th style={{ paddingBottom: '14px' }}>Serial Number</th>
+                  <th style={{ paddingBottom: '14px' }}>Sensor Type</th>
+                  <th style={{ paddingBottom: '14px' }}>Assigned Patient</th>
+                  <th style={{ paddingBottom: '14px' }}>Manufacturer & Model</th>
+                  <th style={{ paddingBottom: '14px' }}>Expiration Date</th>
+                  <th style={{ paddingBottom: '14px' }}>Status</th>
+                  <th style={{ textAlign: 'right', paddingBottom: '14px' }}>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -269,12 +269,12 @@ export function Dashboard() {
 
                   return (
                     <tr key={sensor._id}>
-                      <td>
+                      <td style={{ padding: '16px 12px' }}>
                         <strong className="serial" style={{ fontFamily: 'monospace', fontSize: '13px' }}>
                           {sensor.serialNumber}
                         </strong>
                       </td>
-                      <td>
+                      <td style={{ padding: '16px 12px' }}>
                         <span
                           style={{
                             display: 'inline-flex',
@@ -292,7 +292,7 @@ export function Dashboard() {
                           {sensor.sensorTypeName || sensor.sensorTypeCode || sensor.sensorTypeId}
                         </span>
                       </td>
-                      <td>
+                      <td style={{ padding: '16px 12px' }}>
                         {sensor.customerName ? (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <User size={13} style={{ color: '#64748b' }} />
@@ -311,10 +311,10 @@ export function Dashboard() {
                           </span>
                         )}
                       </td>
-                      <td className="muted-cell" style={{ fontSize: '12px' }}>
+                      <td className="muted-cell" style={{ fontSize: '12px', padding: '16px 12px' }}>
                         {sensor.manufacturer} · {sensor.model}
                       </td>
-                      <td>
+                      <td style={{ padding: '16px 12px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                           <span style={{ fontWeight: 500 }}>{formatDate(sensor.expiresAt)}</span>
                           <span
@@ -331,19 +331,19 @@ export function Dashboard() {
                           </span>
                         </div>
                       </td>
-                      <td>
+                      <td style={{ padding: '16px 12px' }}>
                         <span className={badge.className}>
                           <i />
                           {badge.label}
                         </span>
                       </td>
-                      <td style={{ textAlign: 'right' }}>
+                      <td style={{ textAlign: 'right', padding: '16px 12px' }}>
                         <Link
                           href="/sensors"
                           className="secondary-button"
                           style={{
                             fontSize: '11px',
-                            padding: '4px 8px',
+                            padding: '6px 10px',
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '4px',
