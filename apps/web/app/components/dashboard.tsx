@@ -248,16 +248,16 @@ export function Dashboard() {
             </p>
           </div>
         ) : (
-          <div className="table-wrap">
-            <table className="rich-table">
+          <div className="table-wrap" style={{ overflowX: 'visible' }}>
+            <table className="rich-table" style={{ width: '100%', minWidth: '0', tableLayout: 'auto' }}>
               <thead>
                 <tr>
-                  <th style={{ paddingBottom: '14px' }}>Serial Number</th>
-                  <th style={{ paddingBottom: '14px' }}>Sensor Type</th>
-                  <th style={{ paddingBottom: '14px' }}>Assigned Patient</th>
-                  <th style={{ paddingBottom: '14px' }}>Manufacturer & Model</th>
-                  <th style={{ paddingBottom: '14px' }}>Expiration Date</th>
-                  <th style={{ paddingBottom: '14px' }}>Status</th>
+                  <th style={{ paddingBottom: '14px', width: '14%' }}>Serial Number</th>
+                  <th style={{ paddingBottom: '14px', width: '18%' }}>Sensor Type</th>
+                  <th style={{ paddingBottom: '14px', width: '20%' }}>Assigned Patient</th>
+                  <th style={{ paddingBottom: '14px', width: '18%' }}>Manufacturer & Model</th>
+                  <th style={{ paddingBottom: '14px', width: '15%' }}>Expiration Date</th>
+                  <th style={{ paddingBottom: '14px', width: '15%' }}>Status</th>
                   <th style={{ textAlign: 'right', paddingBottom: '14px' }}>Action</th>
                 </tr>
               </thead>
