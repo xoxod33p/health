@@ -1,6 +1,6 @@
 'use client';
 
-import { Activity, Bell, Boxes, ClipboardList, FileBarChart, LayoutDashboard, LogOut, Menu, Settings, Tag, Users } from 'lucide-react';
+import { Activity, Bell, Boxes, ClipboardList, FileBarChart, LayoutDashboard, LogOut, Menu, Settings, Tag, Users, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -50,9 +50,30 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
     <div className="app-shell">
       {sidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} aria-hidden="true" />}
       <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
-        <div className="brand-row">
-          <div className="brand-mark"><Activity size={19} strokeWidth={2.5} /></div>
-          <span className="brand-name">care<span>signal</span></span>
+        <div className="brand-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+            <div className="brand-mark"><Activity size={19} strokeWidth={2.5} /></div>
+            <span className="brand-name">care<span>signal</span></span>
+          </div>
+          {sidebarOpen && (
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(false)}
+              style={{
+                background: 'rgba(255,255,255,0.08)',
+                color: '#dbe7e7',
+                borderRadius: '6px',
+                padding: '6px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+              }}
+              aria-label="Close sidebar"
+            >
+              <X size={16} />
+            </button>
+          )}
         </div>
         <nav className="main-nav" aria-label="Main navigation">
           <span className="nav-label">Workspace</span>

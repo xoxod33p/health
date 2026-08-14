@@ -808,7 +808,7 @@ export default function ReportsPage() {
                   </p>
                 </div>
 
-                <div style={{ display: 'flex', gap: '6px' }}>
+                <div className="report-modal-actions" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
                   <button
                     type="button"
                     className="secondary-button"
@@ -883,14 +883,7 @@ export default function ReportsPage() {
 
               {/* KPI Summary Block */}
               {activeReport.summary && Object.keys(activeReport.summary).length > 0 && (
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: `repeat(${Math.min(Object.keys(activeReport.summary).length, 4)}, 1fr)`,
-                    gap: '10px',
-                    marginBottom: '16px',
-                  }}
-                >
+                <div className="report-kpi-grid">
                   {Object.entries(activeReport.summary).map(([key, val]) => (
                     <div
                       key={key}
