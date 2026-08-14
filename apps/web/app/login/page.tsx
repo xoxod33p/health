@@ -1,6 +1,6 @@
 'use client';
 
-import { Activity, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Activity, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from '../../lib/api';
@@ -76,11 +76,6 @@ export default function LoginPage() {
             <ArrowRight size={16} />
           </button>
         </form>
-
-        <div className="login-security">
-          <ShieldCheck size={15} />
-          <span>End-to-end encrypted session · HIPAA-compliant healthcare security.</span>
-        </div>
       </section>
 
       <p className="login-footer">CareSignal · Secure clinical operations</p>
