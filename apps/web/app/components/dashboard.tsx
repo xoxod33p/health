@@ -252,13 +252,13 @@ export function Dashboard() {
             <table className="rich-table" style={{ width: '100%', minWidth: '0', tableLayout: 'auto' }}>
               <thead>
                 <tr>
-                  <th style={{ paddingBottom: '14px', width: '14%' }}>Serial Number</th>
+                  <th style={{ paddingBottom: '14px', paddingLeft: 0, width: '15%' }}>Serial Number</th>
                   <th style={{ paddingBottom: '14px', width: '18%' }}>Sensor Type</th>
                   <th style={{ paddingBottom: '14px', width: '20%' }}>Assigned Patient</th>
                   <th style={{ paddingBottom: '14px', width: '18%' }}>Manufacturer & Model</th>
                   <th style={{ paddingBottom: '14px', width: '15%' }}>Expiration Date</th>
-                  <th style={{ paddingBottom: '14px', width: '15%' }}>Status</th>
-                  <th style={{ textAlign: 'right', paddingBottom: '14px' }}>Action</th>
+                  <th style={{ paddingBottom: '14px', width: '14%' }}>Status</th>
+                  <th style={{ textAlign: 'right', paddingBottom: '14px', paddingRight: 0 }}>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -269,7 +269,7 @@ export function Dashboard() {
 
                   return (
                     <tr key={sensor._id}>
-                      <td style={{ padding: '16px 12px' }}>
+                      <td style={{ padding: '16px 12px 16px 0' }}>
                         <strong className="serial" style={{ fontFamily: 'monospace', fontSize: '13px' }}>
                           {sensor.serialNumber}
                         </strong>
@@ -337,7 +337,7 @@ export function Dashboard() {
                           {badge.label}
                         </span>
                       </td>
-                      <td style={{ textAlign: 'right', padding: '16px 12px' }}>
+                      <td style={{ textAlign: 'right', padding: '16px 0 16px 12px' }}>
                         <Link
                           href="/sensors"
                           className="secondary-button"
