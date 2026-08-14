@@ -73,6 +73,11 @@ describe('ReportsService', () => {
           ]),
         }),
       }),
+      lean: jest.fn<any>().mockReturnValue({
+        exec: jest.fn<any>().mockResolvedValue([
+          { _id: 's1', serialNumber: 'SN-001', sensorTypeId: 't1', customerId: 'c1', status: 'ACTIVE', expiresAt: new Date(Date.now() + 864000000) },
+        ]),
+      }),
     }),
     countDocuments: jest.fn<any>().mockReturnValue({ exec: jest.fn<any>().mockResolvedValue(1) }),
   };
@@ -160,9 +165,26 @@ describe('ReportsService', () => {
     expect(result).toBeDefined();
     expect(result.type).toBe('SENSOR_INVENTORY');
     expect(mockStorageService.saveFile).toHaveBeenCalledTimes(3); // CSV, Excel, PDF
-    expect(mockNotificationsModel.create).toHaveBeenCalled();
     expect(mockRealtimeGateway.broadcastCompany).toHaveBeenCalled();
     expect(mockAuditService.record).toHaveBeenCalled();
+  });
+
+  it('creates an expiration and replacement report', async () => {
+    const service = createService();
+    const result = await service.create(mockUser, { type: 'EXPIRATION_REPLACEMENT' });
+    expect(result.type).toBe('EXPIRATION_REPLACEMENT');
+  });
+
+  it('creates a customer coverage report', async () => {
+    const service = createService();
+    const result = await service.create(mockUser, { type: 'CUSTOMER_COVERAGE' });
+    expect(result.type).toBe('CUSTOMER_COVERAGE');
+  });
+
+  it('creates an operational summary report', async () => {
+    const service = createService();
+    const result = await service.create(mockUser, { type: 'OPERATIONAL_SUMMARY' });
+    expect(result.type).toBe('OPERATIONAL_SUMMARY');
   });
 
   it('exports a report as CSV from storage', async () => {

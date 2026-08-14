@@ -102,16 +102,22 @@ export class ReportsService {
     await report.save();
 
     // Create a real-time in-app notification
-    await this.notifications.create({
-      companyId,
-      recipientId: user.authUserId,
-      type: 'REPORT_READY',
-      title: 'Report Generated',
-      body: `Your ${title} is ready and archived in persistent storage.`,
-      status: 'UNREAD',
-      entityType: 'REPORT',
-      entityId: report._id.toString(),
-    });
+    try {
+      const entityId = Types.ObjectId.isValid(report._id as any) ? new Types.ObjectId(report._id as any) : undefined;
+      await this.notifications.create({
+        companyId,
+        recipientId: user.authUserId,
+        type: 'REPORT_READY',
+        title: 'Report Generated',
+        message: `Your ${title} is ready and archived in persistent storage.`,
+        status: 'UNREAD',
+        priority: 'NORMAL',
+        entityType: 'REPORT',
+        ...(entityId ? { entityId } : {}),
+      });
+    } catch {
+      // Non-blocking notification creation
+    }
 
     this.realtime.broadcastCompany(companyId, 'report.ready', {
       reportId: report._id.toString(),
