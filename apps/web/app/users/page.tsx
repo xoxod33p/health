@@ -9,6 +9,7 @@ import {
   RefreshCw,
   Search,
   ShieldCheck,
+  Trash2,
   UserCheck,
   UserPlus,
   Users as UsersIcon,
@@ -260,6 +261,27 @@ export default function UsersPage() {
       await load();
     } catch (caught) {
       alert(caught instanceof Error ? caught.message : 'Failed to update account status');
+    }
+  };
+
+  const handleDeleteUser = async (id: string, name: string) => {
+    const target = users.find((u) => u._id === id);
+    if (target?.isProtected) {
+      alert('The default environment administrator account is protected and cannot be deleted.');
+      return;
+    }
+
+    if (!confirm(`Are you sure you want to permanently delete user "${name}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      await apiFetch(`/employees/${id}`, {
+        method: 'DELETE',
+      });
+      await load();
+    } catch (caught) {
+      alert(caught instanceof Error ? caught.message : 'Failed to delete user account');
     }
   };
 
@@ -522,6 +544,14 @@ export default function UsersPage() {
                                       >
                                         {userItem.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
                                       </button>
+                                      <button
+                                        className="secondary-button"
+                                        type="button"
+                                        onClick={() => void handleDeleteUser(userItem._id, `${userItem.firstName} ${userItem.lastName}`)}
+                                        style={{ fontSize: '11px', padding: '6px 10px', display: 'flex', alignItems: 'center', gap: '4px', color: '#ef4444', borderColor: '#fecaca' }}
+                                      >
+                                        <Trash2 size={12} /> Delete
+                                      </button>
                                     </>
                                   )}
                                 </div>
@@ -776,17 +806,34 @@ export default function UsersPage() {
                   </div>
                 </div>
 
-                <div className="modal-actions" style={{ marginTop: '20px' }}>
-                  <button
-                    className="secondary-button"
-                    type="button"
-                    onClick={() => setEditModalOpen(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button className="primary-button" type="submit" disabled={submitting}>
-                    {submitting ? <RefreshCw size={16} className="spin" /> : 'Save Role & Permissions'}
-                  </button>
+                <div className="modal-actions" style={{ marginTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  {!editingUser.isProtected ? (
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      onClick={() => {
+                        const targetId = editingUser._id;
+                        const targetName = `${editingUser.firstName} ${editingUser.lastName}`;
+                        setEditModalOpen(false);
+                        void handleDeleteUser(targetId, targetName);
+                      }}
+                      style={{ color: '#ef4444', borderColor: '#fecaca', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      <Trash2 size={13} /> Delete user
+                    </button>
+                  ) : <div />}
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      className="secondary-button"
+                      type="button"
+                      onClick={() => setEditModalOpen(false)}
+                    >
+                      Cancel
+                    </button>
+                    <button className="primary-button" type="submit" disabled={submitting}>
+                      {submitting ? <RefreshCw size={16} className="spin" /> : 'Save Role & Permissions'}
+                    </button>
+                  </div>
                 </div>
               </form>
             </div>
