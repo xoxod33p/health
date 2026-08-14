@@ -167,7 +167,7 @@ export default function SettingsPage() {
                     type="email"
                     value={contactEmail}
                     onChange={(e) => setContactEmail(e.target.value)}
-                    placeholder="ops@company.com"
+                    placeholder="Contact email address"
                   />
                 </label>
                 <label>
@@ -175,7 +175,7 @@ export default function SettingsPage() {
                   <input
                     value={supportPhone}
                     onChange={(e) => setSupportPhone(e.target.value)}
-                    placeholder="+1 (800) 000-0000"
+                    placeholder="Support phone number"
                   />
                 </label>
                 <label>
@@ -336,7 +336,7 @@ export default function SettingsPage() {
                 <input
                   value={newKeyName}
                   onChange={(e) => setNewKeyName(e.target.value)}
-                  placeholder="Key description (e.g., Warehouse Scanner service)"
+                  placeholder="Key description"
                   style={{
                     flex: 1,
                     padding: '10px 12px',

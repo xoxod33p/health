@@ -702,7 +702,7 @@ export default function ReportsPage() {
                     <input
                       value={customTitle}
                       onChange={(e) => setCustomTitle(e.target.value)}
-                      placeholder={`e.g. Q3 ${REPORT_TYPE_CONFIG[createType].label}`}
+                      placeholder="Enter custom report title"
                     />
                   </label>
 

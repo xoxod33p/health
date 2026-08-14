@@ -400,7 +400,7 @@ export default function SensorsPage() {
                       onChange={(e) => setFormIssue(e.target.value)}
                     />
                     <small style={{ color: '#94a3b8', fontSize: '11px', marginTop: '2px', display: 'block' }}>
-                      Describe the issue clearly, e.g. &quot;App shows please replace the sensor error message&quot;
+                      Describe the specific hardware issue or maintenance reason
                     </small>
                   </label>
                   <label>

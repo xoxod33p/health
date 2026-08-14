@@ -624,7 +624,7 @@ export default function UsersPage() {
                       required
                       value={newFirstName}
                       onChange={(e) => setNewFirstName(e.target.value)}
-                      placeholder="e.g. Sarah"
+                      placeholder="First name"
                     />
                   </label>
                   <label>
@@ -633,7 +633,7 @@ export default function UsersPage() {
                       required
                       value={newLastName}
                       onChange={(e) => setNewLastName(e.target.value)}
-                      placeholder="e.g. Connor"
+                      placeholder="Last name"
                     />
                   </label>
                   <label>
@@ -643,7 +643,7 @@ export default function UsersPage() {
                       type="email"
                       value={newEmail}
                       onChange={(e) => setNewEmail(e.target.value)}
-                      placeholder="sarah@company.com"
+                      placeholder="Email address"
                     />
                   </label>
                   <label>
@@ -663,7 +663,7 @@ export default function UsersPage() {
                     <input
                       value={newTitle}
                       onChange={(e) => setNewTitle(e.target.value)}
-                      placeholder="e.g. Clinical Operations"
+                      placeholder="Job title or department"
                     />
                   </label>
                 </div>
