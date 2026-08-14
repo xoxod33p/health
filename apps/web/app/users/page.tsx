@@ -78,6 +78,7 @@ export default function UsersPage() {
   const [newFirstName, setNewFirstName] = useState('');
   const [newLastName, setNewLastName] = useState('');
   const [newEmail, setNewEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('ChangeMe123!');
   const [newRole, setNewRole] = useState<UserRole>('INHOUSE_STAFF');
   const [newTitle, setNewTitle] = useState('Inhouse Clinical Operations');
 
@@ -168,6 +169,8 @@ export default function UsersPage() {
         email: newEmail.trim().toLowerCase(),
         authUserId: `user_${Date.now()}`,
         role: newRole,
+        status: 'ACTIVE',
+        password: newPassword.trim() || 'ChangeMe123!',
         permissions: roleMatrixDefaults[newRole] ?? DEFAULT_ROLE_PERMISSIONS[newRole],
         title: newTitle.trim() || ROLE_LABELS[newRole].label,
       };
@@ -179,6 +182,7 @@ export default function UsersPage() {
       setNewFirstName('');
       setNewLastName('');
       setNewEmail('');
+      setNewPassword('ChangeMe123!');
       await load();
     } catch (caught) {
       alert(caught instanceof Error ? caught.message : 'Failed to create user account');
@@ -645,6 +649,20 @@ export default function UsersPage() {
                       onChange={(e) => setNewEmail(e.target.value)}
                       placeholder="Email address"
                     />
+                  </label>
+                  <label>
+                    Temporary Login Password
+                    <input
+                      required
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Enter password (minimum 6 characters)"
+                      minLength={6}
+                    />
+                    <small style={{ color: '#64748b', fontSize: '11px', marginTop: '2px', display: 'block' }}>
+                      Account is activated immediately with this login password.
+                    </small>
                   </label>
                   <label>
                     Role

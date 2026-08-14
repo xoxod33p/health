@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import type { AuthenticatedUser } from '../auth/auth.types';
+import { hashPassword } from '../auth/password.util';
+import { User, UserDocument } from '../users/user.schema';
 import { CreateEmployeeDto, UpdateEmployeeDto } from './employee.dto';
 import { Employee, EmployeeDocument } from './employee.schema';
 
@@ -12,6 +14,7 @@ export class EmployeesService {
 
   constructor(
     @InjectModel(Employee.name) private readonly employees: Model<EmployeeDocument>,
+    @InjectModel(User.name) private readonly users: Model<UserDocument>,
     private readonly config: ConfigService,
   ) {
     this.defaultAdminEmail = (
@@ -24,7 +27,38 @@ export class EmployeesService {
   }
 
   async create(user: AuthenticatedUser, dto: CreateEmployeeDto): Promise<Employee> {
-    return this.employees.create({ ...dto, companyId: user.companyId });
+    const email = dto.email.toLowerCase().trim();
+    const status = dto.status ?? 'ACTIVE';
+    const rawPassword = dto.password || 'ChangeMe123!';
+    const { passwordHash, salt } = hashPassword(rawPassword);
+
+    // Create or update native login User credentials
+    const existingUser = await this.users.findOne({ email }).exec();
+    if (!existingUser) {
+      await this.users.create({
+        authUserId: dto.authUserId,
+        email,
+        companyId: user.companyId,
+        role: dto.role,
+        permissions: dto.permissions || [],
+        status: 'ACTIVE',
+        passwordHash,
+        salt,
+      });
+    } else {
+      existingUser.status = 'ACTIVE';
+      existingUser.role = dto.role;
+      existingUser.permissions = dto.permissions || [];
+      await existingUser.save();
+    }
+
+    // Create Employee record with ACTIVE status
+    return this.employees.create({
+      ...dto,
+      email,
+      status,
+      companyId: user.companyId,
+    });
   }
 
   async findAll(user: AuthenticatedUser): Promise<Array<Employee & { isProtected: boolean }>> {
@@ -63,6 +97,19 @@ export class EmployeesService {
       .exec();
 
     if (!employee) throw new NotFoundException('Employee not found');
+
+    // Sync status or role to native User collection if changed
+    if (dto.status || dto.role || dto.permissions) {
+      await this.users.updateOne(
+        { email: existing.email.toLowerCase().trim() },
+        {
+          ...(dto.status ? { status: dto.status } : {}),
+          ...(dto.role ? { role: dto.role } : {}),
+          ...(dto.permissions ? { permissions: dto.permissions } : {}),
+        }
+      ).exec();
+    }
+
     return employee;
   }
 
@@ -83,7 +130,11 @@ export class EmployeesService {
       );
     }
 
-    await this.employees.deleteOne({ _id: id, companyId: user.companyId }).exec();
+    await Promise.all([
+      this.employees.deleteOne({ _id: id, companyId: user.companyId }).exec(),
+      this.users.deleteOne({ email: existing.email.toLowerCase().trim() }).exec(),
+    ]);
+
     return { deleted: true };
   }
 }

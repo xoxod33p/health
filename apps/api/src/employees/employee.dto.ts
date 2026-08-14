@@ -7,6 +7,8 @@ export class CreateEmployeeDto {
   @IsString() @MinLength(1) authUserId!: string;
   @IsEnum(['SYSTEM_ADMIN', 'MANAGER', 'INHOUSE_STAFF', 'OUT_EMPLOYEE']) role!: string;
   @IsOptional() @IsArray() @IsString({ each: true }) permissions?: string[];
+  @IsOptional() @IsEnum(['ACTIVE', 'INVITED', 'SUSPENDED']) status?: string;
+  @IsOptional() @IsString() @MinLength(6) password?: string;
   @IsOptional() @IsString() @MaxLength(40) phone?: string;
   @IsOptional() @IsString() @MaxLength(100) title?: string;
 }
