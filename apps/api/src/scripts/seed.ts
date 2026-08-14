@@ -1,15 +1,13 @@
 import { config } from 'dotenv';
 import { resolve } from 'node:path';
-import { randomUUID } from 'node:crypto';
 import mongoose, { Types, Model } from 'mongoose';
-import { hashPassword } from '../auth/password.util';
-import { ROLE_PERMISSIONS } from '../auth/permissions';
 
 config();
 config({ path: resolve(process.cwd(), '.env') });
 config({ path: resolve(__dirname, '../../../../.env') });
 
 const companyId = process.env.DEFAULT_ADMIN_COMPANY_ID || 'development-company';
+const defaultAdminEmail = (process.env.DEFAULT_ADMIN_EMAIL || 'admin@localhost.test').toLowerCase().trim();
 const mongodbUri = process.env.MONGODB_URI;
 
 if (!mongodbUri) {
@@ -22,30 +20,6 @@ async function seed() {
   await mongoose.connect(mongodbUri!);
 
   // Schemas
-  const userSchema = new mongoose.Schema({
-    authUserId: { type: String, required: true, unique: true, index: true },
-    companyId: { type: String, required: true, index: true },
-    role: { type: String, required: true },
-    permissions: { type: [String], default: [] },
-    status: { type: String, required: true, default: 'ACTIVE' },
-    email: { type: String, required: true, unique: true, index: true },
-    passwordHash: { type: String, required: true },
-    salt: { type: String, required: true },
-  }, { collection: 'users', timestamps: true });
-
-  const employeeSchema = new mongoose.Schema({
-    companyId: { type: String, required: true, index: true },
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
-    authUserId: { type: String, required: true, unique: true },
-    email: { type: String, required: true },
-    role: { type: String, required: true },
-    permissions: { type: [String], default: [] },
-    status: { type: String, required: true, default: 'ACTIVE' },
-    phone: String,
-    title: String,
-  }, { collection: 'employees', timestamps: true });
-
   const sensorTypeSchema = new mongoose.Schema({
     companyId: { type: String, required: true, index: true },
     name: { type: String, required: true },
@@ -106,29 +80,26 @@ async function seed() {
 
   const notificationSchema = new mongoose.Schema({
     companyId: { type: String, required: true, index: true },
-    recipient: { type: String, required: true, index: true },
+    recipientId: { type: String, required: true, index: true },
     type: { type: String, required: true },
     title: { type: String, required: true },
-    body: { type: String, required: true },
-    channel: { type: String, required: true, default: 'IN_APP' },
+    message: { type: String, required: true },
     status: { type: String, required: true, default: 'UNREAD' },
-    link: String,
-    metadata: mongoose.Schema.Types.Mixed,
+    priority: { type: String, required: true, default: 'NORMAL' },
   }, { collection: 'notifications', timestamps: true });
 
   const auditLogSchema = new mongoose.Schema({
     companyId: { type: String, required: true, index: true },
-    actor: { type: String, required: true, index: true },
+    actorUserId: { type: String, required: true, index: true },
+    actorName: String,
+    actorEmail: String,
     action: { type: String, required: true, index: true },
-    entity: { type: String, required: true, index: true },
-    entityId: { type: String, required: true },
-    diff: mongoose.Schema.Types.Mixed,
-    reason: String,
-    metadata: mongoose.Schema.Types.Mixed,
+    entityType: { type: String, required: true, index: true },
+    entityId: String,
+    newValues: mongoose.Schema.Types.Mixed,
+    oldValues: mongoose.Schema.Types.Mixed,
   }, { collection: 'audit_logs', timestamps: { createdAt: true, updatedAt: false } });
 
-  const UserModel: Model<any> = mongoose.models.User || mongoose.model('User', userSchema);
-  const EmployeeModel: Model<any> = mongoose.models.Employee || mongoose.model('Employee', employeeSchema);
   const SensorTypeModel: Model<any> = mongoose.models.SensorType || mongoose.model('SensorType', sensorTypeSchema);
   const CustomerModel: Model<any> = mongoose.models.Customer || mongoose.model('Customer', customerSchema);
   const SensorModel: Model<any> = mongoose.models.Sensor || mongoose.model('Sensor', sensorSchema);
@@ -139,11 +110,11 @@ async function seed() {
 
   console.log('Seeding Sensor Types...');
   const sensorTypeData = [
-    { name: 'ECG Cardiac Monitor', code: 'ECG', description: 'Continuous multi-lead electrocardiogram cardiac sensor', status: 'ACTIVE', createdBy: 'admin@localhost.test' },
-    { name: 'Continuous Glucose Monitor', code: 'CGM', description: 'Subcutaneous interstitial fluid glucose monitoring patch', status: 'ACTIVE', createdBy: 'admin@localhost.test' },
-    { name: 'Pulse Oximeter', code: 'SPO2', description: 'High-precision blood oxygen saturation and pulse rate sensor', status: 'ACTIVE', createdBy: 'admin@localhost.test' },
-    { name: 'Non-Invasive Blood Pressure', code: 'NIBP', description: 'Oscillometric digital telemetry arterial pressure monitor', status: 'ACTIVE', createdBy: 'admin@localhost.test' },
-    { name: 'Core Temperature Patch', code: 'TEMP', description: 'Axillary continuous wireless temperature telemetry sensor', status: 'ACTIVE', createdBy: 'admin@localhost.test' },
+    { name: 'ECG Cardiac Monitor', code: 'ECG', description: 'Continuous multi-lead electrocardiogram cardiac sensor', status: 'ACTIVE', createdBy: defaultAdminEmail },
+    { name: 'Continuous Glucose Monitor', code: 'CGM', description: 'Subcutaneous interstitial fluid glucose monitoring patch', status: 'ACTIVE', createdBy: defaultAdminEmail },
+    { name: 'Pulse Oximeter', code: 'SPO2', description: 'High-precision blood oxygen saturation and pulse rate sensor', status: 'ACTIVE', createdBy: defaultAdminEmail },
+    { name: 'Non-Invasive Blood Pressure', code: 'NIBP', description: 'Oscillometric digital telemetry arterial pressure monitor', status: 'ACTIVE', createdBy: defaultAdminEmail },
+    { name: 'Core Temperature Patch', code: 'TEMP', description: 'Axillary continuous wireless temperature telemetry sensor', status: 'ACTIVE', createdBy: defaultAdminEmail },
   ];
 
   const createdTypes: Record<string, string> = {};
@@ -154,34 +125,6 @@ async function seed() {
       { upsert: true, new: true }
     );
     createdTypes[item.code] = doc._id.toString();
-  }
-
-  console.log('Seeding Staff & Team Members...');
-  const staffData = [
-    { firstName: 'Marcus', lastName: 'Vance', email: 'marcus.vance@healthcare.org', role: 'MANAGER', title: 'Clinical Operations Director', phone: '+1 (555) 234-5678' },
-    { firstName: 'Elena', lastName: 'Rostova', email: 'elena.rostova@healthcare.org', role: 'INHOUSE_STAFF', title: 'Lead Telemetry Specialist', phone: '+1 (555) 345-6789' },
-    { firstName: 'David', lastName: 'Chen', email: 'david.chen@healthcare.org', role: 'INHOUSE_STAFF', title: 'Clinical Biometrics Technician', phone: '+1 (555) 456-7890' },
-    { firstName: 'Sarah', lastName: 'Jenkins', email: 'sarah.jenkins@healthcare.org', role: 'OUT_EMPLOYEE', title: 'Field Deployment Specialist', phone: '+1 (555) 567-8901' },
-  ];
-
-  const defaultPassword = 'ChangeMe123!';
-  const { passwordHash, salt } = hashPassword(defaultPassword);
-
-  for (const s of staffData) {
-    const authUserId = `usr_${randomUUID().replace(/-/g, '')}`;
-    const perms = Array.from(ROLE_PERMISSIONS[s.role] ?? []);
-
-    await UserModel.findOneAndUpdate(
-      { email: s.email },
-      { authUserId, email: s.email, passwordHash, salt, role: s.role, permissions: perms, companyId, status: 'ACTIVE' },
-      { upsert: true, new: true }
-    );
-
-    await EmployeeModel.findOneAndUpdate(
-      { companyId, email: s.email },
-      { ...s, authUserId, permissions: perms, companyId, status: 'ACTIVE' },
-      { upsert: true, new: true }
-    );
   }
 
   console.log('Seeding Customers...');
@@ -200,7 +143,7 @@ async function seed() {
   for (const c of customerData) {
     const doc = await CustomerModel.findOneAndUpdate(
       { companyId, customerNumber: c.customerNumber },
-      { ...c, companyId, createdBy: 'admin@localhost.test', updatedBy: 'admin@localhost.test' },
+      { ...c, companyId, createdBy: defaultAdminEmail, updatedBy: defaultAdminEmail },
       { upsert: true, new: true }
     );
     createdCustomers[c.customerNumber] = doc;
@@ -242,7 +185,7 @@ async function seed() {
           companyId,
           sensorId: doc._id,
           customerId: s.customerId,
-          assignedBy: 'admin@localhost.test',
+          assignedBy: defaultAdminEmail,
           assignedAt: s.activatedAt || new Date(),
         },
         { upsert: true, new: true }
@@ -252,9 +195,9 @@ async function seed() {
 
   console.log('Seeding Maintenance & Replacement Records...');
   const replacementData = [
-    { customerName: 'Arthur Pendleton', serialNumber: 'ECG-88900', replacedDate: new Date(now - 10 * DAY), issueType: 'Sensor electrode adhesive degradation', notes: 'Replaced with ECG-88901; signal verified stable', replacedBy: 'sarah.jenkins@healthcare.org' },
-    { customerName: 'Daniel Kaufman', serialNumber: 'NIB-77300', replacedDate: new Date(now - 20 * DAY), issueType: 'Bluetooth transmission intermittency', notes: 'Replaced cuff unit; firmware v2.4 flashed', replacedBy: 'sarah.jenkins@healthcare.org' },
-    { customerName: 'Beatrice Holloway', serialNumber: 'CGM-44100', replacedDate: new Date(now - 7 * DAY), issueType: 'Standard 14-day wear expiration', notes: 'New patch applied right upper arm; calibration complete', replacedBy: 'elena.rostova@healthcare.org' },
+    { customerName: 'Arthur Pendleton', serialNumber: 'ECG-88900', replacedDate: new Date(now - 10 * DAY), issueType: 'Sensor electrode adhesive degradation', notes: 'Replaced with ECG-88901; signal verified stable', replacedBy: defaultAdminEmail },
+    { customerName: 'Daniel Kaufman', serialNumber: 'NIB-77300', replacedDate: new Date(now - 20 * DAY), issueType: 'Bluetooth transmission intermittency', notes: 'Replaced cuff unit; firmware v2.4 flashed', replacedBy: defaultAdminEmail },
+    { customerName: 'Beatrice Holloway', serialNumber: 'CGM-44100', replacedDate: new Date(now - 7 * DAY), issueType: 'Standard 14-day wear expiration', notes: 'New patch applied right upper arm; calibration complete', replacedBy: defaultAdminEmail },
   ];
 
   for (const r of replacementData) {
@@ -267,9 +210,9 @@ async function seed() {
 
   console.log('Seeding In-App Notifications...');
   const notificationData = [
-    { recipient: 'admin@localhost.test', type: 'SENSOR_EXPIRING', title: 'Sensor Expiring Soon', body: 'CGM-44102 assigned to Gloria Ramirez expires in 2 days.', status: 'UNREAD', link: '/sensors' },
-    { recipient: 'admin@localhost.test', type: 'REPLACEMENT_LOGGED', title: 'Maintenance Replacement Logged', body: 'Sensor replacement for Arthur Pendleton was completed by Sarah Jenkins.', status: 'READ', link: '/sensors' },
-    { recipient: 'admin@localhost.test', type: 'SYSTEM_AUDIT', title: 'New Sensor Type Registered', body: 'Core Temperature Patch (TEMP) type was activated.', status: 'READ', link: '/sensor-types' },
+    { recipientId: defaultAdminEmail, type: 'SENSOR_EXPIRING', title: 'Sensor Expiring Soon', message: 'CGM-44102 assigned to Gloria Ramirez expires in 2 days.', status: 'UNREAD', priority: 'HIGH' },
+    { recipientId: defaultAdminEmail, type: 'SENSOR_REPLACED', title: 'Maintenance Replacement Logged', message: 'Sensor replacement for Arthur Pendleton was completed.', status: 'READ', priority: 'NORMAL' },
+    { recipientId: defaultAdminEmail, type: 'SYSTEM_ALERT', title: 'New Sensor Type Registered', message: 'Core Temperature Patch (TEMP) type was activated.', status: 'READ', priority: 'LOW' },
   ];
 
   for (const n of notificationData) {
@@ -278,10 +221,10 @@ async function seed() {
 
   console.log('Seeding Audit Trail Logs...');
   const auditData = [
-    { actor: 'admin@localhost.test', action: 'sensor_type.create', entity: 'SensorType', entityId: 'ECG', reason: 'Initial telemetry sensor category setup', metadata: { code: 'ECG' } },
-    { actor: 'marcus.vance@healthcare.org', action: 'customer.create', entity: 'Customer', entityId: 'CUST-1001', reason: 'New patient intake for remote cardiac telemetry', metadata: { customerNumber: 'CUST-1001' } },
-    { actor: 'sarah.jenkins@healthcare.org', action: 'sensor.assign', entity: 'Sensor', entityId: 'ECG-88901', reason: 'Assigned device to Arthur Pendleton', metadata: { serialNumber: 'ECG-88901', customerNumber: 'CUST-1001' } },
-    { actor: 'elena.rostova@healthcare.org', action: 'replacement.create', entity: 'SensorReplacement', entityId: 'CGM-44100', reason: 'Routine sensor replacement performed', metadata: { serialNumber: 'CGM-44100' } },
+    { actorUserId: 'admin', actorName: 'Root Admin', actorEmail: defaultAdminEmail, action: 'sensor_type.create', entityType: 'SensorType', entityId: 'ECG', newValues: { code: 'ECG' } },
+    { actorUserId: 'admin', actorName: 'Root Admin', actorEmail: defaultAdminEmail, action: 'customer.create', entityType: 'Customer', entityId: 'CUST-1001', newValues: { customerNumber: 'CUST-1001' } },
+    { actorUserId: 'admin', actorName: 'Root Admin', actorEmail: defaultAdminEmail, action: 'sensor.assign', entityType: 'Sensor', entityId: 'ECG-88901', newValues: { serialNumber: 'ECG-88901', customerNumber: 'CUST-1001' } },
+    { actorUserId: 'admin', actorName: 'Root Admin', actorEmail: defaultAdminEmail, action: 'replacement.create', entityType: 'SensorReplacement', entityId: 'CGM-44100', newValues: { serialNumber: 'CGM-44100' } },
   ];
 
   for (const a of auditData) {
@@ -294,15 +237,10 @@ async function seed() {
   console.log(' Healthcare platform seed data loaded successfully!');
   console.log('  - 5 Sensor Types (ECG, CGM, SPO2, NIBP, TEMP)');
   console.log('  - 8 Clinical Customers with full demographic records');
-  console.log('  - 4 Staff Accounts with roles & native credentials:');
-  console.log('      * marcus.vance@healthcare.org    (MANAGER)');
-  console.log('      * elena.rostova@healthcare.org   (INHOUSE_STAFF)');
-  console.log('      * david.chen@healthcare.org      (INHOUSE_STAFF)');
-  console.log('      * sarah.jenkins@healthcare.org   (OUT_EMPLOYEE)');
-  console.log('      * Password for all staff: ChangeMe123!');
   console.log('  - 15 Hardware Sensors (Active, Available, Expiring, Expired)');
   console.log('  - 3 Sensor Replacements & Maintenance Logs');
   console.log('  - In-App Notifications & Audit Trail Logs');
+  console.log('  (User/staff accounts were not seeded)');
   console.log('======================================================');
 }
 
