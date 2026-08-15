@@ -82,6 +82,7 @@ export class ReportsService {
         throw new BadRequestException('Invalid report type');
     }
 
+    const generatedBy = this.formatAuthorName(user.email);
     const report = await this.reports.create({
       companyId,
       title,
@@ -93,7 +94,7 @@ export class ReportsService {
       data,
       columns,
       storageFiles: [],
-      generatedBy: user.email || 'System User',
+      generatedBy,
     });
 
     // Generate & save all 3 formats to persistent storage
@@ -955,5 +956,17 @@ export class ReportsService {
 
       doc.end();
     });
+  }
+
+  private formatAuthorName(raw?: string): string {
+    if (!raw) return 'System';
+    if (!raw.includes('@')) {
+      const firstWord = raw.trim().split(' ')[0] || raw;
+      return firstWord.charAt(0).toUpperCase() + firstWord.slice(1);
+    }
+    const username = raw.split('@')[0] || '';
+    const parts = username.split(/[._\-\d]+/);
+    const firstName = parts.find((p) => p.length > 0) || username;
+    return firstName.charAt(0).toUpperCase() + firstName.slice(1);
   }
 }

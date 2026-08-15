@@ -51,6 +51,18 @@ export interface ReportItem {
   createdAt?: string;
 }
 
+function formatAuthorName(raw?: string): string {
+  if (!raw) return 'System';
+  if (!raw.includes('@')) {
+    const firstWord = raw.trim().split(' ')[0] || raw;
+    return firstWord.charAt(0).toUpperCase() + firstWord.slice(1);
+  }
+  const username = raw.split('@')[0] || '';
+  const parts = username.split(/[._\-\d]+/);
+  const firstName = parts.find((p) => p.length > 0) || username;
+  return firstName.charAt(0).toUpperCase() + firstName.slice(1);
+}
+
 interface ReportStats {
   total: number;
   inventory: number;
@@ -485,7 +497,9 @@ export default function ReportsPage() {
                             </div>
                           </td>
                           <td className="muted-cell" style={{ fontSize: '12px' }}>
-                            {report.generatedBy}
+                            <span style={{ fontWeight: 600, color: '#334155' }}>
+                              {formatAuthorName(report.generatedBy)}
+                            </span>
                           </td>
                           <td className="muted-cell" style={{ fontSize: '12px' }}>
                             {report.createdAt ? new Date(report.createdAt).toLocaleDateString('en-US') : '—'}
@@ -814,7 +828,7 @@ export default function ReportsPage() {
                     {activeReport.title}
                   </h2>
                   <p style={{ fontSize: '12px', color: '#64748b', margin: '4px 0 0' }}>
-                    Generated on {activeReport.createdAt ? new Date(activeReport.createdAt).toLocaleString('en-US') : '—'} by <b>{activeReport.generatedBy}</b> · {activeReport.data?.length ?? 0} total records
+                    Generated on {activeReport.createdAt ? new Date(activeReport.createdAt).toLocaleString('en-US') : '—'} by <b>{formatAuthorName(activeReport.generatedBy)}</b> · {activeReport.data?.length ?? 0} total records
                   </p>
                 </div>
 
