@@ -167,9 +167,20 @@ export function Dashboard() {
   ];
 
   return (
-    <div className="page-content">
+    <div
+      className="page-content"
+      style={{
+        height: 'calc(100vh - 60px)',
+        maxHeight: 'calc(100vh - 60px)',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        padding: '18px 24px',
+        boxSizing: 'border-box',
+      }}
+    >
       {/* 1. Metric Summary Cards */}
-      <section className="metric-grid" aria-label="Workspace summary">
+      <section className="metric-grid" style={{ marginBottom: '14px', flexShrink: 0 }} aria-label="Workspace summary">
         {metrics.map((metric) => (
           <article className={`metric-card metric-${metric.tone}`} key={metric.label}>
             <div className="metric-top">
@@ -186,8 +197,19 @@ export function Dashboard() {
       </section>
 
       {/* 2. SECTION: Sensors About to Expire (Urgent Attention) */}
-      <section className="panel" style={{ padding: '24px 26px 36px', marginBottom: '28px' }}>
-        <div className="panel-heading" style={{ marginBottom: '22px' }}>
+      <section
+        className="panel"
+        style={{
+          flex: 1,
+          minHeight: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '18px 22px',
+          overflow: 'hidden',
+          marginBottom: 0,
+        }}
+      >
+        <div className="panel-heading" style={{ marginBottom: '14px', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div
               style={{
@@ -248,17 +270,27 @@ export function Dashboard() {
             </p>
           </div>
         ) : (
-          <div className="table-wrap" style={{ overflowX: 'visible' }}>
+          <div
+            className="table-wrap custom-scrollbar"
+            style={{
+              flex: 1,
+              minHeight: 0,
+              overflowY: 'auto',
+              overflowX: 'auto',
+              border: '1px solid #edf1f1',
+              borderRadius: '6px',
+            }}
+          >
             <table className="rich-table" style={{ width: '100%', minWidth: '0', tableLayout: 'auto' }}>
-              <thead>
+              <thead style={{ position: 'sticky', top: 0, background: '#ffffff', zIndex: 3, boxShadow: '0 1px 0 #edf1f1' }}>
                 <tr>
-                  <th style={{ paddingBottom: '14px', paddingLeft: 0, width: '15%' }}>Serial Number</th>
-                  <th style={{ paddingBottom: '14px', width: '18%' }}>Sensor Type</th>
-                  <th style={{ paddingBottom: '14px', width: '20%' }}>Assigned Patient</th>
-                  <th style={{ paddingBottom: '14px', width: '18%' }}>Manufacturer & Model</th>
-                  <th style={{ paddingBottom: '14px', width: '15%' }}>Expiration Date</th>
-                  <th style={{ paddingBottom: '14px', width: '14%' }}>Status</th>
-                  <th style={{ textAlign: 'right', paddingBottom: '14px', paddingRight: 0 }}>Action</th>
+                  <th style={{ background: '#ffffff', padding: '12px', width: '15%' }}>Serial Number</th>
+                  <th style={{ background: '#ffffff', padding: '12px', width: '18%' }}>Sensor Type</th>
+                  <th style={{ background: '#ffffff', padding: '12px', width: '20%' }}>Assigned Patient</th>
+                  <th style={{ background: '#ffffff', padding: '12px', width: '18%' }}>Manufacturer & Model</th>
+                  <th style={{ background: '#ffffff', padding: '12px', width: '15%' }}>Expiration Date</th>
+                  <th style={{ background: '#ffffff', padding: '12px', width: '14%' }}>Status</th>
+                  <th style={{ background: '#ffffff', textAlign: 'right', padding: '12px' }}>Action</th>
                 </tr>
               </thead>
               <tbody>
