@@ -208,6 +208,20 @@ export class ReportsService {
 
     await this.audit.record(user, 'report.export', 'Report', id, { format: normalizedFormat, title: report.title });
 
+    // For PDF exports, generate with latest layout engine and refresh storage
+    if (normalizedFormat === 'pdf') {
+      const buffer = await this.generatePdfBuffer(report);
+      const pdfFilename = `${sanitizedTitle}.pdf`;
+      const reportId = (report as any)._id?.toString() || id;
+      const subcategory = (report.type || 'general').toLowerCase().replace(/_/g, '-');
+      void this.storage.saveFile(report.companyId, 'reports', reportId, pdfFilename, buffer, subcategory).catch(() => {});
+      return {
+        filename: pdfFilename,
+        contentType: 'application/pdf',
+        buffer,
+      };
+    }
+
     // Check if the file is already archived in storage
     const storedFile = report.storageFiles?.find((f) => f.format === normalizedFormat || (normalizedFormat === 'excel' && f.format === 'xlsx'));
     if (storedFile) {
@@ -243,14 +257,6 @@ export class ReportsService {
       return {
         filename: `${sanitizedTitle}.xlsx`,
         contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        buffer,
-      };
-    }
-    if (normalizedFormat === 'pdf') {
-      const buffer = await this.generatePdfBuffer(report);
-      return {
-        filename: `${sanitizedTitle}.pdf`,
-        contentType: 'application/pdf',
         buffer,
       };
     }
@@ -713,96 +719,239 @@ export class ReportsService {
 
   private async generatePdfBuffer(report: Report): Promise<Buffer> {
     return new Promise((resolve, reject) => {
-      const doc = new PDFDocument({ margin: 40, size: 'A4', layout: 'landscape' });
+      const doc = new PDFDocument({
+        margin: 40,
+        size: 'A4',
+        layout: 'landscape',
+        bufferPages: true,
+      });
       const buffers: Buffer[] = [];
 
       doc.on('data', (chunk) => buffers.push(chunk));
       doc.on('end', () => resolve(Buffer.concat(buffers)));
       doc.on('error', (err) => reject(err));
 
+      const pageWidth = 841.89;
+      const margin = 40;
+      const contentWidth = Math.floor(pageWidth - margin * 2); // 761 pt
+
       // Header Brand
-      doc.rect(40, 35, 6, 28).fill('#1b8b83');
-      doc.fontSize(18).font('Helvetica-Bold').fillColor('#102b35').text(report.title, 55, 35);
-      doc.fontSize(9).font('Helvetica').fillColor('#718087').text(
-        `CareSignal Health Platform | Generated on ${new Date().toLocaleString('en-US')} by ${report.generatedBy} | Type: ${report.type}`,
-        55,
-        55
+      doc.rect(margin, 30, 6, 30).fill('#1b8b83');
+      doc.fontSize(16).font('Helvetica-Bold').fillColor('#102b35').text(report.title, margin + 14, 31, {
+        width: contentWidth - 20,
+        lineBreak: false,
+        ellipsis: true,
+      });
+      doc.fontSize(8.5).font('Helvetica').fillColor('#64748b').text(
+        `CareSignal Health Platform | Generated: ${new Date(report.createdAt || Date.now()).toLocaleDateString('en-US')} by ${report.generatedBy} | Type: ${report.type} | Scope: ${report.dateRange || 'ALL'}`,
+        margin + 14,
+        50,
+        { width: contentWidth - 20, lineBreak: false, ellipsis: true }
       );
 
-      doc.moveDown(2);
-
       // Summary KPIs Box
+      let currentY = 68;
       if (report.summary && Object.keys(report.summary).length > 0) {
-        const startY = 80;
-        doc.roundedRect(40, startY, 762, 50, 6).fillAndStroke('#f6f8f7', '#e4ebeb');
-
-        let xOffset = 55;
         const keys = Object.keys(report.summary);
+        const cardHeight = 44;
+        doc.roundedRect(margin, currentY, contentWidth, cardHeight, 5).fillAndStroke('#f8fafc', '#e2e8f0');
+
+        const cardWidth = Math.floor(contentWidth / Math.min(keys.length, 5));
+        let xOffset = margin + 12;
+
         for (const k of keys.slice(0, 5)) {
           const label = k.replace(/([A-Z])/g, ' $1').toUpperCase();
           const val = String(report.summary[k]);
 
-          doc.fontSize(8).font('Helvetica-Bold').fillColor('#709297').text(label, xOffset, startY + 10, { width: 140 });
-          doc.fontSize(14).font('Helvetica-Bold').fillColor('#17272d').text(val, xOffset, startY + 24, { width: 140 });
-          xOffset += 150;
+          doc.fontSize(7.5).font('Helvetica-Bold').fillColor('#64748b').text(label, xOffset, currentY + 8, {
+            width: cardWidth - 16,
+            lineBreak: false,
+            ellipsis: true,
+          });
+          doc.fontSize(13).font('Helvetica-Bold').fillColor('#0f172a').text(val, xOffset, currentY + 21, {
+            width: cardWidth - 16,
+            lineBreak: false,
+            ellipsis: true,
+          });
+          xOffset += cardWidth;
         }
 
-        doc.y = startY + 65;
+        currentY += cardHeight + 14;
+      } else {
+        currentY += 10;
       }
 
-      // Table
-      const tableTop = doc.y + 10;
-      const numCols = report.columns.length;
-      const colWidth = Math.floor(762 / numCols);
+      // Column weights & widths calculation
+      const getColumnWeight = (key: string, header: string): number => {
+        const k = (key + ' ' + header).toLowerCase();
+        if (
+          k.includes('note') ||
+          k.includes('action') ||
+          k.includes('description') ||
+          k.includes('details') ||
+          k.includes('reason') ||
+          k.includes('summary') ||
+          k.includes('sensor serial')
+        ) {
+          return 2.5;
+        }
+        if (
+          k.includes('status') ||
+          k.includes('type') ||
+          k.includes('serial') ||
+          k.includes('model') ||
+          k.includes('customer') ||
+          k.includes('patient') ||
+          k.includes('name') ||
+          k.includes('manufacturer')
+        ) {
+          return 1.4;
+        }
+        if (
+          k.includes('date') ||
+          k.includes('created') ||
+          k.includes('expires') ||
+          k.includes('time') ||
+          k.includes('id') ||
+          k.includes('count') ||
+          k.includes('days')
+        ) {
+          return 1.0;
+        }
+        return 1.2;
+      };
 
-      // Header Row
-      doc.rect(40, tableTop, 762, 22).fill('#1b8b83');
-      doc.fontSize(9).font('Helvetica-Bold').fillColor('#ffffff');
-      report.columns.forEach((col, idx) => {
-        doc.text(col.header, 45 + idx * colWidth, tableTop + 6, { width: colWidth - 10, ellipsis: true });
-      });
+      const totalWeight = Math.max(1, report.columns.reduce((sum, col) => sum + getColumnWeight(col.key, col.header), 0));
+      const colWidths = report.columns.map((col) =>
+        Math.max(50, Math.floor((getColumnWeight(col.key, col.header) / totalWeight) * contentWidth))
+      );
+      if (colWidths.length > 0) {
+        const currentWidthSum = colWidths.reduce((a, b) => a + b, 0);
+        colWidths[colWidths.length - 1] = (colWidths[colWidths.length - 1] ?? 50) + Math.floor(contentWidth - currentWidthSum);
+      }
 
-      let currentY = tableTop + 24;
-      doc.font('Helvetica').fontSize(8);
+      const colXPositions: number[] = [margin];
+      for (let i = 0; i < colWidths.length - 1; i++) {
+        const prevX = colXPositions[i] ?? margin;
+        const prevW = colWidths[i] ?? 50;
+        colXPositions.push(prevX + prevW);
+      }
 
-      report.data.forEach((row, rowIdx) => {
-        // Page break check
-        if (currentY > 520) {
-          doc.addPage({ margin: 40, size: 'A4', layout: 'landscape' });
-          currentY = 45;
-
-          // Header on new page
-          doc.rect(40, currentY, 762, 20).fill('#1b8b83');
-          doc.fontSize(9).font('Helvetica-Bold').fillColor('#ffffff');
-          report.columns.forEach((col, idx) => {
-            doc.text(col.header, 45 + idx * colWidth, currentY + 5, { width: colWidth - 10, ellipsis: true });
+      // Function to render table headers
+      const renderTableHeader = (y: number) => {
+        const headerHeight = 22;
+        doc.rect(margin, y, contentWidth, headerHeight).fill('#1b8b83');
+        doc.fontSize(8.5).font('Helvetica-Bold').fillColor('#ffffff');
+        report.columns.forEach((col, idx) => {
+          const colX = colXPositions[idx] ?? (margin + idx * 100);
+          const colW = colWidths[idx] ?? 100;
+          doc.text(col.header, colX + 6, y + 6, {
+            width: colW - 12,
+            lineBreak: false,
+            ellipsis: true,
           });
-          currentY += 22;
+        });
+        return y + headerHeight;
+      };
+
+      // Initial Table Header
+      currentY = renderTableHeader(currentY);
+
+      // Render Rows
+      report.data.forEach((row, rowIdx) => {
+        doc.font('Helvetica').fontSize(8);
+
+        // Compute exact dynamic height needed for this row
+        let rowHeight = 20;
+        report.columns.forEach((col, colIdx) => {
+          const val = row[col.key] !== undefined && row[col.key] !== null ? String(row[col.key]) : '—';
+          const cellWidth = (colWidths[colIdx] ?? 100) - 12;
+          const textHeight = doc.heightOfString(val, {
+            width: cellWidth,
+            lineGap: 2,
+          });
+          const neededHeight = Math.ceil(textHeight) + 10;
+          if (neededHeight > rowHeight) {
+            rowHeight = neededHeight;
+          }
+        });
+
+        // Page break check (leave room for footer at bottom)
+        if (currentY + rowHeight > 540) {
+          doc.addPage({ margin: 40, size: 'A4', layout: 'landscape' });
+          currentY = 40;
+          currentY = renderTableHeader(currentY);
           doc.font('Helvetica').fontSize(8);
         }
 
+        // Row background (zebra striping)
         if (rowIdx % 2 === 1) {
-          doc.rect(40, currentY - 2, 762, 18).fill('#f9fafb');
+          doc.rect(margin, currentY, contentWidth, rowHeight).fill('#f8fafc');
         }
 
-        doc.fillColor('#334155');
+        // Draw each cell text with proper vertical & horizontal padding and lineGap
         report.columns.forEach((col, colIdx) => {
           const val = row[col.key] !== undefined && row[col.key] !== null ? String(row[col.key]) : '—';
-          doc.text(val, 45 + colIdx * colWidth, currentY + 2, { width: colWidth - 10, ellipsis: true });
+          const cellWidth = (colWidths[colIdx] ?? 100) - 12;
+          const x = (colXPositions[colIdx] ?? (margin + colIdx * 100)) + 6;
+
+          const keyLower = col.key.toLowerCase();
+          const isStatus =
+            keyLower.includes('status') ||
+            keyLower.includes('type') ||
+            keyLower.includes('record');
+
+          if (isStatus) {
+            if (
+              val.includes('ACTIVE') ||
+              val.includes('Optimal') ||
+              val.includes('Healthy') ||
+              val.includes('AVAILABLE')
+            ) {
+              doc.fillColor('#0f766e');
+            } else if (
+              val.includes('EXPIRED') ||
+              val.includes('CRITICAL') ||
+              val.includes('DISABLED')
+            ) {
+              doc.fillColor('#b91c1c');
+            } else if (
+              val.includes('EXPIRING') ||
+              val.includes('WARNING') ||
+              val.includes('MAINTENANCE')
+            ) {
+              doc.fillColor('#b45309');
+            } else {
+              doc.fillColor('#334155');
+            }
+          } else {
+            doc.fillColor('#1e293b');
+          }
+
+          doc.text(val, x, currentY + 5, {
+            width: cellWidth,
+            lineGap: 2,
+          });
         });
 
-        // Bottom border
-        doc.rect(40, currentY + 14, 762, 0.5).fill('#e5e7eb');
-        currentY += 18;
+        // Bottom border line
+        doc.rect(margin, currentY + rowHeight, contentWidth, 0.5).fill('#e2e8f0');
+
+        // Advance to next row
+        currentY += rowHeight;
       });
 
-      // Footer
-      doc.fontSize(8).font('Helvetica').fillColor('#9ca3af').text(
-        `Confidential — For Internal Healthcare Operations Only. Generated by CareSignal Platform.`,
-        40,
-        560,
-        { align: 'center', width: 762 }
-      );
+      // Add Page Numbers / Footer to all pages
+      const pageRange = doc.bufferedPageRange();
+      for (let i = 0; i < pageRange.count; i++) {
+        doc.switchToPage(i);
+        doc.fontSize(7.5).font('Helvetica').fillColor('#94a3b8').text(
+          `Confidential — Healthcare Operations Only | Generated by CareSignal Platform | Page ${i + 1} of ${pageRange.count}`,
+          margin,
+          565,
+          { align: 'center', width: contentWidth }
+        );
+      }
 
       doc.end();
     });
