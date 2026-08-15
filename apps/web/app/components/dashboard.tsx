@@ -294,17 +294,49 @@ export function Dashboard() {
                       </td>
                       <td style={{ padding: '16px 12px' }}>
                         {sensor.customerName ? (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <User size={13} style={{ color: '#64748b' }} />
-                            <div>
-                              <strong>{sensor.customerName}</strong>
+                          sensor.customerId ? (
+                            <Link
+                              href={`/customers/${sensor.customerId}`}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                textDecoration: 'none',
+                                color: '#0f766e',
+                                fontWeight: 600,
+                              }}
+                              title={`View ${sensor.customerName}'s profile`}
+                            >
+                              <User size={13} style={{ color: '#0f766e' }} />
+                              <strong
+                                style={{
+                                  color: '#0f766e',
+                                  textDecoration: 'underline',
+                                  textDecorationColor: 'rgba(15, 118, 110, 0.35)',
+                                  textUnderlineOffset: '3px',
+                                }}
+                              >
+                                {sensor.customerName}
+                              </strong>
                               {sensor.customerNumber && (
-                                <span style={{ fontSize: '11px', color: '#94a3b8', marginLeft: '4px' }}>
+                                <span style={{ fontSize: '11px', color: '#64748b', textDecoration: 'none', fontWeight: 500 }}>
                                   ({sensor.customerNumber})
                                 </span>
                               )}
+                            </Link>
+                          ) : (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <User size={13} style={{ color: '#64748b' }} />
+                              <div>
+                                <strong>{sensor.customerName}</strong>
+                                {sensor.customerNumber && (
+                                  <span style={{ fontSize: '11px', color: '#94a3b8', marginLeft: '4px' }}>
+                                    ({sensor.customerNumber})
+                                  </span>
+                                )}
+                              </div>
                             </div>
-                          </div>
+                          )
                         ) : (
                           <span style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '12px' }}>
                             Unassigned
