@@ -1,13 +1,22 @@
 'use client';
 
-import { Plus, RefreshCw, Search, SlidersHorizontal, X } from 'lucide-react';
+import { Mail, Phone, Plus, RefreshCw, Search, SlidersHorizontal, UserRound, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { AppShell } from '../components/app-shell';
 import { apiFetch } from '../../lib/api';
 import { connectRealtime } from '../../lib/realtime';
 
-type Customer = { _id: string; customerNumber: string; firstName: string; lastName: string; email?: string; status: string };
+type Customer = {
+  _id: string;
+  customerNumber: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  status: string;
+};
 type CustomerResponse = { data: Customer[]; total: number; page: number; limit: number };
 
 export default function CustomersPage() {
@@ -42,7 +51,9 @@ export default function CustomersPage() {
   const filtered = useMemo(
     () =>
       customers.filter((customer) =>
-        `${customer.firstName} ${customer.lastName} ${customer.customerNumber} ${customer.email ?? ''}`
+        `${customer.firstName} ${customer.lastName} ${customer.customerNumber} ${customer.phone ?? ''} ${
+          customer.email ?? ''
+        } ${customer.address ?? ''}`
           .toLowerCase()
           .includes(query.toLowerCase())
       ),
@@ -56,13 +67,13 @@ export default function CustomersPage() {
         <input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search customers or IDs"
+          placeholder="Search by patient name, ID, phone, or email"
         />
       </div>
       <button className="filter-button">
-        <SlidersHorizontal size={16} /> Filters
+        <SlidersHorizontal size={16} /> Filter
       </button>
-      <span className="result-count">{filtered.length} loaded</span>
+      <span className="result-count">{filtered.length} customers</span>
     </div>
   );
 
@@ -77,8 +88,7 @@ export default function CustomersPage() {
       <div className="page-content">
         {loading && (
           <div className="data-loading">
-            <RefreshCw size={18} className="spin" />
-            Loading customers...
+            <RefreshCw size={18} className="spin" /> Loading customer directory...
           </div>
         )}
 
@@ -120,9 +130,9 @@ export default function CustomersPage() {
                   <thead style={{ position: 'sticky', top: 0, background: '#ffffff', zIndex: 3, boxShadow: '0 1px 0 #edf1f1' }}>
                     <tr>
                       <th style={{ background: '#ffffff' }}>Customer</th>
-                      <th style={{ background: '#ffffff' }}>Contact</th>
+                      <th style={{ background: '#ffffff' }}>Contact & Mobile</th>
                       <th style={{ background: '#ffffff' }}>Status</th>
-                      <th style={{ background: '#ffffff' }} />
+                      <th style={{ background: '#ffffff', textAlign: 'right' }}>Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -142,16 +152,46 @@ export default function CustomersPage() {
                             </div>
                           </div>
                         </td>
-                        <td className="muted-cell">{customer.email ?? 'No email'}</td>
+                        <td>
+                          <div>
+                            {customer.phone ? (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 600, color: '#1e293b' }}>
+                                <Phone size={12} style={{ color: '#0f766e' }} />
+                                <span>{customer.phone}</span>
+                              </div>
+                            ) : null}
+                            {customer.email ? (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: '#64748b', marginTop: customer.phone ? '2px' : '0' }}>
+                                <Mail size={11} style={{ color: '#94a3b8' }} />
+                                <span>{customer.email}</span>
+                              </div>
+                            ) : !customer.phone ? (
+                              <span className="muted-cell">No contact provided</span>
+                            ) : null}
+                          </div>
+                        </td>
                         <td>
                           <span className={`status status-${customer.status.toLowerCase()}`}>
                             <i />
                             {customer.status}
                           </span>
                         </td>
-                        <td>
-                          <Link className="row-link" href={`/customers/${customer._id}`}>
-                            Open
+                        <td style={{ textAlign: 'right' }}>
+                          <Link
+                            className="primary-button"
+                            href={`/customers/${customer._id}`}
+                            style={{
+                              fontSize: '11.5px',
+                              padding: '5px 12px',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '5px',
+                              textDecoration: 'none',
+                              fontWeight: 600,
+                              boxShadow: '0 1px 2px rgba(15, 118, 110, 0.15)',
+                            }}
+                          >
+                            <UserRound size={13} /> View profile
                           </Link>
                         </td>
                       </tr>
@@ -192,6 +232,7 @@ function CustomerForm({ onClose, onCreated }: { onClose: () => void; onCreated: 
         body: JSON.stringify({
           firstName: form.get('firstName'),
           lastName: form.get('lastName'),
+          phone: form.get('phone') || undefined,
           email: form.get('email') || undefined,
           address: form.get('address') || undefined,
           notes: form.get('description') || undefined,
@@ -218,23 +259,27 @@ function CustomerForm({ onClose, onCreated }: { onClose: () => void; onCreated: 
           </button>
         </div>
         <label>
-          First name
+          First name <span style={{ color: '#ef4444' }}>*</span>
           <input name="firstName" required />
         </label>
         <label>
-          Last name
+          Last name <span style={{ color: '#ef4444' }}>*</span>
           <input name="lastName" required />
         </label>
         <label>
+          Mobile / Phone number
+          <input name="phone" type="tel" placeholder="e.g. +1 (555) 888-9900" />
+        </label>
+        <label>
           Email (optional)
-          <input name="email" type="email" />
+          <input name="email" type="email" placeholder="e.g. user@example.com" />
         </label>
         <label>
           Address (optional)
-          <input name="address" />
+          <input name="address" placeholder="e.g. 204 Highland Ave, Chicago" />
         </label>
         <label>
-          Simple description (optional)
+          Notes / Medical remarks (optional)
           <textarea
             name="description"
             rows={2}
@@ -252,12 +297,12 @@ function CustomerForm({ onClose, onCreated }: { onClose: () => void; onCreated: 
           />
         </label>
         {error && <div className="form-error">{error}</div>}
-        <div className="modal-actions">
-          <button type="button" className="ghost-button" onClick={onClose}>
+        <div className="modal-actions" style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+          <button type="button" className="secondary-button" onClick={onClose}>
             Cancel
           </button>
           <button className="primary-button" disabled={saving}>
-            {saving ? 'Creating...' : 'Create customer'}
+            {saving ? <RefreshCw size={14} className="spin" /> : 'Create customer'}
           </button>
         </div>
       </form>
