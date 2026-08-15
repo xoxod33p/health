@@ -37,23 +37,27 @@ async function clean() {
     'audit_logs',
   ];
 
+  console.log(`🧹 Starting production database wipe...`);
+
   for (const name of companyScopedCollections) {
     if (collectionNames.includes(name)) {
-      await mongoose.connection.db!.collection(name).deleteMany({ companyId });
+      const res = await mongoose.connection.db!.collection(name).deleteMany({});
+      console.log(`   - Cleared ${name}: ${res.deletedCount} documents removed`);
     }
   }
 
   if (collectionNames.includes('employees')) {
-    await mongoose.connection.db!.collection('employees').deleteMany({
-      companyId,
+    const res = await mongoose.connection.db!.collection('employees').deleteMany({
       email: { $ne: defaultAdminEmail },
     });
+    console.log(`   - Cleared employees: ${res.deletedCount} non-admin accounts removed`);
   }
 
   if (collectionNames.includes('users')) {
-    await mongoose.connection.db!.collection('users').deleteMany({
+    const res = await mongoose.connection.db!.collection('users').deleteMany({
       email: { $ne: defaultAdminEmail },
     });
+    console.log(`   - Cleared users: ${res.deletedCount} non-admin auth accounts removed`);
   }
 
   const storagePath = resolve(process.cwd(), 'storage');
@@ -62,13 +66,14 @@ async function clean() {
       const reportsDir = resolve(storagePath, 'reports');
       if (fs.existsSync(reportsDir)) {
         fs.rmSync(reportsDir, { recursive: true, force: true });
+        console.log(`   - Cleared generated storage reports directory`);
       }
     } catch {
     }
   }
 
   await mongoose.disconnect();
-  console.log(`🧹 Database wiped clean for company: ${companyId} (protected root admin account preserved: ${defaultAdminEmail})`);
+  console.log(`✅ Production database wiped clean successfully for ${companyId}! (Protected root admin preserved: ${defaultAdminEmail})`);
 }
 
 clean().catch(async (error) => {

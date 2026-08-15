@@ -213,6 +213,8 @@ docker compose -f /opt/health/infra/docker-compose.prod.yml exec -T api node app
 ```bash
 cd /opt/health
 # Wipe demo data (preserves protected root administrator):
+./scripts/clean-prod.sh
+# or:
 ./scripts/seed-prod.sh clean
 
 # Full reset & fresh re-seed:
