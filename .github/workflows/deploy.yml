@@ -1,0 +1,134 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: 'Skip lint & unit tests before deploy'
+        required: false
+        default: 'false'
+        type: boolean
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  test-and-lint:
+    name: 🧪 Lint, Typecheck & Test
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.skip_tests != 'true' }}
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js 22 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+
+      - name: 🔍 Lint & Static Analysis
+        run: npm run lint
+
+      - name: 🏗️ Production Build Verification
+        run: npm run build
+
+      - name: 🧪 Run Automated Tests
+        run: npm run test
+
+  deploy-to-vps:
+    name: 🚀 Deploy to Ubuntu VPS
+    runs-on: ubuntu-latest
+    needs: [test-and-lint]
+    if: always() && (needs.test-and-lint.result == 'success' || github.event.inputs.skip_tests == 'true')
+
+    steps:
+      - name: 🚀 Connect via SSH & Deploy Application
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script_stop: true
+          envs: |
+            DOMAIN_NAME=${{ secrets.DOMAIN_NAME }}
+            WEB_ORIGIN=${{ secrets.WEB_ORIGIN }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            MONGO_ROOT_PASSWORD=${{ secrets.MONGO_ROOT_PASSWORD }}
+            REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+            DEFAULT_ADMIN_EMAIL=${{ secrets.DEFAULT_ADMIN_EMAIL }}
+            DEFAULT_ADMIN_PASSWORD=${{ secrets.DEFAULT_ADMIN_PASSWORD }}
+          script: |
+            set -e
+            APP_DIR="/opt/caresignal"
+            REPO_URL="https://github.com/${{ github.repository }}.git"
+
+            echo "=== [1/5] Checking target application directory ==="
+            if [ ! -d "$APP_DIR/.git" ]; then
+              echo "Cloning repository into $APP_DIR..."
+              sudo mkdir -p "$APP_DIR"
+              sudo chown -R $USER:$USER "$APP_DIR"
+              git clone "$REPO_URL" "$APP_DIR"
+              cd "$APP_DIR"
+            else
+              echo "Repository exists. Pulling latest commits..."
+              cd "$APP_DIR"
+              git fetch --all
+              git reset --hard origin/${{ github.ref_name }} || git pull origin ${{ github.ref_name }}
+            fi
+
+            echo "=== [2/5] Updating production environment configuration ==="
+            if [ ! -f "$APP_DIR/.env" ]; then
+              if [ -f "$APP_DIR/.env.production" ]; then
+                cp "$APP_DIR/.env.production" "$APP_DIR/.env"
+              else
+                cp "$APP_DIR/.env.example" "$APP_DIR/.env"
+              fi
+            fi
+
+            # Optionally sync secrets passed from GitHub Actions into .env
+            if [ -n "$DOMAIN_NAME" ]; then
+              sed -i "s|^DOMAIN_NAME=.*|DOMAIN_NAME=$DOMAIN_NAME|g" "$APP_DIR/.env" || echo "DOMAIN_NAME=$DOMAIN_NAME" >> "$APP_DIR/.env"
+            fi
+            if [ -n "$WEB_ORIGIN" ]; then
+              sed -i "s|^WEB_ORIGIN=.*|WEB_ORIGIN=$WEB_ORIGIN|g" "$APP_DIR/.env" || echo "WEB_ORIGIN=$WEB_ORIGIN" >> "$APP_DIR/.env"
+            fi
+            if [ -n "$JWT_SECRET" ]; then
+              sed -i "s|^JWT_SECRET=.*|JWT_SECRET=$JWT_SECRET|g" "$APP_DIR/.env" || echo "JWT_SECRET=$JWT_SECRET" >> "$APP_DIR/.env"
+            fi
+            if [ -n "$MONGO_ROOT_PASSWORD" ]; then
+              sed -i "s|^MONGO_ROOT_PASSWORD=.*|MONGO_ROOT_PASSWORD=$MONGO_ROOT_PASSWORD|g" "$APP_DIR/.env" || echo "MONGO_ROOT_PASSWORD=$MONGO_ROOT_PASSWORD" >> "$APP_DIR/.env"
+            fi
+            if [ -n "$REDIS_PASSWORD" ]; then
+              sed -i "s|^REDIS_PASSWORD=.*|REDIS_PASSWORD=$REDIS_PASSWORD|g" "$APP_DIR/.env" || echo "REDIS_PASSWORD=$REDIS_PASSWORD" >> "$APP_DIR/.env"
+            fi
+            if [ -n "$DEFAULT_ADMIN_EMAIL" ]; then
+              sed -i "s|^DEFAULT_ADMIN_EMAIL=.*|DEFAULT_ADMIN_EMAIL=$DEFAULT_ADMIN_EMAIL|g" "$APP_DIR/.env" || echo "DEFAULT_ADMIN_EMAIL=$DEFAULT_ADMIN_EMAIL" >> "$APP_DIR/.env"
+            fi
+            if [ -n "$DEFAULT_ADMIN_PASSWORD" ]; then
+              sed -i "s|^DEFAULT_ADMIN_PASSWORD=.*|DEFAULT_ADMIN_PASSWORD=$DEFAULT_ADMIN_PASSWORD|g" "$APP_DIR/.env" || echo "DEFAULT_ADMIN_PASSWORD=$DEFAULT_ADMIN_PASSWORD" >> "$APP_DIR/.env"
+            fi
+
+            echo "=== [3/5] Setting script execution permissions ==="
+            chmod +x "$APP_DIR"/scripts/*.sh
+
+            echo "=== [4/5] Running zero-downtime deployment script ==="
+            bash "$APP_DIR/scripts/deploy.sh"
+
+            echo "=== [5/5] Verifying Nginx & SSL status ==="
+            if command -v nginx >/dev/null 2>&1; then
+              sudo nginx -t && sudo systemctl reload nginx
+            fi
+
+            echo "🎉 CI/CD Deployment to Ubuntu VPS finished successfully!"
