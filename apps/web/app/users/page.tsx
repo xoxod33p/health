@@ -11,7 +11,6 @@ import {
   Search,
   ShieldCheck,
   Trash2,
-  UserCheck,
   UserPlus,
   Users as UsersIcon,
   X,
@@ -19,6 +18,7 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 import { AppShell } from '../components/app-shell';
 import { apiFetch, getSession } from '../../lib/api';
+import { connectPresence } from '../../lib/realtime';
 
 export type UserRole = 'SYSTEM_ADMIN' | 'MANAGER' | 'INHOUSE_STAFF' | 'OUT_EMPLOYEE';
 
@@ -40,6 +40,7 @@ type UserMember = {
   title?: string;
   status: 'ACTIVE' | 'INVITED' | 'SUSPENDED';
   isProtected?: boolean;
+  isOnline?: boolean;
   createdAt?: string;
 };
 
@@ -185,6 +186,34 @@ export default function UsersPage() {
 
   useEffect(() => {
     void load();
+
+    let cleanup: (() => void) | undefined;
+    void connectPresence(
+      (presence) => {
+        setUsers((prev) =>
+          prev.map((u) =>
+            u.email.toLowerCase().trim() === presence.email.toLowerCase().trim()
+              ? { ...u, isOnline: presence.online }
+              : u
+          )
+        );
+      },
+      (onlineEmails) => {
+        const emailSet = new Set(onlineEmails.map((e) => e.toLowerCase().trim()));
+        setUsers((prev) =>
+          prev.map((u) => ({
+            ...u,
+            isOnline: emailSet.has(u.email.toLowerCase().trim()),
+          }))
+        );
+      }
+    ).then((unsub) => {
+      cleanup = unsub;
+    });
+
+    return () => {
+      if (cleanup) cleanup();
+    };
   }, []);
 
   const filtered = useMemo(
@@ -395,7 +424,7 @@ export default function UsersPage() {
 
         {activeTab === 'users' && (
           <>
-            <section className="mini-stat-grid">
+            <section className="mini-stat-grid" style={{ marginBottom: '24px' }}>
               <div className="mini-stat">
                 <div className="mini-stat-top">
                   <span>Total accounts</span>
@@ -406,23 +435,23 @@ export default function UsersPage() {
               </div>
               <div className="mini-stat mini-stat-teal">
                 <div className="mini-stat-top">
+                  <span>Online Now</span>
+                  <span className="live-pulse-badge">LIVE</span>
+                </div>
+                <strong style={{ color: '#059669' }}>{users.filter((u) => u.isOnline).length}</strong>
+                <small>{users.filter((u) => u.isOnline).length} active in workspace</small>
+              </div>
+              <div className="mini-stat mini-stat-blue">
+                <div className="mini-stat-top">
                   <span>System Admins</span>
                   <ShieldCheck size={18} />
                 </div>
                 <strong>{users.filter((u) => u.role === 'SYSTEM_ADMIN').length}</strong>
                 <small>Full platform control</small>
               </div>
-              <div className="mini-stat mini-stat-blue">
-                <div className="mini-stat-top">
-                  <span>Managers</span>
-                  <UserCheck size={18} />
-                </div>
-                <strong>{users.filter((u) => u.role === 'MANAGER').length}</strong>
-                <small>Operations management</small>
-              </div>
               <div className="mini-stat mini-stat-amber">
                 <div className="mini-stat-top">
-                  <span>Inhouse & Out Staff</span>
+                  <span>Staff & Technicians</span>
                   <UserPlus size={18} />
                 </div>
                 <strong>{users.filter((u) => u.role === 'INHOUSE_STAFF' || u.role === 'OUT_EMPLOYEE').length}</strong>
@@ -496,8 +525,14 @@ export default function UsersPage() {
                             <tr key={userItem._id}>
                               <td>
                                 <div className="entity-cell">
-                                  <div className="entity-avatar">
-                                    {initials}
+                                  <div className="entity-avatar-wrap">
+                                    <div className="entity-avatar">
+                                      {initials}
+                                    </div>
+                                    <span
+                                      className={`avatar-status-dot ${userItem.isOnline ? 'online' : 'offline'}`}
+                                      title={userItem.isOnline ? 'Online now' : 'Offline'}
+                                    />
                                   </div>
                                   <div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -569,18 +604,19 @@ export default function UsersPage() {
                                 </div>
                               </td>
                               <td>
-                                <span
-                                  className={`status ${
-                                    userItem.status === 'ACTIVE'
-                                      ? 'status-healthy'
-                                      : userItem.status === 'INVITED'
-                                      ? 'status-warning'
-                                      : 'status-critical'
-                                  }`}
-                                >
-                                  <i />
-                                  {userItem.status}
-                                </span>
+                                {userItem.status === 'SUSPENDED' ? (
+                                  <span className="status status-critical" title="Account is suspended">
+                                    <i /> Suspended
+                                  </span>
+                                ) : userItem.isOnline ? (
+                                  <span className="status status-online" title="User is currently active in workspace">
+                                    <span className="presence-pulse-dot" /> Online
+                                  </span>
+                                ) : (
+                                  <span className="status status-offline" title="User is currently offline">
+                                    <span className="presence-static-dot" /> Offline
+                                  </span>
+                                )}
                               </td>
                               <td style={{ textAlign: 'right' }}>
                                 <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>

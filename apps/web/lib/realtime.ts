@@ -11,6 +11,12 @@ function getRealtimeUrl(): string {
   return process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/v1$/, '') ?? 'http://localhost:3001';
 }
 
+export interface PresenceChangePayload {
+  email: string;
+  authUserId: string;
+  online: boolean;
+}
+
 export async function connectRealtime(onChange: () => void): Promise<() => void> {
   const { data, error } = await getSession();
   if (error || !data.session) return () => undefined;
@@ -19,5 +25,35 @@ export async function connectRealtime(onChange: () => void): Promise<() => void>
   socket.on('customer.changed', onChange);
   socket.on('sensor.changed', onChange);
   socket.on('dashboard.updated', onChange);
+  return () => socket.disconnect();
+}
+
+export async function connectPresence(
+  onPresenceChange: (presence: PresenceChangePayload) => void,
+  onPresenceState?: (onlineEmails: string[]) => void
+): Promise<() => void> {
+  const { data, error } = await getSession();
+  if (error || !data.session) return () => undefined;
+  const realtimeUrl = getRealtimeUrl();
+  const socket: Socket = io(`${realtimeUrl}/realtime`, { auth: { token: data.session.access_token }, transports: ['websocket'] });
+
+  socket.on('presence.state', (state: { onlineEmails?: string[] }) => {
+    if (onPresenceState && Array.isArray(state?.onlineEmails)) {
+      onPresenceState(state.onlineEmails);
+    }
+  });
+
+  socket.on('realtime.ready', (payload: { onlineEmails?: string[] }) => {
+    if (onPresenceState && Array.isArray(payload?.onlineEmails)) {
+      onPresenceState(payload.onlineEmails);
+    }
+  });
+
+  socket.on('presence.changed', (payload: PresenceChangePayload) => {
+    if (payload && typeof payload.email === 'string') {
+      onPresenceChange(payload);
+    }
+  });
+
   return () => socket.disconnect();
 }
