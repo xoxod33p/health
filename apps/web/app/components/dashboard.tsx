@@ -167,20 +167,9 @@ export function Dashboard() {
   ];
 
   return (
-    <div
-      className="page-content"
-      style={{
-        height: 'calc(100vh - 60px)',
-        maxHeight: 'calc(100vh - 60px)',
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '18px 24px',
-        boxSizing: 'border-box',
-      }}
-    >
-      
-      <section className="metric-grid" style={{ marginBottom: '14px', flexShrink: 0 }} aria-label="Workspace summary">
+    <div className="page-content">
+      {/* Top 3 KPI metric summary cards */}
+      <section className="metric-grid" aria-label="Workspace summary">
         {metrics.map((metric) => (
           <article className={`metric-card metric-${metric.tone}`} key={metric.label}>
             <div className="metric-top">
@@ -196,20 +185,9 @@ export function Dashboard() {
         ))}
       </section>
 
-      
-      <section
-        className="panel"
-        style={{
-          flex: 1,
-          minHeight: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          padding: '18px 22px',
-          overflow: 'hidden',
-          marginBottom: 0,
-        }}
-      >
-        <div className="panel-heading" style={{ marginBottom: '14px', flexShrink: 0 }}>
+      {/* Main Expiring Sensors Data Table */}
+      <section className="panel" style={{ padding: '20px 22px', marginBottom: '24px' }}>
+        <div className="panel-heading" style={{ marginBottom: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div
               style={{
@@ -221,6 +199,7 @@ export function Dashboard() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: '#d97706',
+                flexShrink: 0,
               }}
             >
               <AlertTriangle size={20} />
@@ -273,15 +252,13 @@ export function Dashboard() {
           <div
             className="table-wrap custom-scrollbar"
             style={{
-              flex: 1,
-              minHeight: 0,
-              overflowY: 'auto',
               overflowX: 'auto',
               border: '1px solid #edf1f1',
               borderRadius: '6px',
+              width: '100%',
             }}
           >
-            <table className="rich-table" style={{ width: '100%', minWidth: '0', tableLayout: 'auto' }}>
+            <table className="rich-table" style={{ width: '100%', minWidth: '650px', tableLayout: 'auto' }}>
               <thead style={{ position: 'sticky', top: 0, background: '#ffffff', zIndex: 3, boxShadow: '0 1px 0 #edf1f1' }}>
                 <tr>
                   <th style={{ background: '#ffffff', padding: '12px', width: '15%' }}>Serial Number</th>
