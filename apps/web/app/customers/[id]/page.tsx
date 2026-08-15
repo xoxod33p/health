@@ -116,7 +116,7 @@ export default function CustomerDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Edit Customer Modal State
+  
   const [editOpen, setEditOpen] = useState(false);
   const [editFirstName, setEditFirstName] = useState('');
   const [editLastName, setEditLastName] = useState('');
@@ -126,13 +126,13 @@ export default function CustomerDetailPage() {
   const [editStatus, setEditStatus] = useState('ACTIVE');
   const [editSaving, setEditSaving] = useState(false);
 
-  // Assign Sensor Modal State
+  
   const [assignOpen, setAssignOpen] = useState(false);
   const [selectedSensorId, setSelectedSensorId] = useState('');
   const [assignReason, setAssignReason] = useState('Standard clinical telemetry monitoring');
   const [assignSubmitting, setAssignSubmitting] = useState(false);
 
-  // Log Replacement Modal State
+  
   const [replaceOpen, setReplaceOpen] = useState(false);
   const [replaceSerial, setReplaceSerial] = useState('');
   const [replaceDate, setReplaceDate] = useState(() => new Date().toISOString().split('T')[0] ?? '');
@@ -171,7 +171,7 @@ export default function CustomerDetailPage() {
     return () => disconnect?.();
   }, [customerId]);
 
-  // Filter sensors assigned to this specific customer
+  
   const assignedSensors = useMemo(() => {
     if (!customer) return [];
     return allSensors.filter((s) => {
@@ -187,12 +187,12 @@ export default function CustomerDetailPage() {
     });
   }, [allSensors, customer]);
 
-  // Filter available unassigned sensors for assignment modal
+  
   const availableSensors = useMemo(() => {
     return allSensors.filter((s) => !s.customerId || s.status === 'AVAILABLE');
   }, [allSensors]);
 
-  // Filter replacements logged for this customer
+  
   const customerReplacements = useMemo(() => {
     if (!customer) return [];
     const fullName = `${customer.firstName} ${customer.lastName}`.toLowerCase();
@@ -306,7 +306,7 @@ export default function CustomerDetailPage() {
   return (
     <AppShell>
       <div className="page-content" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        {/* Top Back Navigation & Actions */}
+        
         <div
           style={{
             display: 'flex',
@@ -383,7 +383,7 @@ export default function CustomerDetailPage() {
 
         {customer && (
           <>
-            {/* Hero Profile Card */}
+            
             <section
               className="panel"
               style={{
@@ -492,7 +492,7 @@ export default function CustomerDetailPage() {
                   </div>
                 </div>
 
-                {/* Quick Coverage KPI Badges */}
+                
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                   <div
                     style={{
@@ -528,7 +528,7 @@ export default function CustomerDetailPage() {
               </div>
             </section>
 
-            {/* Two-Column Grid: Left Contact Info, Right Assigned Sensors */}
+            
             <div
               style={{
                 display: 'grid',
@@ -537,7 +537,7 @@ export default function CustomerDetailPage() {
                 alignItems: 'flex-start',
               }}
             >
-              {/* Left Column: Demographics & Contact */}
+              
               <section className="panel" style={{ padding: '22px' }}>
                 <div className="panel-heading" style={{ marginBottom: '16px' }}>
                   <div>
@@ -649,9 +649,9 @@ export default function CustomerDetailPage() {
                 </div>
               </section>
 
-              {/* Right Column: Assigned Hardware Sensors & Replacements */}
+              
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                {/* Active Telemetry Sensors */}
+                
                 <section className="panel" style={{ padding: '22px' }}>
                   <div className="panel-heading" style={{ marginBottom: '16px' }}>
                     <div>
@@ -807,7 +807,7 @@ export default function CustomerDetailPage() {
                   )}
                 </section>
 
-                {/* Maintenance & Replacement Records */}
+                
                 {customerReplacements.length > 0 && (
                   <section className="panel" style={{ padding: '22px' }}>
                     <div className="panel-heading" style={{ marginBottom: '14px' }}>
@@ -866,7 +866,7 @@ export default function CustomerDetailPage() {
           </>
         )}
 
-        {/* ── Edit Customer Modal ── */}
+        
         {editOpen && customer && (
           <div className="modal-backdrop">
             <div className="modal-card" style={{ maxWidth: '480px' }}>
@@ -954,7 +954,7 @@ export default function CustomerDetailPage() {
           </div>
         )}
 
-        {/* ── Assign Sensor to Patient Modal ── */}
+        
         {assignOpen && customer && (
           <div className="modal-backdrop">
             <div className="modal-card" style={{ maxWidth: '480px' }}>
@@ -1033,7 +1033,7 @@ export default function CustomerDetailPage() {
           </div>
         )}
 
-        {/* ── Log Replacement Modal ── */}
+        
         {replaceOpen && customer && (
           <div className="modal-backdrop">
             <div className="modal-card" style={{ maxWidth: '480px' }}>

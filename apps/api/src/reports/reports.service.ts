@@ -97,12 +97,12 @@ export class ReportsService {
       generatedBy,
     });
 
-    // Generate & save all 3 formats to persistent storage
+    
     const storageFiles = await this.saveReportToStorage(report);
     report.storageFiles = storageFiles;
     await report.save();
 
-    // Create a real-time in-app notification
+    
     try {
       const entityId = Types.ObjectId.isValid(report._id as any) ? new Types.ObjectId(report._id as any) : undefined;
       await this.notifications.create({
@@ -117,7 +117,7 @@ export class ReportsService {
         ...(entityId ? { entityId } : {}),
       });
     } catch {
-      // Non-blocking notification creation
+      
     }
 
     this.realtime.broadcastCompany(companyId, 'report.ready', {
@@ -147,7 +147,7 @@ export class ReportsService {
       this.reports.countDocuments(filter).exec(),
     ]);
 
-    // Ensure legacy/previous reports have their files archived in storage
+    
     for (const report of data) {
       if (!report.storageFiles || report.storageFiles.length === 0) {
         void this.saveReportToStorage(report).then(async (files) => {
@@ -165,7 +165,7 @@ export class ReportsService {
     const report = await this.reports.findOne({ _id: id, companyId: user.companyId }).exec();
     if (!report) throw new NotFoundException('Report not found');
 
-    // If legacy report is missing storage files, auto-archive now
+    
     if (!report.storageFiles || report.storageFiles.length === 0) {
       report.storageFiles = await this.saveReportToStorage(report);
       await report.save();
@@ -191,7 +191,7 @@ export class ReportsService {
     const report = await this.reports.findOneAndDelete({ _id: id, companyId: user.companyId }).exec();
     if (!report) throw new NotFoundException('Report not found');
 
-    // Clean up stored files
+    
     if (report.storageFiles && report.storageFiles.length > 0) {
       for (const file of report.storageFiles) {
         if (file.storageKey) void this.storage.deleteFile(file.storageKey);
@@ -209,7 +209,7 @@ export class ReportsService {
 
     await this.audit.record(user, 'report.export', 'Report', id, { format: normalizedFormat, title: report.title });
 
-    // For PDF exports, generate with latest layout engine and refresh storage
+    
     if (normalizedFormat === 'pdf') {
       const buffer = await this.generatePdfBuffer(report);
       const pdfFilename = `${sanitizedTitle}.pdf`;
@@ -223,7 +223,7 @@ export class ReportsService {
       };
     }
 
-    // Check if the file is already archived in storage
+    
     const storedFile = report.storageFiles?.find((f) => f.format === normalizedFormat || (normalizedFormat === 'excel' && f.format === 'xlsx'));
     if (storedFile) {
       const buffer = await this.storage.getFile(storedFile.storageKey);
@@ -236,7 +236,7 @@ export class ReportsService {
       }
     }
 
-    // If missing from storage (e.g. previous legacy report), generate and archive to storage
+    
     const storageFiles = await this.saveReportToStorage(report);
     await this.reports.updateOne({ _id: id }, { storageFiles }).exec();
 
@@ -252,7 +252,7 @@ export class ReportsService {
       }
     }
 
-    // Direct fallback if storage I/O fails
+    
     if (normalizedFormat === 'excel') {
       const buffer = await this.generateExcelBuffer(report);
       return {
@@ -269,7 +269,7 @@ export class ReportsService {
     };
   }
 
-  // --- Storage Archival Helper ---
+  
 
   async saveReportToStorage(report: Report | ReportDocument): Promise<StoredReportFile[]> {
     const reportId = (report as any)._id?.toString() || 'temp-id';
@@ -277,18 +277,18 @@ export class ReportsService {
     const subcategory = (report.type || 'general').toLowerCase().replace(/_/g, '-');
     const sanitizedTitle = report.title.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
 
-    // 1. Generate CSV
+    
     const csvString = this.generateCsvString(report);
     const csvBuffer = Buffer.from(csvString, 'utf-8');
     const csvFilename = `${sanitizedTitle}.csv`;
     const csvStored = await this.storage.saveFile(companyId, 'reports', reportId, csvFilename, csvBuffer, subcategory);
 
-    // 2. Generate Excel
+    
     const excelBuffer = await this.generateExcelBuffer(report);
     const excelFilename = `${sanitizedTitle}.xlsx`;
     const excelStored = await this.storage.saveFile(companyId, 'reports', reportId, excelFilename, excelBuffer, subcategory);
 
-    // 3. Generate PDF
+    
     const pdfBuffer = await this.generatePdfBuffer(report);
     const pdfFilename = `${sanitizedTitle}.pdf`;
     const pdfStored = await this.storage.saveFile(companyId, 'reports', reportId, pdfFilename, pdfBuffer, subcategory);
@@ -321,7 +321,7 @@ export class ReportsService {
     ];
   }
 
-  // --- Data builders ---
+  
 
   private calculateDateRange(range: string): { from?: Date; to?: Date } {
     const now = new Date();
@@ -442,7 +442,7 @@ export class ReportsService {
 
     const data: Array<Record<string, unknown>> = [];
 
-    // Expiring sensors
+    
     for (const s of expiringSensorsList) {
       const expDate = new Date(s.expiresAt);
       const isPast = expDate.getTime() < now;
@@ -461,7 +461,7 @@ export class ReportsService {
       });
     }
 
-    // Replacements
+    
     for (const r of replacementsList) {
       data.push({
         recordType: 'MAINTENANCE REPLACEMENT',
@@ -500,7 +500,7 @@ export class ReportsService {
       this.sensors.find({ companyId, customerId: { $exists: true, $ne: null } }).lean().exec(),
     ]);
 
-    // Group sensors by customer
+    
     const sensorByCustomer = new Map<string, string[]>();
     for (const s of sensorsList) {
       if (!s.customerId) continue;
@@ -603,7 +603,7 @@ export class ReportsService {
     return { columns, summary, data };
   }
 
-  // --- Export Generators ---
+  
 
   private generateCsvString(report: Report): string {
     const headers = report.columns.map((c) => `"${c.header.replace(/"/g, '""')}"`).join(',');
@@ -625,7 +625,7 @@ export class ReportsService {
 
     const sheet = workbook.addWorksheet('Report Data');
 
-    // Title Row
+    
     sheet.mergeCells('A1:G1');
     const titleCell = sheet.getCell('A1');
     titleCell.value = report.title;
@@ -633,17 +633,17 @@ export class ReportsService {
     titleCell.alignment = { vertical: 'middle' };
     sheet.getRow(1).height = 30;
 
-    // Metadata Row
+    
     sheet.mergeCells('A2:G2');
     const metaCell = sheet.getCell('A2');
     metaCell.value = `Generated: ${new Date().toLocaleString('en-US')} | Author: ${report.generatedBy} | Type: ${report.type} | Scope: ${report.dateRange}`;
     metaCell.font = { name: 'Arial', size: 10, italic: true, color: { argb: 'FF718087' } };
     sheet.getRow(2).height = 20;
 
-    // Blank row
+    
     sheet.addRow([]);
 
-    // Summary KPIs
+    
     if (report.summary && Object.keys(report.summary).length > 0) {
       sheet.addRow(['Summary Metrics:']);
       sheet.getRow(4).font = { bold: true, size: 11, color: { argb: 'FF1B8B83' } };
@@ -660,7 +660,7 @@ export class ReportsService {
       sheet.addRow([]);
     }
 
-    // Table Header
+    
     const headers = report.columns.map((c) => c.header);
     const headerRow = sheet.addRow(headers);
     headerRow.height = 24;
@@ -683,7 +683,7 @@ export class ReportsService {
       };
     });
 
-    // Data Rows
+    
     report.data.forEach((row, idx) => {
       const rowValues = report.columns.map((col) => row[col.key] ?? '');
       const dataRow = sheet.addRow(rowValues);
@@ -704,7 +704,7 @@ export class ReportsService {
       });
     });
 
-    // Auto fit column widths
+    
     sheet.columns.forEach((column) => {
       let maxLen = 12;
       column.eachCell?.({ includeEmpty: true }, (cell) => {
@@ -734,9 +734,9 @@ export class ReportsService {
 
       const pageWidth = 841.89;
       const margin = 40;
-      const contentWidth = Math.floor(pageWidth - margin * 2); // 761 pt
+      const contentWidth = Math.floor(pageWidth - margin * 2); 
 
-      // Header Brand
+      
       doc.rect(margin, 30, 6, 30).fill('#1b8b83');
       doc.fontSize(16).font('Helvetica-Bold').fillColor('#102b35').text(report.title, margin + 14, 31, {
         width: contentWidth - 20,
@@ -750,7 +750,7 @@ export class ReportsService {
         { width: contentWidth - 20, lineBreak: false, ellipsis: true }
       );
 
-      // Summary KPIs Box
+      
       let currentY = 68;
       if (report.summary && Object.keys(report.summary).length > 0) {
         const keys = Object.keys(report.summary);
@@ -782,7 +782,7 @@ export class ReportsService {
         currentY += 10;
       }
 
-      // Column weights & widths calculation
+      
       const getColumnWeight = (key: string, header: string): number => {
         const k = (key + ' ' + header).toLowerCase();
         if (
@@ -838,7 +838,7 @@ export class ReportsService {
         colXPositions.push(prevX + prevW);
       }
 
-      // Function to render table headers
+      
       const renderTableHeader = (y: number) => {
         const headerHeight = 22;
         doc.rect(margin, y, contentWidth, headerHeight).fill('#1b8b83');
@@ -855,14 +855,14 @@ export class ReportsService {
         return y + headerHeight;
       };
 
-      // Initial Table Header
+      
       currentY = renderTableHeader(currentY);
 
-      // Render Rows
+      
       report.data.forEach((row, rowIdx) => {
         doc.font('Helvetica').fontSize(8);
 
-        // Compute exact dynamic height needed for this row
+        
         let rowHeight = 20;
         report.columns.forEach((col, colIdx) => {
           const val = row[col.key] !== undefined && row[col.key] !== null ? String(row[col.key]) : '—';
@@ -877,7 +877,7 @@ export class ReportsService {
           }
         });
 
-        // Page break check (leave room for footer at bottom)
+        
         if (currentY + rowHeight > 540) {
           doc.addPage({ margin: 40, size: 'A4', layout: 'landscape' });
           currentY = 40;
@@ -885,12 +885,12 @@ export class ReportsService {
           doc.font('Helvetica').fontSize(8);
         }
 
-        // Row background (zebra striping)
+        
         if (rowIdx % 2 === 1) {
           doc.rect(margin, currentY, contentWidth, rowHeight).fill('#f8fafc');
         }
 
-        // Draw each cell text with proper vertical & horizontal padding and lineGap
+        
         report.columns.forEach((col, colIdx) => {
           const val = row[col.key] !== undefined && row[col.key] !== null ? String(row[col.key]) : '—';
           const cellWidth = (colWidths[colIdx] ?? 100) - 12;
@@ -935,14 +935,14 @@ export class ReportsService {
           });
         });
 
-        // Bottom border line
+        
         doc.rect(margin, currentY + rowHeight, contentWidth, 0.5).fill('#e2e8f0');
 
-        // Advance to next row
+        
         currentY += rowHeight;
       });
 
-      // Add Page Numbers / Footer to all pages
+      
       const pageRange = doc.bufferedPageRange();
       for (let i = 0; i < pageRange.count; i++) {
         doc.switchToPage(i);

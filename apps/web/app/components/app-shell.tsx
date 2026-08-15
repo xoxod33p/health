@@ -101,7 +101,7 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
           </Link>
         </nav>
 
-        {/* Sidebar Footer - Sign Out Only */}
+        
         <div className="sidebar-footer" style={{ padding: '12px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
           <button
             type="button"

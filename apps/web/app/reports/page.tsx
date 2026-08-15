@@ -115,11 +115,11 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Filters
+  
   const [query, setQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('ALL');
 
-  // Generation Modal
+  
   const [createOpen, setCreateOpen] = useState(false);
   const [createType, setCreateType] = useState<ReportType>('SENSOR_INVENTORY');
   const [createRange, setCreateRange] = useState<DateRange>('ALL_TIME');
@@ -127,7 +127,7 @@ export default function ReportsPage() {
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState('');
 
-  // Report Detail Viewer
+  
   const [activeReport, setActiveReport] = useState<ReportItem | null>(null);
   const [viewerSearch, setViewerSearch] = useState('');
   const [exportingFormat, setExportingFormat] = useState<string | null>(null);
@@ -264,7 +264,7 @@ export default function ReportsPage() {
     <AppShell headerCenter={topbarCenter} headerActions={topbarRight}>
       <div className="page-content">
 
-        {/* Stats Grid */}
+        
         <section className="mini-stat-grid">
           <div className="mini-stat">
             <div className="mini-stat-top">
@@ -506,7 +506,7 @@ export default function ReportsPage() {
                           </td>
                           <td style={{ textAlign: 'right' }}>
                             <div style={{ display: 'flex', gap: '5px', justifyContent: 'flex-end' }}>
-                              {/* View Report */}
+                              
                               <button
                                 type="button"
                                 className="secondary-button"
@@ -517,7 +517,7 @@ export default function ReportsPage() {
                                 <Eye size={13} /> View
                               </button>
 
-                              {/* Export Excel */}
+                              
                               <button
                                 type="button"
                                 className="secondary-button"
@@ -539,7 +539,7 @@ export default function ReportsPage() {
                                 Excel
                               </button>
 
-                              {/* Export PDF */}
+                              
                               <button
                                 type="button"
                                 className="secondary-button"
@@ -561,7 +561,7 @@ export default function ReportsPage() {
                                 PDF
                               </button>
 
-                              {/* Export CSV */}
+                              
                               <button
                                 type="button"
                                 className="secondary-button"
@@ -577,7 +577,7 @@ export default function ReportsPage() {
                                 )}
                               </button>
 
-                              {/* Delete */}
+                              
                               <button
                                 type="button"
                                 className="secondary-button"
@@ -609,7 +609,7 @@ export default function ReportsPage() {
           </section>
         )}
 
-        {/* Generate Report Modal */}
+        
         {createOpen && (
           <div className="modal-backdrop">
             <div className="modal-card" style={{ maxWidth: '560px' }}>
@@ -632,7 +632,7 @@ export default function ReportsPage() {
               <form onSubmit={handleGenerate}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
-                  {/* Report Type Selector */}
+                  
                   <div>
                     <label style={{ fontWeight: 600, fontSize: '12px', color: '#334155', display: 'block', marginBottom: '8px' }}>
                       Report Category <span style={{ color: '#ef4444' }}>*</span>
@@ -687,7 +687,7 @@ export default function ReportsPage() {
                     </div>
                   </div>
 
-                  {/* Date Range Selector */}
+                  
                   <div>
                     <label style={{ fontWeight: 600, fontSize: '12px', color: '#334155', display: 'block', marginBottom: '6px' }}>
                       Time Scope
@@ -720,7 +720,7 @@ export default function ReportsPage() {
                     </div>
                   </div>
 
-                  {/* Custom Title */}
+                  
                   <label>
                     Report Title (optional)
                     <input
@@ -730,7 +730,7 @@ export default function ReportsPage() {
                     />
                   </label>
 
-                  {/* Format Highlights */}
+                  
                   <div
                     style={{
                       background: '#f8fafc',
@@ -781,7 +781,7 @@ export default function ReportsPage() {
           </div>
         )}
 
-        {/* Report Detail Viewer Modal */}
+        
         {activeReport && (
           <div className="modal-backdrop" style={{ zIndex: 30 }}>
             <div
@@ -795,7 +795,7 @@ export default function ReportsPage() {
                 padding: '24px',
               }}
             >
-              {/* Header */}
+              
               <div
                 style={{
                   display: 'flex',
@@ -879,7 +879,7 @@ export default function ReportsPage() {
                 </div>
               </div>
 
-              {/* Storage Archive Status */}
+              
               <div
                 style={{
                   display: 'flex',
@@ -905,7 +905,7 @@ export default function ReportsPage() {
                 </span>
               </div>
 
-              {/* KPI Summary Block */}
+              
               {activeReport.summary && Object.keys(activeReport.summary).length > 0 && (
                 <div className="report-kpi-grid">
                   {Object.entries(activeReport.summary).map(([key, val]) => (
@@ -939,7 +939,7 @@ export default function ReportsPage() {
                 </div>
               )}
 
-              {/* Filter within Viewer */}
+              
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                 <div className="search-field" style={{ maxWidth: '320px', padding: '6px 10px' }}>
                   <Search size={14} />
@@ -961,7 +961,7 @@ export default function ReportsPage() {
                 </span>
               </div>
 
-              {/* Data Table */}
+              
               <div
                 className="table-wrap custom-scrollbar"
                 style={{
@@ -1035,7 +1035,7 @@ export default function ReportsPage() {
                 </table>
               </div>
 
-              {/* Modal Footer */}
+              
               <div
                 style={{
                   display: 'flex',

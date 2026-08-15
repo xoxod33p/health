@@ -52,7 +52,7 @@ a {
   text-decoration: none;
 }
 
-/* ── App Shell & Layout ── */
+
 .app-shell {
   display: flex;
   min-height: 100vh;
@@ -178,7 +178,7 @@ a {
   to { opacity: 1; }
 }
 
-/* ── Content Shell & Topbar ── */
+
 .content-shell {
   flex: 1;
   min-width: 0;
@@ -315,7 +315,7 @@ a {
   background: #f1f5f5;
 }
 
-/* ── Page Content & Typography ── */
+
 .page-content {
   margin: 0 auto;
   max-width: 1450px;
@@ -354,7 +354,7 @@ a {
   flex-wrap: wrap;
 }
 
-/* ── Buttons ── */
+
 .primary-button {
   align-items: center;
   background: var(--navy);
@@ -411,7 +411,7 @@ a {
   background: #eaf5f2;
 }
 
-/* ── Metric & Summary Cards ── */
+
 .metric-grid {
   display: grid;
   gap: 14px;
@@ -479,7 +479,7 @@ a {
   color: #a0abad;
 }
 
-/* Mini stat cards */
+
 .mini-stat-grid {
   display: grid;
   gap: 12px;
@@ -531,7 +531,7 @@ a {
 .mini-stat-amber strong { color: var(--amber); }
 .mini-stat-blue strong { color: var(--blue); }
 
-/* ── Panels & Tables ── */
+
 .panel {
   background: var(--white);
   border: 1px solid var(--line);
@@ -619,7 +619,7 @@ td {
   color: #8b989b;
 }
 
-/* ── Status Badges ── */
+
 .status {
   align-items: center;
   display: inline-flex;
@@ -667,7 +667,7 @@ td {
 }
 .status-available i { background: #3b82f6; }
 
-/* ── Search & Form Controls ── */
+
 .search-field {
   align-items: center;
   background: #fff;
@@ -701,7 +701,7 @@ td {
   padding: 9px 28px 9px 12px;
 }
 
-/* ── Modals & Dialogs ── */
+
 .modal-backdrop {
   align-items: center;
   background: rgba(10, 27, 33, 0.65);
@@ -741,7 +741,7 @@ td {
   color: var(--ink);
 }
 
-/* Modal form controls */
+
 .modal-card form {
   display: flex;
   flex-direction: column;
@@ -816,7 +816,7 @@ td {
   margin-bottom: 16px;
 }
 
-/* ── Data States ── */
+
 .data-loading, .data-error {
   align-items: center;
   background: #fff;
@@ -876,7 +876,7 @@ td {
   margin: 0;
 }
 
-/* ── Settings & Form Panels ── */
+
 .settings-tabs-bar {
   display: flex;
   gap: 8px;
@@ -1016,7 +1016,7 @@ td {
   width: 5px;
 }
 
-/* ── Login Page ── */
+
 .login-page {
   align-items: center;
   background: radial-gradient(circle at 75% 18%, #dff2ed 0, #f5f8f7 32%, #eef3f2 100%);
@@ -1165,11 +1165,9 @@ td {
   text-align: center;
 }
 
-/* ══════════════════════════════════════════════════════════
-   MOBILE & RESPONSIVE BREAKPOINTS (Tablets & Phones)
-   ══════════════════════════════════════════════════════════ */
 
-/* Tablet (1024px down) */
+
+
 @media (max-width: 1024px) {
   .metric-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -1185,7 +1183,7 @@ td {
   }
 }
 
-/* Mobile & Tablet Portrait (768px down) */
+
 @media (max-width: 768px) {
   .sidebar {
     position: fixed;
@@ -1292,7 +1290,7 @@ td {
   }
 }
 
-/* Small Mobile Screens (640px down) */
+
 @media (max-width: 640px) {
   .page-content {
     padding: 16px 12px 28px;
@@ -1342,7 +1340,7 @@ td {
     align-self: flex-start;
   }
 
-  /* Table Horizontal Scrolling on Mobile */
+  
   .table-wrap {
     margin: 0 -12px;
     padding: 0 12px;
@@ -1357,7 +1355,7 @@ td {
     font-size: 11px;
   }
 
-  /* Mobile Bottom-Sheet Modal Behavior */
+  
   .modal-backdrop {
     padding: 0;
     align-items: flex-end;
@@ -1408,7 +1406,7 @@ td {
   }
 }
 
-/* Extra Small Phones (400px down) */
+
 @media (max-width: 400px) {
   .metric-grid,
   .mini-stat-grid,
@@ -1418,7 +1416,7 @@ td {
   }
 }
 
-/* Print Stylesheet */
+
 @media print {
   .sidebar, .topbar, .modal-backdrop button, .panel-heading button, .modal-actions, .menu-trigger {
     display: none !important;

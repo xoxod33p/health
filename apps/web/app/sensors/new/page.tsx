@@ -31,7 +31,7 @@ export default function NewSensorPage() {
   const [sensorTypes, setSensorTypes] = useState<SensorTypeItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Form State
+  
   const [serialNumber, setSerialNumber] = useState('');
   const [sensorTypeId, setSensorTypeId] = useState('');
   const [manufacturer, setManufacturer] = useState('');

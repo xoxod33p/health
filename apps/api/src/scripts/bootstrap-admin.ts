@@ -72,11 +72,10 @@ async function bootstrap(): Promise<void> {
   }
 
   await mongoose.disconnect();
-  console.log(`Native MongoDB Admin ready: ${email} (Role: ${role})`);
+  
 }
 
-bootstrap().catch(async (error: unknown) => {
+bootstrap().catch(async () => {
   await mongoose.disconnect().catch(() => undefined);
-  console.error(error instanceof Error ? error.message : 'Admin bootstrap failed');
   process.exitCode = 1;
 });

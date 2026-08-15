@@ -100,28 +100,28 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Modals
+  
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserMember | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // New User Form State
+  
   const [newFirstName, setNewFirstName] = useState('');
   const [newLastName, setNewLastName] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('ChangeMe123!');
   const [newRole, setNewRole] = useState<UserRole>('INHOUSE_STAFF');
 
-  // Edit Role & Permissions Form State
+  
   const [editRole, setEditRole] = useState<UserRole>('INHOUSE_STAFF');
   const [editPermissions, setEditPermissions] = useState<string[]>([]);
 
-  // Delete Confirmation Modal State
+  
   const [deleteTarget, setDeleteTarget] = useState<UserMember | null>(null);
   const [deleteSubmitting, setDeleteSubmitting] = useState(false);
 
-  // Role Matrix Custom Defaults State
+  
   const [roleMatrixDefaults, setRoleMatrixDefaults] = useState<Record<UserRole, string[]>>(DEFAULT_ROLE_PERMISSIONS);
 
   const load = async () => {
@@ -366,7 +366,7 @@ export default function UsersPage() {
   return (
     <AppShell headerCenter={topbarCenter} headerActions={topbarRight}>
       <div className="page-content">
-        {/* Navigation Tabs */}
+        
         <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', borderBottom: '1px solid var(--border-color, #e2e8f0)', paddingBottom: '12px' }}>
           <button
             type="button"
@@ -634,7 +634,7 @@ export default function UsersPage() {
           </>
         )}
 
-        {/* Roles & Permissions Matrix Tab */}
+        
         {activeTab === 'roles' && (
           <section className="panel">
             <div className="panel-heading">
@@ -702,7 +702,7 @@ export default function UsersPage() {
           </section>
         )}
 
-        {/* Modal: Add User */}
+        
         {addModalOpen && (
           <div className="modal-backdrop">
             <div className="modal-card">
@@ -792,7 +792,7 @@ export default function UsersPage() {
           </div>
         )}
 
-        {/* Modal: Edit User Role & Permission Levels */}
+        
         {editModalOpen && editingUser && (
           <div className="modal-backdrop">
             <div className="modal-card" style={{ maxWidth: '560px' }}>
@@ -900,7 +900,7 @@ export default function UsersPage() {
           </div>
         )}
 
-        {/* Modal: Delete User Confirmation */}
+        
         {deleteTarget && (
           <div className="modal-backdrop" onClick={() => !deleteSubmitting && setDeleteTarget(null)}>
             <div className="modal-card" style={{ maxWidth: '440px' }} onClick={(e) => e.stopPropagation()}>

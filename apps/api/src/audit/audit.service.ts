@@ -51,7 +51,7 @@ export class AuditService {
       .lean()
       .exec();
 
-    // Collect all actor identifiers
+    
     const actorUserIds = Array.from(new Set(rawLogs.map((l) => l.actorUserId).filter(Boolean)));
     const actorEmails = Array.from(new Set(rawLogs.map((l) => l.actorEmail).filter(Boolean)));
 

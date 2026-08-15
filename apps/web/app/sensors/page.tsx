@@ -145,7 +145,7 @@ function getSensorEffectiveStatus(sensor: Sensor) {
 export default function SensorsPage() {
   const [activeTab, setActiveTab] = useState<'inventory' | 'replacements'>('inventory');
 
-  // Inventory state
+  
   const [sensors, setSensors] = useState<Sensor[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [query, setQuery] = useState('');
@@ -153,13 +153,13 @@ export default function SensorsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Replacement log state
+  
   const [replacements, setReplacements] = useState<SensorReplacement[]>([]);
   const [replQuery, setReplQuery] = useState('');
   const [replacementsLoading, setReplacementsLoading] = useState(false);
   const [replacementsError, setReplacementsError] = useState('');
 
-  // Log Replacement modal
+  
   const [modalOpen, setModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formCustomerName, setFormCustomerName] = useState('');
@@ -168,14 +168,14 @@ export default function SensorsPage() {
   const [formIssue, setFormIssue] = useState('');
   const [formNotes, setFormNotes] = useState('');
 
-  // Assign Sensor modal
+  
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [assignSensor, setAssignSensor] = useState<Sensor | null>(null);
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
   const [assignReason, setAssignReason] = useState('Standard clinical telemetry monitoring');
   const [assignSubmitting, setAssignSubmitting] = useState(false);
 
-  // History modal
+  
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [historySensor, setHistorySensor] = useState<Sensor | null>(null);
   const [historyRecords, setHistoryRecords] = useState<AssignmentRecord[]>([]);
@@ -259,7 +259,7 @@ export default function SensorsPage() {
     [replacements, replQuery]
   );
 
-  // Statistics
+  
   const stats = useMemo(() => {
     let active = 0;
     let expiring = 0;
@@ -444,7 +444,7 @@ export default function SensorsPage() {
           boxSizing: 'border-box',
         }}
       >
-        {/* Stats Grid */}
+        
         <section className="mini-stat-grid" style={{ marginBottom: '14px', flexShrink: 0 }}>
           <div className="mini-stat">
             <div className="mini-stat-top">
@@ -480,7 +480,7 @@ export default function SensorsPage() {
           </div>
         </section>
 
-        {/* ── Inventory Tab ── */}
+        
         {activeTab === 'inventory' && (
           <>
             {loading && (
@@ -720,7 +720,7 @@ export default function SensorsPage() {
           </>
         )}
 
-        {/* ── Replacement Log Tab ── */}
+        
         {activeTab === 'replacements' && (
           <>
             {replacementsLoading && (
@@ -872,7 +872,7 @@ export default function SensorsPage() {
           </>
         )}
 
-        {/* ── Assign / Reassign Patient Modal ── */}
+        
         {assignModalOpen && assignSensor && (
           <div className="modal-backdrop">
             <div className="modal-card" style={{ maxWidth: '480px' }}>
@@ -951,7 +951,7 @@ export default function SensorsPage() {
           </div>
         )}
 
-        {/* ── Log Replacement Modal ── */}
+        
         {modalOpen && (
           <div className="modal-backdrop">
             <div className="modal-card" style={{ maxWidth: '500px' }}>
@@ -1047,7 +1047,7 @@ export default function SensorsPage() {
           </div>
         )}
 
-        {/* ── Sensor Assignment History Modal ── */}
+        
         {historyModalOpen && historySensor && (
           <div className="modal-backdrop">
             <div className="modal-card" style={{ maxWidth: '560px' }}>

@@ -32,7 +32,7 @@ export class EmployeesService {
     const rawPassword = dto.password || 'ChangeMe123!';
     const { passwordHash, salt } = hashPassword(rawPassword);
 
-    // Create or update native login User credentials
+    
     const existingUser = await this.users.findOne({ email }).exec();
     if (!existingUser) {
       await this.users.create({
@@ -52,7 +52,7 @@ export class EmployeesService {
       await existingUser.save();
     }
 
-    // Create Employee record with ACTIVE status
+    
     return this.employees.create({
       ...dto,
       email,
@@ -84,7 +84,7 @@ export class EmployeesService {
       throw new NotFoundException('Employee not found');
     }
 
-    // Disallow editing or modifying the default bootstrap admin account
+    
     if (existing.email.toLowerCase().trim() === this.defaultAdminEmail) {
       throw new ForbiddenException(
         'The default environment administrator account is protected and cannot be edited, modified, or suspended.'
@@ -98,7 +98,7 @@ export class EmployeesService {
 
     if (!employee) throw new NotFoundException('Employee not found');
 
-    // Sync status or role to native User collection if changed
+    
     if (dto.status || dto.role || dto.permissions) {
       await this.users.updateOne(
         { email: existing.email.toLowerCase().trim() },
@@ -123,7 +123,7 @@ export class EmployeesService {
       throw new NotFoundException('Employee not found');
     }
 
-    // Disallow deleting the default bootstrap admin account
+    
     if (existing.email.toLowerCase().trim() === this.defaultAdminEmail) {
       throw new ForbiddenException(
         'The default environment administrator account is protected and cannot be deleted.'

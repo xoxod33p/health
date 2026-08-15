@@ -30,7 +30,7 @@ export default function LoginPage() {
   return (
     <main className="login-page">
       <div className="login-container">
-        {/* Centered Brand Header */}
+        
         <div className="login-brand">
           <div className="brand-mark">
             <Activity size={22} strokeWidth={2.5} />
@@ -40,7 +40,7 @@ export default function LoginPage() {
           </span>
         </div>
 
-        {/* Card */}
+        
         <section className="login-card">
           <div className="login-heading">
             <p className="eyebrow">Protected Workspace</p>

@@ -35,7 +35,7 @@ export class SensorsController {
     return this.sensors.history(user, id);
   }
 
-  // Sensor Replacement & Issue Log Endpoints
+  
   @Post('replacements')
   @RequirePermissions('sensor.replace')
   logReplacement(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateSensorReplacementDto) {

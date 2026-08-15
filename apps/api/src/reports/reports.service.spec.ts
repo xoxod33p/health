@@ -164,7 +164,7 @@ describe('ReportsService', () => {
 
     expect(result).toBeDefined();
     expect(result.type).toBe('SENSOR_INVENTORY');
-    expect(mockStorageService.saveFile).toHaveBeenCalledTimes(3); // CSV, Excel, PDF
+    expect(mockStorageService.saveFile).toHaveBeenCalledTimes(3); 
     expect(mockRealtimeGateway.broadcastCompany).toHaveBeenCalled();
     expect(mockAuditService.record).toHaveBeenCalled();
   });

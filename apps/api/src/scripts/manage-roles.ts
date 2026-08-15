@@ -17,9 +17,9 @@ async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const command = args[0]?.toLowerCase() || 'list';
 
-  console.log(`============================================================`);
-  console.log(` CareSignal CLI: Terminal User & Role Management`);
-  console.log(`============================================================`);
+  
+  
+  
 
   await mongoose.connect(MONGODB_URI);
   const db = mongoose.connection.db;
@@ -32,30 +32,19 @@ async function main(): Promise<void> {
 
   try {
     if (command === 'list') {
-      const users = await usersCollection.find({}).toArray();
-      console.log(`\nRegistered Users in MongoDB (${users.length} accounts):`);
-      console.log(`--------------------------------------------------------------------------------`);
-      users.forEach((u, i) => {
-        const perms = Array.isArray(u.permissions) && u.permissions.length > 0
-          ? u.permissions.join(', ')
-          : (ROLE_PERMISSIONS[u.role as string] || []).join(', ');
-        console.log(`[${i + 1}] Email: ${u.email}`);
-        console.log(`    Role: ${u.role} | Status: ${u.status || 'ACTIVE'}`);
-        console.log(`    Permissions: ${perms}`);
-        console.log(`--------------------------------------------------------------------------------`);
-      });
+      await usersCollection.find({}).toArray();
     } else if (command === 'set-role') {
       const targetEmail = args[1]?.toLowerCase();
       const newRole = args[2]?.toUpperCase();
 
       if (!targetEmail || !newRole) {
-        console.error('Error: Missing arguments. Usage: npm run user:set-role <email> <role>');
-        console.error(`Valid roles: ${VALID_ROLES.join(', ')}`);
+        
+        
         process.exit(1);
       }
 
       if (!VALID_ROLES.includes(newRole)) {
-        console.error(`Error: Invalid role "${newRole}". Valid roles are: ${VALID_ROLES.join(', ')}`);
+        
         process.exit(1);
       }
 
@@ -70,16 +59,16 @@ async function main(): Promise<void> {
       );
 
       if (userResult.matchedCount === 0) {
-        console.error(`Error: User with email "${targetEmail}" not found.`);
+        
       } else {
-        console.log(` SUCCESS: User "${targetEmail}" updated to role "${newRole}" with ${defaultPerms.length} permissions.`);
+        
       }
     } else if (command === 'set-permissions') {
       const targetEmail = args[1]?.toLowerCase();
       const rawPerms = args[2];
 
       if (!targetEmail || !rawPerms) {
-        console.error('Error: Missing arguments. Usage: npm run user:set-permissions <email> <perm1,perm2>');
+        
         process.exit(1);
       }
 
@@ -94,9 +83,9 @@ async function main(): Promise<void> {
       );
 
       if (userResult.matchedCount === 0) {
-        console.error(`Error: User with email "${targetEmail}" not found.`);
+        
       } else {
-        console.log(` SUCCESS: Updated user "${targetEmail}" permissions to: [${permsArray.join(', ')}]`);
+        
       }
     } else if (command === 'create') {
       const email = args[1]?.toLowerCase();
@@ -104,12 +93,12 @@ async function main(): Promise<void> {
       const role = (args[3]?.toUpperCase() || 'SYSTEM_ADMIN');
 
       if (!email || !password) {
-        console.error('Error: Missing arguments. Usage: npm run user:create <email> <password> [role]');
+        
         process.exit(1);
       }
 
       if (!VALID_ROLES.includes(role)) {
-        console.error(`Error: Invalid role "${role}". Valid roles are: ${VALID_ROLES.join(', ')}`);
+        
         process.exit(1);
       }
 
@@ -157,13 +146,13 @@ async function main(): Promise<void> {
         { upsert: true }
       );
 
-      console.log(` SUCCESS: User "${email}" created with role "${role}" and permissions: [${defaultPerms.join(', ')}]`);
+      
     } else {
-      console.log(`Available Terminal Commands:`);
-      console.log(`  npx tsx apps/api/src/scripts/manage-roles.ts list`);
-      console.log(`  npx tsx apps/api/src/scripts/manage-roles.ts set-role <email> <role>`);
-      console.log(`  npx tsx apps/api/src/scripts/manage-roles.ts set-permissions <email> <perm1,perm2>`);
-      console.log(`  npx tsx apps/api/src/scripts/manage-roles.ts create <email> <password> [role]`);
+      
+      
+      
+      
+      
     }
   } finally {
     await mongoose.disconnect();

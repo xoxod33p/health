@@ -42,7 +42,7 @@ export class SensorsService {
       this.sensors.countDocuments(filter).exec(),
     ]);
 
-    // Collect customer IDs and sensor type IDs to enrich response
+    
     const customerIds = rawSensors
       .map((s) => s.customerId)
       .filter((id): id is Types.ObjectId => !!id && Types.ObjectId.isValid(id as any));

@@ -103,7 +103,7 @@ export function Dashboard() {
     return () => disconnect?.();
   }, []);
 
-  // Filter sensors into "About to Expire / Expired"
+  
   const expiringSensors = useMemo(() => {
     return allSensors
       .filter((s) => {
@@ -179,7 +179,7 @@ export function Dashboard() {
         boxSizing: 'border-box',
       }}
     >
-      {/* 1. Metric Summary Cards */}
+      
       <section className="metric-grid" style={{ marginBottom: '14px', flexShrink: 0 }} aria-label="Workspace summary">
         {metrics.map((metric) => (
           <article className={`metric-card metric-${metric.tone}`} key={metric.label}>
@@ -196,7 +196,7 @@ export function Dashboard() {
         ))}
       </section>
 
-      {/* 2. SECTION: Sensors About to Expire (Urgent Attention) */}
+      
       <section
         className="panel"
         style={{

@@ -28,26 +28,26 @@ export default function SettingsPage() {
   const [savedMessage, setSavedMessage] = useState('');
   const [saving, setSaving] = useState(false);
 
-  // Company Tab State
+  
   const [companyName, setCompanyName] = useState('CareSignal Health Systems');
   const [contactEmail, setContactEmail] = useState('ops@caresignal.health');
   const [timezone, setTimezone] = useState('Asia/Colombo');
   const [expirationWindow, setExpirationWindow] = useState('30');
   const [supportPhone, setSupportPhone] = useState('+1 (800) 555-0199');
 
-  // Notifications Tab State
+  
   const [expirationAlerts, setExpirationAlerts] = useState(true);
   const [dailyDigest, setDailyDigest] = useState(true);
   const [criticalAlerts, setCriticalAlerts] = useState(true);
   const [weeklyReport, setWeeklyReport] = useState(false);
 
-  // Security Tab State
+  
   const [enforceTwoFactor, setEnforceTwoFactor] = useState(true);
   const [sessionTimeout, setSessionTimeout] = useState('30');
   const [ipRestriction, setIpRestriction] = useState(false);
   const [auditRetention, setAuditRetention] = useState('90');
 
-  // API Access Tab State
+  
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([
     {
       id: 'key-1',
@@ -116,7 +116,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* In-Page Clean Tabs Bar */}
+        
         <div className="settings-tabs-bar">
           <button
             type="button"
@@ -155,7 +155,7 @@ export default function SettingsPage() {
           </div>
         )}
 
-        {/* Tab 1: Company Profile */}
+        
         {activeTab === 'company' && (
           <form className="panel form-panel" onSubmit={handleSave}>
             <div className="form-section">
@@ -222,7 +222,7 @@ export default function SettingsPage() {
           </form>
         )}
 
-        {/* Tab 2: Notifications & Alerts */}
+        
         {activeTab === 'notifications' && (
           <form className="panel form-panel" onSubmit={handleSave}>
             <div className="form-section">
@@ -288,7 +288,7 @@ export default function SettingsPage() {
           </form>
         )}
 
-        {/* Tab 3: Security & Access */}
+        
         {activeTab === 'security' && (
           <form className="panel form-panel" onSubmit={handleSave}>
             <div className="form-section">
@@ -351,7 +351,7 @@ export default function SettingsPage() {
           </form>
         )}
 
-        {/* Tab 4: API Keys & Webhooks */}
+        
         {activeTab === 'api' && (
           <div className="panel form-panel">
             <div className="form-section">

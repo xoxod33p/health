@@ -29,7 +29,7 @@ describe('StorageService', () => {
     const retrieved = await service.getFile(result.storageKey);
     expect(retrieved?.toString()).toBe('test-content');
 
-    // Cleanup
+    
     await service.deleteFile(result.storageKey);
     const existsAfterDelete = await service.fileExists(result.storageKey);
     expect(existsAfterDelete).toBe(false);

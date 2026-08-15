@@ -11,15 +11,15 @@ const defaultAdminEmail = (process.env.DEFAULT_ADMIN_EMAIL || 'admin@localhost.t
 const mongodbUri = process.env.MONGODB_URI;
 
 if (!mongodbUri) {
-  console.error('Error: MONGODB_URI environment variable is missing.');
+  
   process.exit(1);
 }
 
 async function seed() {
-  console.log('Connecting to MongoDB...');
+  
   await mongoose.connect(mongodbUri!);
 
-  // Schemas
+  
   const sensorTypeSchema = new mongoose.Schema({
     companyId: { type: String, required: true, index: true },
     name: { type: String, required: true },
@@ -108,7 +108,7 @@ async function seed() {
   const NotificationModel: Model<any> = mongoose.models.Notification || mongoose.model('Notification', notificationSchema);
   const AuditLogModel: Model<any> = mongoose.models.AuditLog || mongoose.model('AuditLog', auditLogSchema);
 
-  console.log('Seeding Sensor Types...');
+  
   const sensorTypeData = [
     { name: 'ECG Cardiac Monitor', code: 'ECG', description: 'Continuous multi-lead electrocardiogram cardiac sensor', status: 'ACTIVE', createdBy: defaultAdminEmail },
     { name: 'Continuous Glucose Monitor', code: 'CGM', description: 'Subcutaneous interstitial fluid glucose monitoring patch', status: 'ACTIVE', createdBy: defaultAdminEmail },
@@ -127,7 +127,7 @@ async function seed() {
     createdTypes[item.code] = doc._id.toString();
   }
 
-  console.log('Seeding Customers...');
+  
   const customerData = [
     { customerNumber: 'CUST-1001', firstName: 'Arthur', lastName: 'Pendleton', dateOfBirth: new Date('1958-04-12'), gender: 'MALE', email: 'arthur.p@example.com', phone: '+1 (555) 111-2233', address: '742 Evergreen Terrace, Springfield', emergencyContact: 'Martha Pendleton (+1 555-111-2234)', status: 'ACTIVE', notes: 'Hypertension and cardiac arrhythmia monitoring' },
     { customerNumber: 'CUST-1002', firstName: 'Beatrice', lastName: 'Holloway', dateOfBirth: new Date('1965-08-23'), gender: 'FEMALE', email: 'beatrice.h@example.com', phone: '+1 (555) 222-3344', address: '128 Baker Street, Seattle', emergencyContact: 'Robert Holloway (+1 555-222-3345)', status: 'ACTIVE', notes: 'Type 1 Diabetes CGM telemetry tracking' },
@@ -149,7 +149,7 @@ async function seed() {
     createdCustomers[c.customerNumber] = doc;
   }
 
-  console.log('Seeding Hardware Sensors & Assignments...');
+  
   const now = Date.now();
   const DAY = 24 * 60 * 60 * 1000;
 
@@ -193,7 +193,7 @@ async function seed() {
     }
   }
 
-  console.log('Seeding Maintenance & Replacement Records...');
+  
   const replacementData = [
     { customerName: 'Arthur Pendleton', serialNumber: 'ECG-88900', replacedDate: new Date(now - 10 * DAY), issueType: 'Sensor electrode adhesive degradation', notes: 'Replaced with ECG-88901; signal verified stable', replacedBy: defaultAdminEmail },
     { customerName: 'Daniel Kaufman', serialNumber: 'NIB-77300', replacedDate: new Date(now - 20 * DAY), issueType: 'Bluetooth transmission intermittency', notes: 'Replaced cuff unit; firmware v2.4 flashed', replacedBy: defaultAdminEmail },
@@ -208,7 +208,7 @@ async function seed() {
     );
   }
 
-  console.log('Seeding In-App Notifications...');
+  
   const notificationData = [
     { recipientId: defaultAdminEmail, type: 'SENSOR_EXPIRING', title: 'Sensor Expiring Soon', message: 'CGM-44102 assigned to Gloria Ramirez expires in 2 days.', status: 'UNREAD', priority: 'HIGH' },
     { recipientId: defaultAdminEmail, type: 'SENSOR_REPLACED', title: 'Maintenance Replacement Logged', message: 'Sensor replacement for Arthur Pendleton was completed.', status: 'READ', priority: 'NORMAL' },
@@ -219,7 +219,7 @@ async function seed() {
     await NotificationModel.create({ ...n, companyId });
   }
 
-  console.log('Seeding Audit Trail Logs...');
+  
   const auditData = [
     { actorUserId: 'admin', actorName: 'Root Admin', actorEmail: defaultAdminEmail, action: 'sensor_type.create', entityType: 'SensorType', entityId: 'ECG', newValues: { code: 'ECG' } },
     { actorUserId: 'admin', actorName: 'Root Admin', actorEmail: defaultAdminEmail, action: 'customer.create', entityType: 'Customer', entityId: 'CUST-1001', newValues: { customerNumber: 'CUST-1001' } },
@@ -232,20 +232,19 @@ async function seed() {
   }
 
   await mongoose.disconnect();
-  console.log('');
-  console.log('======================================================');
-  console.log(' Healthcare platform seed data loaded successfully!');
-  console.log('  - 5 Sensor Types (ECG, CGM, SPO2, NIBP, TEMP)');
-  console.log('  - 8 Clinical Customers with full demographic records');
-  console.log('  - 15 Hardware Sensors (Active, Available, Expiring, Expired)');
-  console.log('  - 3 Sensor Replacements & Maintenance Logs');
-  console.log('  - In-App Notifications & Audit Trail Logs');
-  console.log('  (User/staff accounts were not seeded)');
-  console.log('======================================================');
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 }
 
-seed().catch(async (error: unknown) => {
+seed().catch(async () => {
   await mongoose.disconnect().catch(() => undefined);
-  console.error(error instanceof Error ? error.message : 'Seeding failed');
   process.exit(1);
 });

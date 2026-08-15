@@ -28,7 +28,7 @@ export default function SensorTypesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Create modal
+  
   const [createOpen, setCreateOpen] = useState(false);
   const [createName, setCreateName] = useState('');
   const [createCode, setCreateCode] = useState('');
@@ -36,7 +36,7 @@ export default function SensorTypesPage() {
   const [createSubmitting, setCreateSubmitting] = useState(false);
   const [createError, setCreateError] = useState('');
 
-  // Edit modal
+  
   const [editOpen, setEditOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<SensorType | null>(null);
   const [editName, setEditName] = useState('');
@@ -151,7 +151,7 @@ export default function SensorTypesPage() {
     <AppShell headerCenter={topbarCenter} headerActions={topbarRight}>
       <div className="page-content">
 
-        {/* Stats */}
+        
         <section className="mini-stat-grid mini-stat-grid-3">
           <div className="mini-stat">
             <div className="mini-stat-top"><span>Total types</span><Tag size={18} /></div>
@@ -264,7 +264,7 @@ export default function SensorTypesPage() {
           </section>
         )}
 
-        {/* Create Modal */}
+        
         {createOpen && (
           <div className="modal-backdrop">
             <div className="modal-card" style={{ maxWidth: '460px' }}>
@@ -313,7 +313,7 @@ export default function SensorTypesPage() {
           </div>
         )}
 
-        {/* Edit Modal */}
+        
         {editOpen && editTarget && (
           <div className="modal-backdrop">
             <div className="modal-card" style={{ maxWidth: '460px' }}>

@@ -30,7 +30,7 @@ export class StorageService {
     if (configuredPath) {
       this.baseStorageDir = resolve(configuredPath);
     } else {
-      // Default to storage directory at workspace root
+      
       this.baseStorageDir = resolve(process.cwd(), '../../storage');
     }
     void this.initCategories();
@@ -49,10 +49,7 @@ export class StorageService {
     }
   }
 
-  /**
-   * Save a file into a well-categorized tenant directory:
-   * storage/{category}/{companyId}/{subcategory?}/{fileId}/{filename}
-   */
+  
   async saveCategorizedFile(options: SaveFileOptions): Promise<StoredFileResult> {
     const { category, companyId, subcategory, fileId, filename, buffer } = options;
     const sanitizedFilename = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
@@ -81,9 +78,7 @@ export class StorageService {
     };
   }
 
-  /**
-   * Backwards compatible helper for saving files
-   */
+  
   async saveFile(
     companyId: string,
     category: string,
