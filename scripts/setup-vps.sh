@@ -42,7 +42,7 @@ echo "======================================================"
 # 2. Input Parameters (Domain, Email, Target Directory)
 DOMAIN_NAME="${1:-${DOMAIN_NAME:-}}"
 SSL_EMAIL="${2:-${SSL_EMAIL:-}}"
-APP_DIR="${3:-${APP_DIR:-/opt/caresignal}}"
+APP_DIR="${3:-${APP_DIR:-/opt/health}}"
 
 if [ -z "$DOMAIN_NAME" ]; then
     read -rp "Enter your Domain Name (e.g., caresignal.example.com): " DOMAIN_NAME

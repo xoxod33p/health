@@ -71,7 +71,7 @@ jobs:
             DEFAULT_ADMIN_PASSWORD=${{ secrets.DEFAULT_ADMIN_PASSWORD }}
           script: |
             set -e
-            APP_DIR="/opt/caresignal"
+            APP_DIR="/opt/health"
             REPO_URL="https://github.com/${{ github.repository }}.git"
 
             echo "=== [1/5] Checking target application directory ==="

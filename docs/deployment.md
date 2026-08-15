@@ -59,8 +59,8 @@ Run the automated provisioning script directly from GitHub:
 
 ```bash
 # Clone the repository (or download setup script)
-git clone https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPOSITORY.git /opt/caresignal
-cd /opt/caresignal
+git clone https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPOSITORY.git /opt/health
+cd /opt/health
 
 # Make scripts executable and run setup
 chmod +x scripts/*.sh
@@ -127,7 +127,7 @@ You can also trigger a manual deployment anytime from GitHub:
 If you need to deploy directly on the server without GitHub Actions:
 
 ```bash
-cd /opt/caresignal
+cd /opt/health
 git pull origin main
 bash scripts/deploy.sh
 ```
@@ -146,7 +146,7 @@ sudo certbot renew --dry-run
 
 ### Manual SSL Renewal Helper
 ```bash
-sudo bash /opt/caresignal/scripts/renew-ssl.sh
+sudo bash /opt/health/scripts/renew-ssl.sh
 ```
 
 ---
@@ -160,7 +160,7 @@ After deployment, verify your live system:
 - **WebSocket Streaming**: Open Web Inspector console on `https://yourdomain.com` and verify WebSocket connection to `wss://yourdomain.com/realtime` is active.
 - **Docker Container Status**:
   ```bash
-  docker compose -f /opt/caresignal/infra/docker-compose.prod.yml ps
+  docker compose -f /opt/health/infra/docker-compose.prod.yml ps
   ```
 
 ---
@@ -170,23 +170,23 @@ After deployment, verify your live system:
 ### View Live Container Logs
 ```bash
 # View all logs
-docker compose -f /opt/caresignal/infra/docker-compose.prod.yml logs -f
+docker compose -f /opt/health/infra/docker-compose.prod.yml logs -f
 
 # View API logs only
-docker compose -f /opt/caresignal/infra/docker-compose.prod.yml logs -f api
+docker compose -f /opt/health/infra/docker-compose.prod.yml logs -f api
 
 # View Next.js Web logs only
-docker compose -f /opt/caresignal/infra/docker-compose.prod.yml logs -f web
+docker compose -f /opt/health/infra/docker-compose.prod.yml logs -f web
 ```
 
 ### Restart All Services
 ```bash
-docker compose -f /opt/caresignal/infra/docker-compose.prod.yml restart
+docker compose -f /opt/health/infra/docker-compose.prod.yml restart
 ```
 
 ### Bootstrap / Reset Admin Credentials
 ```bash
-docker compose -f /opt/caresignal/infra/docker-compose.prod.yml exec -T api node apps/api/dist/scripts/bootstrap-admin.js
+docker compose -f /opt/health/infra/docker-compose.prod.yml exec -T api node apps/api/dist/scripts/bootstrap-admin.js
 ```
 
 ### Backup MongoDB Database
