@@ -120,29 +120,6 @@
     justify-content: center;
   }
 
-  /* Mobile Menu Header Button */
-  .mobile-menu-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    color: #1e293b;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    flex-shrink: 0;
-  }
-
-  .mobile-menu-btn:hover,
-  .mobile-menu-btn:active {
-    background: #edf2f7;
-    border-color: #cbd5e1;
-    color: var(--teal);
-  }
-
   /* Mobile Bottom Tab Bar */
   .mobile-bottom-nav {
     display: flex;

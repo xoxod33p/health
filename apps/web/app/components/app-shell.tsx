@@ -1,6 +1,6 @@
 'use client';
 
-import { Activity, Boxes, ClipboardList, FileBarChart, LayoutDashboard, LogOut, Menu, Tag, Users, X } from 'lucide-react';
+import { Activity, Boxes, ClipboardList, FileBarChart, LayoutDashboard, LogOut, ShieldCheck, Tag, Users, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -161,14 +161,6 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
       <main className="content-shell">
         <header className="topbar">
           <div className="topbar-left">
-            <button
-              type="button"
-              className="mobile-menu-btn"
-              onClick={() => setSidebarOpen(true)}
-              aria-label="Open navigation menu"
-            >
-              <Menu size={19} strokeWidth={2} />
-            </button>
             <h1 className="topbar-title">{title ?? activeLabel}</h1>
           </div>
           {headerCenter && <div className="topbar-center">{headerCenter}</div>}
@@ -177,7 +169,7 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
         {children}
 
         {/* Mobile Bottom Navigation Bar */}
-        <nav className="mobile-bottom-nav" aria-label="Mobile quick navigation">
+        <nav className="mobile-bottom-nav" aria-label="Mobile navigation">
           <Link href="/" className={`mobile-nav-item ${pathname === '/' ? 'active' : ''}`}>
             <LayoutDashboard size={19} strokeWidth={pathname === '/' ? 2.3 : 1.8} />
             <span>Overview</span>
@@ -194,15 +186,10 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
             <FileBarChart size={19} strokeWidth={pathname.startsWith('/reports') ? 2.3 : 1.8} />
             <span>Reports</span>
           </Link>
-          <button
-            type="button"
-            className={`mobile-nav-item ${sidebarOpen || pathname === '/audit' || pathname === '/sensor-types' || pathname === '/users' ? 'active' : ''}`}
-            onClick={() => setSidebarOpen(true)}
-            aria-label="Open all navigation menus"
-          >
-            <Menu size={19} strokeWidth={sidebarOpen ? 2.3 : 1.8} />
-            <span>Menu</span>
-          </button>
+          <Link href="/users" className={`mobile-nav-item ${pathname.startsWith('/users') ? 'active' : ''}`}>
+            <ShieldCheck size={19} strokeWidth={pathname.startsWith('/users') ? 2.3 : 1.8} />
+            <span>Users</span>
+          </Link>
         </nav>
       </main>
     </div>

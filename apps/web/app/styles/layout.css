@@ -252,10 +252,6 @@
 }
 
 /* Mobile Navigation - Hidden on Desktop screens */
-.mobile-menu-btn {
-  display: none;
-}
-
 .mobile-bottom-nav {
   display: none;
 }
