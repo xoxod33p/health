@@ -1,6 +1,6 @@
 'use client';
 
-import { Activity, Boxes, ClipboardList, FileBarChart, LayoutDashboard, LogOut, Menu, Settings, Tag, Users, X } from 'lucide-react';
+import { Activity, Boxes, ClipboardList, FileBarChart, LayoutDashboard, LogOut, Menu, Tag, Users, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -24,7 +24,7 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const cachedSession = getCachedSession();
   const [authState, setAuthState] = useState<'loading' | 'ready' | 'error'>(cachedSession ? 'ready' : 'loading');
-  const activeLabel = navigation.find((item) => item.href === pathname)?.label ?? (pathname.startsWith('/users') ? 'User management' : pathname.startsWith('/settings') ? 'Settings' : 'Workspace');
+  const activeLabel = navigation.find((item) => item.href === pathname)?.label ?? (pathname.startsWith('/users') ? 'User management' : 'Workspace');
 
   useEffect(() => {
     let mounted = true;
@@ -94,10 +94,6 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
           <Link className={`nav-item ${activeLabel === 'User management' ? 'nav-active' : ''}`} href="/users" onClick={() => setSidebarOpen(false)}>
             <Users size={17} strokeWidth={1.8} />
             <span style={{ fontWeight: 500 }}>User management</span>
-          </Link>
-          <Link className={`nav-item ${activeLabel === 'Settings' ? 'nav-active' : ''}`} href="/settings" onClick={() => setSidebarOpen(false)}>
-            <Settings size={17} strokeWidth={1.8} />
-            <span style={{ fontWeight: 500 }}>Settings</span>
           </Link>
         </nav>
 
