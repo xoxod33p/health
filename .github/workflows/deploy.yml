@@ -74,18 +74,40 @@ jobs:
             APP_DIR="/opt/health"
             REPO_URL="https://github.com/${{ github.repository }}.git"
 
-            echo "=== [1/5] Checking target application directory ==="
+            CURRENT_USER="$(id -un)"
+            git config --global --add safe.directory "$APP_DIR" || true
+            if [ -d "/root" ] && [ "$CURRENT_USER" != "root" ]; then
+              sudo git config --global --add safe.directory "$APP_DIR" 2>/dev/null || true
+            fi
+
+            echo "=== [1/5] Checking target application directory ($APP_DIR) ==="
+            if [ ! -d "$APP_DIR" ]; then
+              echo "Creating $APP_DIR..."
+              mkdir -p "$APP_DIR" 2>/dev/null || sudo mkdir -p "$APP_DIR"
+              chown -R "$CURRENT_USER" "$APP_DIR" 2>/dev/null || sudo chown -R "$CURRENT_USER" "$APP_DIR" 2>/dev/null || true
+            fi
+
             if [ ! -d "$APP_DIR/.git" ]; then
-              echo "Cloning repository into $APP_DIR..."
-              sudo mkdir -p "$APP_DIR"
-              sudo chown -R $USER:$USER "$APP_DIR"
-              git clone "$REPO_URL" "$APP_DIR"
-              cd "$APP_DIR"
+              echo "Cloning repository from $REPO_URL..."
+              chown -R "$CURRENT_USER" "$APP_DIR" 2>/dev/null || sudo chown -R "$CURRENT_USER" "$APP_DIR" 2>/dev/null || true
+              if [ -z "$(ls -A "$APP_DIR" 2>/dev/null)" ]; then
+                git clone "$REPO_URL" "$APP_DIR"
+                cd "$APP_DIR"
+              else
+                cd "$APP_DIR"
+                git init
+                git remote add origin "$REPO_URL" || git remote set-url origin "$REPO_URL"
+                git fetch origin "${{ github.ref_name }}" || git fetch --all
+                git checkout -f -B "${{ github.ref_name }}" "origin/${{ github.ref_name }}"
+              fi
             else
-              echo "Repository exists. Pulling latest commits..."
+              echo "Repository exists. Synchronizing latest commits..."
               cd "$APP_DIR"
-              git fetch --all
-              git reset --hard origin/${{ github.ref_name }} || git pull origin ${{ github.ref_name }}
+              chown -R "$CURRENT_USER" "$APP_DIR" 2>/dev/null || sudo chown -R "$CURRENT_USER" "$APP_DIR" 2>/dev/null || true
+              git remote set-url origin "$REPO_URL" || true
+              git fetch origin "${{ github.ref_name }}" || git fetch --all
+              git checkout -f "${{ github.ref_name }}" || git checkout -f -B "${{ github.ref_name }}" "origin/${{ github.ref_name }}"
+              git reset --hard "origin/${{ github.ref_name }}" || git pull origin "${{ github.ref_name }}"
             fi
 
             echo "=== [2/5] Updating production environment configuration ==="
@@ -127,8 +149,8 @@ jobs:
             bash "$APP_DIR/scripts/deploy.sh"
 
             echo "=== [5/5] Verifying Nginx & SSL status ==="
-            if command -v nginx >/dev/null 2>&1; then
-              sudo nginx -t && sudo systemctl reload nginx
+            if command -v nginx >/dev/null 2>&1 && (systemctl is-active --quiet nginx 2>/dev/null || sudo systemctl is-active --quiet nginx 2>/dev/null); then
+              (nginx -t 2>/dev/null || sudo nginx -t) && (systemctl reload nginx 2>/dev/null || sudo systemctl reload nginx)
             fi
 
             echo "🎉 CI/CD Deployment to Ubuntu VPS finished successfully!"
