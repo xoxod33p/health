@@ -141,6 +141,7 @@ export default function UsersPage() {
         if (!exists) {
           const emailName = currentUser.email.split('@')[0] ?? 'admin';
           const userRole = (currentUser.role as UserRole) || 'SYSTEM_ADMIN';
+          const isRoot = currentUser.email.toLowerCase() === 'admin@localhost.test';
           const authUser: UserMember = {
             _id: currentUser.id,
             firstName: emailName,
@@ -149,9 +150,9 @@ export default function UsersPage() {
             authUserId: currentUser.id,
             role: userRole,
             permissions: DEFAULT_ROLE_PERMISSIONS[userRole] ?? DEFAULT_ROLE_PERMISSIONS.SYSTEM_ADMIN,
-            title: 'Primary Administrator',
+            title: isRoot ? 'Primary Administrator' : (ROLE_LABELS[userRole]?.label || 'System Admin'),
             status: 'ACTIVE',
-            isProtected: true,
+            isProtected: isRoot,
             createdAt: new Date().toISOString().split('T')[0] ?? '',
           };
           combinedList = [authUser, ...combinedList];
@@ -162,7 +163,6 @@ export default function UsersPage() {
         ...u,
         isProtected: Boolean(
           u.isProtected ||
-          (currentUser?.email && u.email.toLowerCase() === currentUser.email.toLowerCase() && u.role === 'SYSTEM_ADMIN') ||
           (u.email.toLowerCase() === 'admin@localhost.test' && u.role === 'SYSTEM_ADMIN')
         ),
         permissions: u.permissions && u.permissions.length > 0 ? u.permissions : DEFAULT_ROLE_PERMISSIONS[u.role] ?? DEFAULT_ROLE_PERMISSIONS.INHOUSE_STAFF,
@@ -454,16 +454,26 @@ export default function UsersPage() {
                     <p>Add team members to configure workspace permissions.</p>
                   </div>
                 ) : (
-                  <div className="table-wrap">
+                  <div
+                    className="table-wrap custom-scrollbar"
+                    style={{
+                      maxHeight: 'calc(100vh - 360px)',
+                      minHeight: '300px',
+                      overflowY: 'auto',
+                      overflowX: 'auto',
+                      borderRadius: '6px',
+                      border: '1px solid #edf1f1',
+                    }}
+                  >
                     <table className="rich-table">
-                      <thead>
+                      <thead style={{ position: 'sticky', top: 0, background: '#ffffff', zIndex: 3, boxShadow: '0 1px 0 #edf1f1' }}>
                         <tr>
-                          <th>Account</th>
-                          <th>Email</th>
-                          <th>Role</th>
-                          <th>Permissions</th>
-                          <th>Status</th>
-                          <th style={{ textAlign: 'right' }}>Actions</th>
+                          <th style={{ background: '#ffffff' }}>Account</th>
+                          <th style={{ background: '#ffffff' }}>Email</th>
+                          <th style={{ background: '#ffffff' }}>Role</th>
+                          <th style={{ background: '#ffffff' }}>Permissions</th>
+                          <th style={{ background: '#ffffff' }}>Status</th>
+                          <th style={{ textAlign: 'right', background: '#ffffff' }}>Actions</th>
                         </tr>
                       </thead>
                       <tbody>

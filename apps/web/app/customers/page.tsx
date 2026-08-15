@@ -105,14 +105,24 @@ export default function CustomersPage() {
                 <p>Create the first customer for this workspace.</p>
               </div>
             ) : (
-              <div className="table-wrap">
+              <div
+                className="table-wrap custom-scrollbar"
+                style={{
+                  maxHeight: 'calc(100vh - 280px)',
+                  minHeight: '300px',
+                  overflowY: 'auto',
+                  overflowX: 'auto',
+                  borderRadius: '6px',
+                  border: '1px solid #edf1f1',
+                }}
+              >
                 <table className="rich-table">
-                  <thead>
+                  <thead style={{ position: 'sticky', top: 0, background: '#ffffff', zIndex: 3, boxShadow: '0 1px 0 #edf1f1' }}>
                     <tr>
-                      <th>Customer</th>
-                      <th>Contact</th>
-                      <th>Status</th>
-                      <th />
+                      <th style={{ background: '#ffffff' }}>Customer</th>
+                      <th style={{ background: '#ffffff' }}>Contact</th>
+                      <th style={{ background: '#ffffff' }}>Status</th>
+                      <th style={{ background: '#ffffff' }} />
                     </tr>
                   </thead>
                   <tbody>

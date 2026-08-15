@@ -149,14 +149,24 @@ export default function AuditPage() {
                 <p>Try clearing filters or search criteria.</p>
               </div>
             ) : (
-              <div className="table-wrap">
+              <div
+                className="table-wrap custom-scrollbar"
+                style={{
+                  maxHeight: 'calc(100vh - 300px)',
+                  minHeight: '300px',
+                  overflowY: 'auto',
+                  overflowX: 'auto',
+                  borderRadius: '6px',
+                  border: '1px solid #edf1f1',
+                }}
+              >
                 <table className="rich-table">
-                  <thead>
+                  <thead style={{ position: 'sticky', top: 0, background: '#ffffff', zIndex: 3, boxShadow: '0 1px 0 #edf1f1' }}>
                     <tr>
-                      <th>User / Actor</th>
-                      <th>Action</th>
-                      <th>Target Entity</th>
-                      <th>Timestamp</th>
+                      <th style={{ background: '#ffffff' }}>User / Actor</th>
+                      <th style={{ background: '#ffffff' }}>Action</th>
+                      <th style={{ background: '#ffffff' }}>Target Entity</th>
+                      <th style={{ background: '#ffffff' }}>Timestamp</th>
                     </tr>
                   </thead>
                   <tbody>

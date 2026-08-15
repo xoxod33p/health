@@ -188,16 +188,26 @@ export default function SensorTypesPage() {
                 <p>Create your first sensor type to categorise devices in the inventory.</p>
               </div>
             ) : (
-              <div className="table-wrap">
+              <div
+                className="table-wrap custom-scrollbar"
+                style={{
+                  maxHeight: 'calc(100vh - 280px)',
+                  minHeight: '300px',
+                  overflowY: 'auto',
+                  overflowX: 'auto',
+                  borderRadius: '6px',
+                  border: '1px solid #edf1f1',
+                }}
+              >
                 <table className="rich-table">
-                  <thead>
+                  <thead style={{ position: 'sticky', top: 0, background: '#ffffff', zIndex: 3, boxShadow: '0 1px 0 #edf1f1' }}>
                     <tr>
-                      <th>Name</th>
-                      <th>Code</th>
-                      <th>Description</th>
-                      <th>Status</th>
-                      <th>Created</th>
-                      <th style={{ textAlign: 'right' }}>Actions</th>
+                      <th style={{ background: '#ffffff' }}>Name</th>
+                      <th style={{ background: '#ffffff' }}>Code</th>
+                      <th style={{ background: '#ffffff' }}>Description</th>
+                      <th style={{ background: '#ffffff' }}>Status</th>
+                      <th style={{ background: '#ffffff' }}>Created</th>
+                      <th style={{ textAlign: 'right', background: '#ffffff' }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
