@@ -637,7 +637,7 @@ export default function ReportsPage() {
                     <label style={{ fontWeight: 600, fontSize: '12px', color: '#334155', display: 'block', marginBottom: '8px' }}>
                       Report Category <span style={{ color: '#ef4444' }}>*</span>
                     </label>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    <div className="report-category-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '8px' }}>
                       {(Object.keys(REPORT_TYPE_CONFIG) as ReportType[]).map((typeKey) => {
                         const config = REPORT_TYPE_CONFIG[typeKey];
                         const Icon = config.icon;
@@ -692,7 +692,7 @@ export default function ReportsPage() {
                     <label style={{ fontWeight: 600, fontSize: '12px', color: '#334155', display: 'block', marginBottom: '6px' }}>
                       Time Scope
                     </label>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
+                    <div className="report-scope-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(75px, 1fr))', gap: '6px' }}>
                       {[
                         { id: 'ALL_TIME', label: 'All Time' },
                         { id: '90_DAYS', label: 'Last 90d' },
@@ -781,11 +781,11 @@ export default function ReportsPage() {
           </div>
         )}
 
-        
+        {/* Report Full Details View Modal */}
         {activeReport && (
-          <div className="modal-backdrop" style={{ zIndex: 30 }}>
+          <div className="modal-backdrop">
             <div
-              className="modal-card"
+              className="modal-card report-viewer-modal"
               style={{
                 maxWidth: '960px',
                 width: '95%',
@@ -797,6 +797,7 @@ export default function ReportsPage() {
             >
               
               <div
+                className="report-modal-header"
                 style={{
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -804,10 +805,12 @@ export default function ReportsPage() {
                   borderBottom: '1px solid #e2e8f0',
                   paddingBottom: '16px',
                   marginBottom: '16px',
+                  gap: '12px',
+                  flexWrap: 'wrap',
                 }}
               >
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <div style={{ flex: '1 1 auto', minWidth: '0' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
                     <span
                       style={{
                         fontSize: '11px',
@@ -824,7 +827,7 @@ export default function ReportsPage() {
                       Scope: <b>{activeReport.dateRange}</b>
                     </span>
                   </div>
-                  <h2 style={{ fontSize: '20px', margin: 0, color: '#0f172a' }}>
+                  <h2 style={{ fontSize: '19px', margin: 0, color: '#0f172a', wordBreak: 'break-word' }}>
                     {activeReport.title}
                   </h2>
                   <p style={{ fontSize: '12px', color: '#64748b', margin: '4px 0 0' }}>
@@ -872,7 +875,8 @@ export default function ReportsPage() {
                     className="icon-button"
                     type="button"
                     onClick={() => setActiveReport(null)}
-                    style={{ marginLeft: '6px' }}
+                    style={{ marginLeft: '4px' }}
+                    aria-label="Close modal"
                   >
                     <X size={20} />
                   </button>
@@ -939,18 +943,18 @@ export default function ReportsPage() {
                 </div>
               )}
 
-              
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                <div className="search-field" style={{ maxWidth: '320px', padding: '6px 10px' }}>
+              {/* Search Inside Table */}
+              <div className="report-viewer-search-row">
+                <div className="search-field" style={{ flex: '1 1 auto', maxWidth: '320px', minWidth: '0', padding: '6px 10px' }}>
                   <Search size={14} />
                   <input
                     value={viewerSearch}
                     onChange={(e) => setViewerSearch(e.target.value)}
                     placeholder="Search inside table..."
-                    style={{ fontSize: '11px' }}
+                    style={{ fontSize: '12px' }}
                   />
                 </div>
-                <span style={{ fontSize: '11px', color: '#94a3b8' }}>
+                <span className="report-viewer-count" style={{ fontSize: '11px', color: '#64748b' }}>
                   Showing {
                     (activeReport.data || []).filter((row) =>
                       Object.values(row).some((v) =>
@@ -1035,8 +1039,9 @@ export default function ReportsPage() {
                 </table>
               </div>
 
-              
+              {/* Modal Actions */}
               <div
+                className="modal-actions"
                 style={{
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -1044,15 +1049,17 @@ export default function ReportsPage() {
                   marginTop: '16px',
                   paddingTop: '12px',
                   borderTop: '1px solid #e2e8f0',
+                  gap: '8px',
+                  width: '100%',
                 }}
               >
                 <button
                   type="button"
                   className="secondary-button"
                   onClick={() => void handleDelete(activeReport._id, activeReport.title)}
-                  style={{ color: '#ef4444', borderColor: '#fecaca', fontSize: '11px' }}
+                  style={{ color: '#ef4444', borderColor: '#fecaca', fontSize: '12px' }}
                 >
-                  <Trash2 size={13} /> Delete this report
+                  <Trash2 size={14} /> Delete this report
                 </button>
                 <button
                   type="button"

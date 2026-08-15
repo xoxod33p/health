@@ -427,13 +427,14 @@
   .modal-backdrop {
     padding: 0;
     align-items: flex-end;
+    z-index: 120 !important;
   }
 
   .modal-card {
     max-width: 100%;
-    border-radius: 16px 16px 0 0;
-    padding: 20px 16px calc(20px + env(safe-area-inset-bottom, 0px));
-    max-height: 88vh;
+    border-radius: 18px 18px 0 0;
+    padding: 20px 16px calc(24px + env(safe-area-inset-bottom, 16px));
+    max-height: calc(100dvh - 24px);
     animation: slideUp 0.25s cubic-bezier(0.2, 0.9, 0.3, 1);
   }
 
@@ -454,15 +455,57 @@
     padding: 12px;
   }
 
+  .report-modal-header {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 12px;
+  }
+
   .report-modal-actions {
     width: 100%;
-    justify-content: flex-start;
-    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
   }
 
   .report-modal-actions button {
     flex: 1 1 calc(50% - 4px);
     justify-content: center;
+  }
+
+  .report-modal-actions .icon-button {
+    flex: 0 0 auto;
+    position: absolute;
+    top: 16px;
+    right: 16px;
+  }
+
+  .report-viewer-search-row {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    margin-bottom: 10px;
+    width: 100%;
+  }
+
+  .report-viewer-search-row .search-field {
+    max-width: 100% !important;
+    width: 100%;
+  }
+
+  .report-viewer-count {
+    font-size: 11px;
+    color: #64748b;
+    text-align: right;
+  }
+
+  .report-category-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .report-scope-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
   }
 
   .login-card {
