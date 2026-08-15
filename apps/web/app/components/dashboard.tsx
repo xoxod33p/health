@@ -258,15 +258,14 @@ export function Dashboard() {
               width: '100%',
             }}
           >
-            <table className="rich-table" style={{ width: '100%', minWidth: '650px', tableLayout: 'auto' }}>
+            <table className="rich-table" style={{ width: '100%', minWidth: '600px', tableLayout: 'auto' }}>
               <thead style={{ position: 'sticky', top: 0, background: '#ffffff', zIndex: 3, boxShadow: '0 1px 0 #edf1f1' }}>
                 <tr>
-                  <th style={{ background: '#ffffff', padding: '12px', width: '15%' }}>Serial Number</th>
-                  <th style={{ background: '#ffffff', padding: '12px', width: '18%' }}>Sensor Type</th>
-                  <th style={{ background: '#ffffff', padding: '12px', width: '20%' }}>Assigned Patient</th>
-                  <th style={{ background: '#ffffff', padding: '12px', width: '18%' }}>Manufacturer & Model</th>
-                  <th style={{ background: '#ffffff', padding: '12px', width: '15%' }}>Expiration Date</th>
-                  <th style={{ background: '#ffffff', padding: '12px', width: '14%' }}>Status</th>
+                  <th style={{ background: '#ffffff', padding: '12px' }}>Serial Number</th>
+                  <th style={{ background: '#ffffff', padding: '12px' }}>Sensor Type</th>
+                  <th style={{ background: '#ffffff', padding: '12px' }}>Assigned Patient</th>
+                  <th style={{ background: '#ffffff', padding: '12px' }}>Expiration Date</th>
+                  <th style={{ background: '#ffffff', padding: '12px' }}>Status</th>
                   <th style={{ background: '#ffffff', textAlign: 'right', padding: '12px' }}>Action</th>
                 </tr>
               </thead>
@@ -351,9 +350,6 @@ export function Dashboard() {
                             Unassigned
                           </span>
                         )}
-                      </td>
-                      <td className="muted-cell" style={{ fontSize: '12px', padding: '16px 12px' }}>
-                        {sensor.manufacturer} · {sensor.model}
                       </td>
                       <td style={{ padding: '16px 12px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
