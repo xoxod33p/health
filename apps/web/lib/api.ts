@@ -15,33 +15,21 @@ let cachedToken: string | null = null;
 let cachedUser: AuthUser | null = null;
 
 export function getApiBaseUrl(): string {
-  let url = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
-
-  if (url.startsWith('/')) {
-    url = url.replace(/\/+$/, '');
-    if (!url.endsWith('/api/v1')) url = `${url}/api/v1`;
-    return url;
+  // If running in browser:
+  if (typeof window !== 'undefined') {
+    // In browser on a custom domain (e.g. test.xoxod33p.tech), always use same-origin /api/v1
+    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      return `${window.location.origin}/api/v1`;
+    }
+    // In local development:
+    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
   }
 
-  if (!url.startsWith('http://') && !url.startsWith('https://')) {
-    url = url.includes('localhost') || url.includes('127.0.0.1') ? `http://${url}` : `https://${url}`;
-  }
-
-  if (
-    typeof window !== 'undefined' &&
-    window.location.protocol === 'https:' &&
-    url.startsWith('http:') &&
-    !url.includes('localhost') &&
-    !url.includes('127.0.0.1')
-  ) {
-    url = url.replace(/^http:/, 'https:');
-  }
-
-  url = url.replace(/\/+$/, '');
+  // Server-Side Rendering (SSR / Node environment)
+  let url = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://127.0.0.1:3001/api/v1';
   if (!url.endsWith('/api/v1')) {
-    url = `${url}/api/v1`;
+    url = `${url.replace(/\/+$/, '')}/api/v1`;
   }
-
   return url;
 }
 

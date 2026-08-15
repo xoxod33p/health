@@ -204,8 +204,8 @@ server {
     gzip_comp_level 6;
     gzip_types text/plain text/css text/xml application/json application/javascript application/rss+xml application/atom+xml image/svg+xml;
 
-    location /api/v1/ {
-        proxy_pass http://127.0.0.1:3001/api/v1/;
+    location /api/ {
+        proxy_pass http://127.0.0.1:3001;
         proxy_http_version 1.1;
 
         proxy_set_header Host \$host;

@@ -90,8 +90,14 @@ docker image prune -f >/dev/null 2>&1 || true
 
 # 7. Reload Nginx if running on host
 if command -v nginx >/dev/null 2>&1 && systemctl is-active --quiet nginx 2>/dev/null; then
-    log_info "Reloading Nginx web server..."
-    nginx -t && systemctl reload nginx
+    log_info "Synchronizing Nginx configuration..."
+    if [ -f "$ROOT_DIR/infra/nginx/caresignal.conf.template" ] && [ -f "$ROOT_DIR/.env" ]; then
+        DOMAIN=$(grep -E '^DOMAIN_NAME=' "$ROOT_DIR/.env" | cut -d '=' -f2 | tr -d '\r"' || true)
+        if [ -n "$DOMAIN" ] && [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
+            sed "s/\${DOMAIN_NAME}/$DOMAIN/g" "$ROOT_DIR/infra/nginx/caresignal.conf.template" | sudo tee /etc/nginx/sites-available/caresignal.conf >/dev/null
+        fi
+    fi
+    sudo nginx -t && sudo systemctl reload nginx
 fi
 
 # 8. Print running container summary
