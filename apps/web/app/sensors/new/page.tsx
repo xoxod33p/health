@@ -1,9 +1,9 @@
 'use client';
 
-import { Check, ChevronDown, RefreshCw } from 'lucide-react';
+import { Check, ChevronDown, RefreshCw, Search, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AppShell } from '../../components/app-shell';
 import { apiFetch } from '../../../lib/api';
 
@@ -31,15 +31,24 @@ export default function NewSensorPage() {
   const [sensorTypes, setSensorTypes] = useState<SensorTypeItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  
+  // Form State
   const [serialNumber, setSerialNumber] = useState('');
   const [sensorTypeId, setSensorTypeId] = useState('');
   const [manufacturer, setManufacturer] = useState('');
   const [model, setModel] = useState('');
   const [expiresAt, setExpiresAt] = useState('');
   const [customerId, setCustomerId] = useState('');
+  const [customerQuery, setCustomerQuery] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  const filteredCustomers = useMemo(() => {
+    const q = customerQuery.trim().toLowerCase();
+    if (!q) return customers;
+    return customers.filter((c) =>
+      `${c.firstName} ${c.lastName} ${c.customerNumber}`.toLowerCase().includes(q)
+    );
+  }, [customers, customerQuery]);
 
   useEffect(() => {
     let mounted = true;
@@ -174,16 +183,59 @@ export default function NewSensorPage() {
                 />
               </label>
 
-              <label>
-                Link to customer (optional)
-                <div className="select-wrap">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <label style={{ margin: 0, fontWeight: 500 }}>
+                    Link to customer (optional)
+                  </label>
+                  {customerQuery && (
+                    <span style={{ fontSize: '11px', color: '#64748b' }}>
+                      {filteredCustomers.length} {filteredCustomers.length === 1 ? 'match' : 'matches'}
+                    </span>
+                  )}
+                </div>
+
+                <div className="search-field" style={{ width: '100%', maxWidth: '100%', position: 'relative' }}>
+                  <Search size={15} />
+                  <input
+                    type="text"
+                    value={customerQuery}
+                    onChange={(e) => setCustomerQuery(e.target.value)}
+                    placeholder="Search customer name or ID..."
+                    style={{ height: '36px', fontSize: '13px', width: '100%', paddingRight: customerQuery ? '28px' : '10px' }}
+                  />
+                  {customerQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setCustomerQuery('')}
+                      style={{
+                        position: 'absolute',
+                        right: '8px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#94a3b8',
+                        cursor: 'pointer',
+                        padding: '4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                      }}
+                      aria-label="Clear customer search"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
+
+                <div className="select-wrap" style={{ marginTop: '2px' }}>
                   <select
                     value={customerId}
                     onChange={(e) => setCustomerId(e.target.value)}
                     disabled={loading}
                   >
                     <option value="">None — keep as unassigned inventory</option>
-                    {customers.map((c) => (
+                    {filteredCustomers.map((c) => (
                       <option key={c._id} value={c._id}>
                         {c.firstName} {c.lastName} ({c.customerNumber})
                       </option>
@@ -191,7 +243,7 @@ export default function NewSensorPage() {
                   </select>
                   <ChevronDown size={15} />
                 </div>
-              </label>
+              </div>
             </div>
 
             {error && (

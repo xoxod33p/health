@@ -45,6 +45,8 @@ type Customer = {
   firstName: string;
   lastName: string;
   customerNumber: string;
+  email?: string;
+  phone?: string;
   status?: string;
 };
 type CustomerResponse = { data: Customer[]; total: number };
@@ -172,8 +174,19 @@ export default function SensorsPage() {
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [assignSensor, setAssignSensor] = useState<Sensor | null>(null);
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
+  const [assignCustomerQuery, setAssignCustomerQuery] = useState('');
   const [assignReason, setAssignReason] = useState('Standard clinical telemetry monitoring');
   const [assignSubmitting, setAssignSubmitting] = useState(false);
+
+  const assignFilteredCustomers = useMemo(() => {
+    const q = assignCustomerQuery.trim().toLowerCase();
+    if (!q) return customers;
+    return customers.filter((c) =>
+      `${c.firstName} ${c.lastName} ${c.customerNumber} ${c.email ?? ''} ${c.phone ?? ''}`
+        .toLowerCase()
+        .includes(q)
+    );
+  }, [customers, assignCustomerQuery]);
 
   
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
@@ -277,6 +290,7 @@ export default function SensorsPage() {
   const handleOpenAssign = (sensor: Sensor) => {
     setAssignSensor(sensor);
     setSelectedCustomerId(sensor.customerId || (customers[0]?._id ?? ''));
+    setAssignCustomerQuery('');
     setAssignReason('Standard clinical telemetry monitoring');
     setAssignModalOpen(true);
   };
@@ -861,25 +875,69 @@ export default function SensorsPage() {
               </div>
               <form onSubmit={handleConfirmAssign}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  <label>
-                    Select Customer <span style={{ color: '#ef4444' }}>*</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <label style={{ margin: 0, fontWeight: 600, fontSize: '13px', color: '#1e293b' }}>
+                        Select Customer <span style={{ color: '#ef4444' }}>*</span>
+                      </label>
+                      {assignCustomerQuery && (
+                        <span style={{ fontSize: '11px', color: '#64748b' }}>
+                          {assignFilteredCustomers.length} {assignFilteredCustomers.length === 1 ? 'match' : 'matches'}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="search-field" style={{ width: '100%', maxWidth: '100%', position: 'relative' }}>
+                      <Search size={15} />
+                      <input
+                        type="text"
+                        value={assignCustomerQuery}
+                        onChange={(e) => setAssignCustomerQuery(e.target.value)}
+                        placeholder="Search customer name, ID, phone, or email..."
+                        style={{ height: '36px', fontSize: '13px', width: '100%', paddingRight: assignCustomerQuery ? '28px' : '10px' }}
+                      />
+                      {assignCustomerQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setAssignCustomerQuery('')}
+                          style={{
+                            position: 'absolute',
+                            right: '8px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#94a3b8',
+                            cursor: 'pointer',
+                            padding: '4px',
+                            display: 'flex',
+                            alignItems: 'center',
+                          }}
+                          aria-label="Clear customer search"
+                        >
+                          <X size={14} />
+                        </button>
+                      )}
+                    </div>
+
                     <select
                       required
                       value={selectedCustomerId}
                       onChange={(e) => setSelectedCustomerId(e.target.value)}
                       className="select-control"
-                      style={{ width: '100%', marginTop: '4px' }}
+                      style={{ width: '100%', marginTop: '2px', height: '38px' }}
                     >
                       <option value="" disabled>
-                        Choose a customer...
+                        {assignFilteredCustomers.length === 0 ? 'No customers found matching search' : 'Choose customer to assign...'}
                       </option>
-                      {customers.map((c) => (
+                      {assignFilteredCustomers.map((c) => (
                         <option key={c._id} value={c._id}>
                           {c.firstName} {c.lastName} ({c.customerNumber})
                         </option>
                       ))}
                     </select>
-                  </label>
+                  </div>
+
                   <label>
                     Assignment Clinical Reason
                     <input
