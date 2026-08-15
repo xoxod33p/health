@@ -525,14 +525,8 @@ export default function UsersPage() {
                             <tr key={userItem._id}>
                               <td>
                                 <div className="entity-cell">
-                                  <div className="entity-avatar-wrap">
-                                    <div className="entity-avatar">
-                                      {initials}
-                                    </div>
-                                    <span
-                                      className={`avatar-status-dot ${userItem.isOnline ? 'online' : 'offline'}`}
-                                      title={userItem.isOnline ? 'Online now' : 'Offline'}
-                                    />
+                                  <div className="entity-avatar">
+                                    {initials}
                                   </div>
                                   <div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
