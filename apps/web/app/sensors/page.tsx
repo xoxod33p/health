@@ -398,21 +398,31 @@ export default function SensorsPage() {
   );
 
   const topbarRight = (
-    <div style={{ display: 'flex', gap: '8px' }}>
+    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
       <button
         type="button"
-        className="secondary-button"
-        onClick={() => {
-          setFormCustomerName('');
-          setFormSerial('');
-          setFormDate(new Date().toISOString().split('T')[0] ?? '');
-          setFormIssue('');
-          setFormNotes('');
-          setModalOpen(true);
+        className={activeTab === 'replacements' ? 'primary-button' : 'secondary-button'}
+        onClick={() => setActiveTab(activeTab === 'inventory' ? 'replacements' : 'inventory')}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          ...(activeTab !== 'replacements' && replacements.length > 0
+            ? { borderColor: '#fde68a', color: '#d97706' }
+            : {}),
         }}
-        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
       >
-        <AlertTriangle size={15} style={{ color: '#d97706' }} /> Log replacement
+        {activeTab === 'inventory' ? (
+          <>
+            <AlertTriangle size={15} style={{ color: '#d97706' }} />
+            <span>Replacement Log ({replacements.length})</span>
+          </>
+        ) : (
+          <>
+            <Boxes size={15} />
+            <span>Sensor Inventory ({sensors.length})</span>
+          </>
+        )}
       </button>
       <Link className="primary-button" href="/sensors/new">
         <Plus size={17} /> Add sensor
@@ -434,44 +444,8 @@ export default function SensorsPage() {
           boxSizing: 'border-box',
         }}
       >
-        {/* Tabs */}
-        <div
-          style={{
-            display: 'flex',
-            gap: '8px',
-            marginBottom: '12px',
-            borderBottom: '1px solid var(--border-color, #e2e8f0)',
-            paddingBottom: '10px',
-            flexShrink: 0,
-          }}
-        >
-          <button
-            type="button"
-            className={activeTab === 'inventory' ? 'primary-button' : 'secondary-button'}
-            onClick={() => setActiveTab('inventory')}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-          >
-            <Boxes size={16} /> Sensor Inventory ({sensors.length})
-          </button>
-          <button
-            type="button"
-            className={activeTab === 'replacements' ? 'primary-button' : 'secondary-button'}
-            onClick={() => setActiveTab('replacements')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              ...(activeTab !== 'replacements' && replacements.length > 0
-                ? { borderColor: '#fde68a', color: '#d97706' }
-                : {}),
-            }}
-          >
-            <AlertTriangle size={16} /> Replacement Log ({replacements.length})
-          </button>
-        </div>
-
         {/* Stats Grid */}
-        <section className="mini-stat-grid" style={{ marginBottom: '12px', flexShrink: 0 }}>
+        <section className="mini-stat-grid" style={{ marginBottom: '14px', flexShrink: 0 }}>
           <div className="mini-stat">
             <div className="mini-stat-top">
               <span>Total sensors</span>
