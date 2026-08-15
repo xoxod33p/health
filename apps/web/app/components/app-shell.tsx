@@ -45,28 +45,14 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
 
   if (authState === 'loading') {
     return (
-      <div className="auth-loading-screen">
-        <div className="auth-loading-card">
-          <div className="auth-loading-brand">
-            <div className="auth-loading-logo">
-              <Activity size={24} strokeWidth={2.5} className="pulse-heartbeat" />
-            </div>
-            <span className="brand-name">care<span>signal</span></span>
+      <div className="auth-loading-screen white-simple">
+        <div className="auth-loading-simple">
+          <div className="brand-mark-simple">
+            <Activity size={24} strokeWidth={2.5} className="pulse-heartbeat" />
           </div>
-
-          <div className="auth-loading-spinner-wrap">
-            <div className="auth-loading-spinner" />
-          </div>
-
-          <div className="auth-loading-text">
-            <h3>Verifying secure session</h3>
-            <p>Connecting to healthcare telemetry gateway...</p>
-          </div>
-
-          <div className="auth-loading-badge">
-            <span className="secure-dot" />
-            <span>256-bit encrypted session</span>
-          </div>
+          <span className="brand-name-simple">care<span>signal</span></span>
+          <div className="simple-spinner" />
+          <p className="simple-loading-text">Loading workspace...</p>
         </div>
       </div>
     );
@@ -74,21 +60,20 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
 
   if (authState === 'error') {
     return (
-      <div className="auth-loading-screen">
-        <div className="auth-loading-card">
-          <div className="auth-loading-logo error-logo">
+      <div className="auth-loading-screen white-simple">
+        <div className="auth-loading-simple">
+          <div className="brand-mark-simple error">
             <Activity size={24} strokeWidth={2.5} />
           </div>
-          <div className="auth-loading-text" style={{ marginTop: '16px' }}>
-            <h3>Session Verification Failed</h3>
-            <p>Your secure session could not be verified. Please sign in again.</p>
-          </div>
+          <h3 style={{ margin: '14px 0 6px', fontSize: '17px', color: '#0f172a', fontWeight: 600 }}>Session Expired</h3>
+          <p style={{ margin: '0 0 16px', fontSize: '14px', color: '#64748b' }}>Please sign in to continue.</p>
           <button
             type="button"
-            className="primary-button auth-retry-btn"
+            className="primary-button"
+            style={{ padding: '8px 18px', fontSize: '13px', borderRadius: '8px' }}
             onClick={() => router.replace('/login')}
           >
-            Return to Sign in
+            Sign in
           </button>
         </div>
       </div>
