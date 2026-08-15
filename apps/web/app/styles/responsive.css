@@ -168,14 +168,14 @@
   }
 
   .page-content {
-    padding-bottom: 76px !important;
+    padding: 20px 16px calc(80px + env(safe-area-inset-bottom, 16px)) !important;
   }
 }
 
 /* Small Mobile Devices */
 @media (max-width: 640px) {
   .page-content {
-    padding: 16px 12px 28px;
+    padding: 16px 12px calc(84px + env(safe-area-inset-bottom, 16px)) !important;
   }
 
   .form-grid {
@@ -292,6 +292,10 @@
 
 /* Extra Small Screens (< 400px) */
 @media (max-width: 400px) {
+  .page-content {
+    padding: 14px 10px calc(84px + env(safe-area-inset-bottom, 16px)) !important;
+  }
+
   .metric-grid,
   .mini-stat-grid,
   .mini-stat-grid-3,
