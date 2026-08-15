@@ -1,0 +1,222 @@
+/* ==============================================================================
+   AUTHENTICATION & SESSION VERIFICATION (LOGIN, AUTH-LOADING)
+   ============================================================================== */
+
+/* Login Page Layout */
+.login-page {
+  align-items: center;
+  background: radial-gradient(circle at 75% 18%, #dff2ed 0, #f5f8f7 32%, #eef3f2 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+  position: relative;
+}
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 440px;
+  position: relative;
+  z-index: 2;
+}
+
+.login-brand {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.login-brand .brand-mark {
+  background: var(--navy);
+  color: #a9e6d3;
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(16, 43, 53, 0.15);
+}
+
+.login-brand .brand-name {
+  color: var(--navy);
+  font: 800 24px/1 'Manrope', sans-serif;
+  letter-spacing: -0.5px;
+}
+
+.login-brand .brand-name span {
+  color: var(--teal);
+}
+
+.login-card {
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid #dce8e5;
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(33, 74, 69, 0.12);
+  padding: 36px 34px 30px;
+  width: 100%;
+}
+
+.login-heading {
+  margin-bottom: 24px;
+}
+
+.login-heading .eyebrow {
+  color: var(--teal);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.login-heading h1 {
+  color: var(--ink);
+  font: 800 28px/1.1 'Manrope', sans-serif;
+  letter-spacing: -0.8px;
+  margin: 0 0 8px;
+}
+
+.login-subtitle {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.login-form label {
+  color: #475569;
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  font-weight: 600;
+  gap: 7px;
+}
+
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-with-icon .input-icon {
+  position: absolute;
+  left: 12px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.input-with-icon input {
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  color: var(--ink);
+  font-size: 13px;
+  outline: 0;
+  padding: 11px 12px 11px 38px;
+  width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input-with-icon input:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(27, 139, 131, 0.15);
+}
+
+.login-submit {
+  width: 100%;
+  justify-content: center;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 7px;
+  margin-top: 4px;
+}
+
+.login-footer {
+  color: #8da3a1;
+  font: 500 11px 'DM Mono', monospace;
+  margin: 22px 0 0;
+  text-align: center;
+}
+
+/* Minimal White Auth Loading Screen */
+.auth-loading-screen.white-simple {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  z-index: 9999;
+  padding: 24px;
+}
+
+.auth-loading-simple {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.brand-mark-simple {
+  width: 48px;
+  height: 48px;
+  background: #a9e6d3;
+  color: #102b35;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.brand-mark-simple.error {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.brand-name-simple {
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 21px;
+  font-weight: 700;
+  color: #102b35;
+  letter-spacing: -0.02em;
+  margin-bottom: 24px;
+}
+
+.brand-name-simple span {
+  color: #1b8b83;
+}
+
+.simple-spinner {
+  width: 26px;
+  height: 26px;
+  border: 2.5px solid #e2e8f0;
+  border-top-color: #1b8b83;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 12px;
+}
+
+.simple-loading-text {
+  margin: 0;
+  font-size: 13.5px;
+  color: #64748b;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
