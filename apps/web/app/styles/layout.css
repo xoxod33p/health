@@ -251,6 +251,15 @@
   background: #f1f5f5;
 }
 
+/* Mobile Navigation - Hidden on Desktop screens */
+.mobile-menu-btn {
+  display: none;
+}
+
+.mobile-bottom-nav {
+  display: none;
+}
+
 /* Page Content Frame */
 .page-content {
   margin: 0 auto;
