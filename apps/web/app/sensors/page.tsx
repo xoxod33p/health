@@ -432,20 +432,9 @@ export default function SensorsPage() {
 
   return (
     <AppShell headerCenter={topbarCenter} headerActions={topbarRight}>
-      <div
-        className="page-content"
-        style={{
-          height: 'calc(100vh - 60px)',
-          maxHeight: 'calc(100vh - 60px)',
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-          padding: '18px 24px',
-          boxSizing: 'border-box',
-        }}
-      >
-        
-        <section className="mini-stat-grid" style={{ marginBottom: '14px', flexShrink: 0 }}>
+      <div className="page-content">
+        {/* Metric Summary KPI Cards */}
+        <section className="mini-stat-grid" style={{ marginBottom: '20px' }}>
           <div className="mini-stat">
             <div className="mini-stat-top">
               <span>Total sensors</span>
@@ -497,18 +486,8 @@ export default function SensorsPage() {
               </div>
             )}
             {!loading && !error && (
-              <section
-                className="panel"
-                style={{
-                  flex: 1,
-                  minHeight: 0,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  padding: '16px 20px',
-                  overflow: 'hidden',
-                }}
-              >
-                <div className="panel-heading" style={{ marginBottom: '12px', flexShrink: 0 }}>
+              <section className="panel" style={{ padding: '20px 22px', marginBottom: '24px' }}>
+                <div className="panel-heading" style={{ marginBottom: '16px' }}>
                   <div>
                     <p className="eyebrow">Inventory telemetry register</p>
                     <h2>Hardware Sensors & Deployments</h2>
@@ -523,15 +502,13 @@ export default function SensorsPage() {
                   <div
                     className="table-wrap custom-scrollbar"
                     style={{
-                      flex: 1,
-                      minHeight: 0,
-                      overflowY: 'auto',
                       overflowX: 'auto',
                       borderRadius: '6px',
                       border: '1px solid #edf1f1',
+                      width: '100%',
                     }}
                   >
-                    <table className="rich-table">
+                    <table className="rich-table" style={{ width: '100%', minWidth: '700px', tableLayout: 'auto' }}>
                       <thead style={{ position: 'sticky', top: 0, background: '#ffffff', zIndex: 3, boxShadow: '0 1px 0 #edf1f1' }}>
                         <tr>
                           <th style={{ background: '#ffffff' }}>Serial Number</th>
@@ -737,18 +714,8 @@ export default function SensorsPage() {
               </div>
             )}
             {!replacementsLoading && !replacementsError && (
-              <section
-                className="panel"
-                style={{
-                  flex: 1,
-                  minHeight: 0,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  padding: '16px 20px',
-                  overflow: 'hidden',
-                }}
-              >
-                <div className="panel-heading" style={{ marginBottom: '12px', flexShrink: 0 }}>
+              <section className="panel" style={{ padding: '20px 22px', marginBottom: '24px' }}>
+                <div className="panel-heading" style={{ marginBottom: '16px' }}>
                   <div>
                     <p className="eyebrow">Issue & Maintenance Log</p>
                     <h2>Sensor Replacement Records</h2>
@@ -784,15 +751,13 @@ export default function SensorsPage() {
                   <div
                     className="table-wrap custom-scrollbar"
                     style={{
-                      flex: 1,
-                      minHeight: 0,
-                      overflowY: 'auto',
                       overflowX: 'auto',
                       borderRadius: '6px',
                       border: '1px solid #edf1f1',
+                      width: '100%',
                     }}
                   >
-                    <table className="rich-table">
+                    <table className="rich-table" style={{ width: '100%', minWidth: '700px', tableLayout: 'auto' }}>
                       <thead style={{ position: 'sticky', top: 0, background: '#ffffff', zIndex: 3, boxShadow: '0 1px 0 #edf1f1' }}>
                         <tr>
                           <th style={{ background: '#ffffff' }}>Customer Name</th>
