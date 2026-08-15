@@ -139,13 +139,12 @@ export default function UsersPage() {
           (u) => u.email.toLowerCase() === currentUser.email.toLowerCase()
         );
         if (!exists) {
-          const emailName = currentUser.email.split('@')[0] ?? 'admin';
-          const userRole = (currentUser.role as UserRole) || 'SYSTEM_ADMIN';
           const isRoot = currentUser.email.toLowerCase() === 'admin@localhost.test';
+          const userRole = (currentUser.role as UserRole) || 'SYSTEM_ADMIN';
           const authUser: UserMember = {
             _id: currentUser.id,
-            firstName: emailName,
-            lastName: 'Admin',
+            firstName: isRoot ? 'Admin' : (currentUser.email.split('@')[0] ?? 'User'),
+            lastName: isRoot ? '' : 'Account',
             email: currentUser.email,
             authUserId: currentUser.id,
             role: userRole,
@@ -159,14 +158,22 @@ export default function UsersPage() {
         }
       }
 
-      const enrichedUsers = combinedList.map((u) => ({
-        ...u,
-        isProtected: Boolean(
-          u.isProtected ||
-          (u.email.toLowerCase() === 'admin@localhost.test' && u.role === 'SYSTEM_ADMIN')
-        ),
-        permissions: u.permissions && u.permissions.length > 0 ? u.permissions : DEFAULT_ROLE_PERMISSIONS[u.role] ?? DEFAULT_ROLE_PERMISSIONS.INHOUSE_STAFF,
-      }));
+      const enrichedUsers = combinedList.map((u) => {
+        const isRootAdmin = u.email.toLowerCase() === 'admin@localhost.test' && u.role === 'SYSTEM_ADMIN';
+        const firstName = isRootAdmin || (u.firstName?.toLowerCase() === 'admin' && u.lastName?.toLowerCase() === 'admin')
+          ? 'Admin'
+          : u.firstName;
+        const lastName = isRootAdmin || (u.firstName?.toLowerCase() === 'admin' && u.lastName?.toLowerCase() === 'admin')
+          ? ''
+          : u.lastName;
+        return {
+          ...u,
+          firstName,
+          lastName,
+          isProtected: Boolean(u.isProtected || isRootAdmin),
+          permissions: u.permissions && u.permissions.length > 0 ? u.permissions : DEFAULT_ROLE_PERMISSIONS[u.role] ?? DEFAULT_ROLE_PERMISSIONS.INHOUSE_STAFF,
+        };
+      });
 
       setUsers(enrichedUsers);
     } catch (caught) {
@@ -480,18 +487,22 @@ export default function UsersPage() {
                         {filtered.map((userItem) => {
                           const activePermCount = userItem.permissions?.length ?? 0;
                           const roleMeta = ROLE_LABELS[userItem.role] || { label: userItem.role, bg: '#f1f5f9', textColor: '#475569' };
+                          const displayName = [userItem.firstName, userItem.lastName].filter(Boolean).join(' ') || 'Admin';
+                          const initials = (userItem.lastName && userItem.lastName.trim())
+                            ? `${userItem.firstName.slice(0, 1)}${userItem.lastName.slice(0, 1)}`.toUpperCase()
+                            : userItem.firstName.slice(0, 1).toUpperCase();
+
                           return (
                             <tr key={userItem._id}>
                               <td>
                                 <div className="entity-cell">
                                   <div className="entity-avatar">
-                                    {userItem.firstName.slice(0, 1).toUpperCase()}
-                                    {userItem.lastName.slice(0, 1).toUpperCase()}
+                                    {initials}
                                   </div>
                                   <div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                       <strong>
-                                        {userItem.firstName} {userItem.lastName}
+                                        {displayName}
                                       </strong>
                                       {userItem.isProtected && (
                                         <span
