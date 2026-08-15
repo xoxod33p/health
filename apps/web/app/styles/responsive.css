@@ -45,9 +45,10 @@
   .topbar {
     height: auto;
     min-height: 56px;
-    padding: 10px 16px;
+    padding: 10px 16px 12px;
     flex-wrap: wrap;
     gap: 8px;
+    overflow: visible;
   }
 
   .topbar-left {
@@ -66,23 +67,53 @@
     flex: 1 0 100%;
     order: 3;
     width: 100%;
-    padding: 4px 0 2px;
+    padding: 6px 0 2px;
+    min-width: 0;
   }
 
   .topbar-center-wrap {
     max-width: 100%;
+    display: flex;
     flex-wrap: wrap;
+    align-items: stretch;
     gap: 8px;
+    width: 100%;
+    min-width: 0;
   }
 
   .topbar-center-wrap .search-field {
     max-width: 100%;
     flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
   }
 
-  .topbar-center-wrap .select-control {
+  .topbar-center-wrap .select-control,
+  .topbar-center-wrap .filter-button {
     flex: 1 1 calc(50% - 4px);
-    font-size: 11px;
+    font-size: 12px;
+    height: 36px;
+    padding: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-sizing: border-box;
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  .topbar-center-wrap .filter-button {
+    background: #ffffff;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--ink-light);
+    font-weight: 500;
+  }
+
+  .topbar-center-wrap .select-control:only-of-type,
+  .topbar-center-wrap .filter-button:only-of-type {
+    flex: 1 1 100%;
   }
 
   .topbar-center-wrap .result-count {
