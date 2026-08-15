@@ -422,15 +422,27 @@ export default function SensorsPage() {
 
   return (
     <AppShell headerCenter={topbarCenter} headerActions={topbarRight}>
-      <div className="page-content">
+      <div
+        className="page-content"
+        style={{
+          height: 'calc(100vh - 60px)',
+          maxHeight: 'calc(100vh - 60px)',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '18px 24px',
+          boxSizing: 'border-box',
+        }}
+      >
         {/* Tabs */}
         <div
           style={{
             display: 'flex',
             gap: '8px',
-            marginBottom: '20px',
+            marginBottom: '12px',
             borderBottom: '1px solid var(--border-color, #e2e8f0)',
-            paddingBottom: '12px',
+            paddingBottom: '10px',
+            flexShrink: 0,
           }}
         >
           <button
@@ -459,7 +471,7 @@ export default function SensorsPage() {
         </div>
 
         {/* Stats Grid */}
-        <section className="mini-stat-grid">
+        <section className="mini-stat-grid" style={{ marginBottom: '12px', flexShrink: 0 }}>
           <div className="mini-stat">
             <div className="mini-stat-top">
               <span>Total sensors</span>
@@ -511,8 +523,18 @@ export default function SensorsPage() {
               </div>
             )}
             {!loading && !error && (
-              <section className="panel">
-                <div className="panel-heading">
+              <section
+                className="panel"
+                style={{
+                  flex: 1,
+                  minHeight: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  padding: '16px 20px',
+                  overflow: 'hidden',
+                }}
+              >
+                <div className="panel-heading" style={{ marginBottom: '12px', flexShrink: 0 }}>
                   <div>
                     <p className="eyebrow">Inventory telemetry register</p>
                     <h2>Hardware Sensors & Deployments</h2>
@@ -527,8 +549,8 @@ export default function SensorsPage() {
                   <div
                     className="table-wrap custom-scrollbar"
                     style={{
-                      maxHeight: 'calc(100vh - 360px)',
-                      minHeight: '300px',
+                      flex: 1,
+                      minHeight: 0,
                       overflowY: 'auto',
                       overflowX: 'auto',
                       borderRadius: '6px',
@@ -741,8 +763,18 @@ export default function SensorsPage() {
               </div>
             )}
             {!replacementsLoading && !replacementsError && (
-              <section className="panel">
-                <div className="panel-heading">
+              <section
+                className="panel"
+                style={{
+                  flex: 1,
+                  minHeight: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  padding: '16px 20px',
+                  overflow: 'hidden',
+                }}
+              >
+                <div className="panel-heading" style={{ marginBottom: '12px', flexShrink: 0 }}>
                   <div>
                     <p className="eyebrow">Issue & Maintenance Log</p>
                     <h2>Sensor Replacement Records</h2>
@@ -778,8 +810,8 @@ export default function SensorsPage() {
                   <div
                     className="table-wrap custom-scrollbar"
                     style={{
-                      maxHeight: 'calc(100vh - 360px)',
-                      minHeight: '300px',
+                      flex: 1,
+                      minHeight: 0,
                       overflowY: 'auto',
                       overflowX: 'auto',
                       borderRadius: '6px',
