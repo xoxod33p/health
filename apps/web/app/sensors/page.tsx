@@ -398,7 +398,7 @@ export default function SensorsPage() {
   );
 
   const topbarRight = (
-    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+    <div className="header-actions-group" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
       <button
         type="button"
         className={activeTab === 'replacements' ? 'primary-button' : 'secondary-button'}
@@ -415,17 +415,17 @@ export default function SensorsPage() {
         {activeTab === 'inventory' ? (
           <>
             <AlertTriangle size={15} style={{ color: '#d97706' }} />
-            <span>Replacement Log ({replacements.length})</span>
+            <span>Replacements ({replacements.length})</span>
           </>
         ) : (
           <>
             <Boxes size={15} />
-            <span>Sensor Inventory ({sensors.length})</span>
+            <span>Inventory ({sensors.length})</span>
           </>
         )}
       </button>
       <Link className="primary-button" href="/sensors/new">
-        <Plus size={17} /> Add sensor
+        <Plus size={17} /> <span>Add sensor</span>
       </Link>
     </div>
   );

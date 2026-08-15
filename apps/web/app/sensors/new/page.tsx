@@ -101,28 +101,22 @@ export default function NewSensorPage() {
 
   return (
     <AppShell title="Add a sensor">
-      <div className="page-content" style={{ paddingTop: '16px' }}>
-        <section className="panel" style={{ maxWidth: '100%' }}>
-          <div className="panel-heading">
+      <div className="page-content">
+        <section className="panel" style={{ maxWidth: '680px', margin: '0 auto', padding: '20px 22px' }}>
+          <div className="panel-heading" style={{ marginBottom: '16px' }}>
             <div>
-              <p className="eyebrow">New record</p>
-              <h2>Add sensor</h2>
+              <p className="eyebrow">Hardware telemetry register</p>
+              <h2>Add New Sensor</h2>
             </div>
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '16px',
-                padding: '0 0 20px',
-              }}
-            >
+            <div className="form-grid">
               <label>
                 Serial number <span style={{ color: '#ef4444' }}>*</span>
                 <input
                   required
+                  placeholder="e.g. CGM-44105 or ECG-88902"
                   value={serialNumber}
                   onChange={(e) => setSerialNumber(e.target.value)}
                 />
@@ -155,6 +149,7 @@ export default function NewSensorPage() {
               <label>
                 Manufacturer
                 <input
+                  placeholder="e.g. Abbott, Dexcom, Philips"
                   value={manufacturer}
                   onChange={(e) => setManufacturer(e.target.value)}
                 />
@@ -163,6 +158,7 @@ export default function NewSensorPage() {
               <label>
                 Model
                 <input
+                  placeholder="e.g. FreeStyle Libre 3"
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
                 />
@@ -199,11 +195,11 @@ export default function NewSensorPage() {
             </div>
 
             {error && (
-              <div className="form-error" style={{ marginBottom: '16px' }}>{error}</div>
+              <div className="form-error" style={{ marginTop: '16px', marginBottom: '8px' }}>{error}</div>
             )}
 
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', borderTop: '1px solid #e2e8f0', paddingTop: '20px' }}>
-              <Link className="ghost-button" href="/sensors">Cancel</Link>
+            <div className="form-actions">
+              <Link className="secondary-button" href="/sensors">Cancel</Link>
               <button className="primary-button" type="submit" disabled={saving}>
                 {saving ? <RefreshCw size={16} className="spin" /> : <><Check size={16} /> Save sensor</>}
               </button>

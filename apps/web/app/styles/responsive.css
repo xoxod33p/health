@@ -180,6 +180,22 @@
 
   .form-grid {
     grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .form-actions .primary-button,
+  .form-actions .secondary-button,
+  .form-actions .ghost-button,
+  .form-actions button,
+  .form-actions a {
+    width: 100%;
+    justify-content: center;
   }
 
   .metric-grid,
