@@ -1,6 +1,6 @@
 'use client';
 
-import { Activity, Boxes, ClipboardList, FileBarChart, LayoutDashboard, LogOut, ShieldCheck, Tag, Users, X } from 'lucide-react';
+import { Activity, Boxes, ClipboardList, FileBarChart, LayoutDashboard, LogOut, MoreHorizontal, ShieldCheck, Tag, Users, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -22,9 +22,10 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [moreSheetOpen, setMoreSheetOpen] = useState(false);
   const cachedSession = getCachedSession();
   const [authState, setAuthState] = useState<'loading' | 'ready' | 'error'>(cachedSession ? 'ready' : 'loading');
-  const activeLabel = navigation.find((item) => item.href === pathname)?.label ?? (pathname.startsWith('/users') ? 'User management' : 'Workspace');
+  const activeLabel = navigation.find((item) => item.href === pathname)?.label ?? (pathname.startsWith('/users') ? 'User management' : pathname.startsWith('/sensor-types') ? 'Sensor Types' : 'Workspace');
 
   useEffect(() => {
     let mounted = true;
@@ -168,28 +169,100 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
         </header>
         {children}
 
+        {/* Mobile "More" Navigation Bottom Sheet */}
+        {moreSheetOpen && (
+          <div className="mobile-more-backdrop" onClick={() => setMoreSheetOpen(false)}>
+            <div className="mobile-more-sheet" onClick={(e) => e.stopPropagation()}>
+              <div className="mobile-more-header">
+                <span className="mobile-more-title">More Navigation</span>
+                <button
+                  type="button"
+                  className="icon-button"
+                  onClick={() => setMoreSheetOpen(false)}
+                  aria-label="Close menu"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="mobile-more-links">
+                <Link
+                  href="/sensor-types"
+                  className={`mobile-more-item ${pathname.startsWith('/sensor-types') ? 'active' : ''}`}
+                  onClick={() => setMoreSheetOpen(false)}
+                >
+                  <div className="mobile-more-icon"><Tag size={18} /></div>
+                  <div className="mobile-more-text">
+                    <strong>Sensor Types</strong>
+                    <small>Device specifications & hardware catalog</small>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/audit"
+                  className={`mobile-more-item ${pathname.startsWith('/audit') ? 'active' : ''}`}
+                  onClick={() => setMoreSheetOpen(false)}
+                >
+                  <div className="mobile-more-icon"><ClipboardList size={18} /></div>
+                  <div className="mobile-more-text">
+                    <strong>Audit Log</strong>
+                    <small>Compliance & system activity trail</small>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/users"
+                  className={`mobile-more-item ${pathname.startsWith('/users') ? 'active' : ''}`}
+                  onClick={() => setMoreSheetOpen(false)}
+                >
+                  <div className="mobile-more-icon"><ShieldCheck size={18} /></div>
+                  <div className="mobile-more-text">
+                    <strong>User Management</strong>
+                    <small>Team accounts & role matrix</small>
+                  </div>
+                </Link>
+              </div>
+
+              <div className="mobile-more-footer">
+                <button
+                  type="button"
+                  className="mobile-signout-btn"
+                  onClick={handleSignOut}
+                >
+                  <LogOut size={16} /> Sign out
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Mobile Bottom Navigation Bar */}
         <nav className="mobile-bottom-nav" aria-label="Mobile navigation">
-          <Link href="/" className={`mobile-nav-item ${pathname === '/' ? 'active' : ''}`}>
+          <Link href="/" className={`mobile-nav-item ${pathname === '/' ? 'active' : ''}`} onClick={() => setMoreSheetOpen(false)}>
             <LayoutDashboard size={19} strokeWidth={pathname === '/' ? 2.3 : 1.8} />
             <span>Overview</span>
           </Link>
-          <Link href="/customers" className={`mobile-nav-item ${pathname.startsWith('/customers') ? 'active' : ''}`}>
+          <Link href="/customers" className={`mobile-nav-item ${pathname.startsWith('/customers') ? 'active' : ''}`} onClick={() => setMoreSheetOpen(false)}>
             <Users size={19} strokeWidth={pathname.startsWith('/customers') ? 2.3 : 1.8} />
             <span>Customers</span>
           </Link>
-          <Link href="/sensors" className={`mobile-nav-item ${pathname.startsWith('/sensors') ? 'active' : ''}`}>
+          <Link href="/sensors" className={`mobile-nav-item ${pathname.startsWith('/sensors') ? 'active' : ''}`} onClick={() => setMoreSheetOpen(false)}>
             <Boxes size={19} strokeWidth={pathname.startsWith('/sensors') ? 2.3 : 1.8} />
             <span>Sensors</span>
           </Link>
-          <Link href="/reports" className={`mobile-nav-item ${pathname.startsWith('/reports') ? 'active' : ''}`}>
+          <Link href="/reports" className={`mobile-nav-item ${pathname.startsWith('/reports') ? 'active' : ''}`} onClick={() => setMoreSheetOpen(false)}>
             <FileBarChart size={19} strokeWidth={pathname.startsWith('/reports') ? 2.3 : 1.8} />
             <span>Reports</span>
           </Link>
-          <Link href="/users" className={`mobile-nav-item ${pathname.startsWith('/users') ? 'active' : ''}`}>
-            <ShieldCheck size={19} strokeWidth={pathname.startsWith('/users') ? 2.3 : 1.8} />
-            <span>Users</span>
-          </Link>
+          <button
+            type="button"
+            className={`mobile-nav-item ${moreSheetOpen || pathname.startsWith('/sensor-types') || pathname.startsWith('/audit') || pathname.startsWith('/users') ? 'active' : ''}`}
+            onClick={() => setMoreSheetOpen(!moreSheetOpen)}
+            aria-label="More navigation options"
+          >
+            <MoreHorizontal size={19} strokeWidth={moreSheetOpen || pathname.startsWith('/sensor-types') || pathname.startsWith('/audit') || pathname.startsWith('/users') ? 2.3 : 1.8} />
+            <span>More</span>
+          </button>
         </nav>
       </main>
     </div>

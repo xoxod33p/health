@@ -252,7 +252,8 @@
 }
 
 /* Mobile Navigation - Hidden on Desktop screens */
-.mobile-bottom-nav {
+.mobile-bottom-nav,
+.mobile-more-backdrop {
   display: none;
 }
 
