@@ -147,7 +147,7 @@ export function Dashboard() {
       label: 'Active customers',
       value: summary.activeCustomers,
       delta: `${summary.totalCustomers} total`,
-      note: 'From patient directory',
+      note: 'From customer directory',
       tone: 'teal',
     },
     {
@@ -263,7 +263,7 @@ export function Dashboard() {
                 <tr>
                   <th style={{ background: '#ffffff', padding: '12px' }}>Serial Number</th>
                   <th style={{ background: '#ffffff', padding: '12px' }}>Sensor Type</th>
-                  <th style={{ background: '#ffffff', padding: '12px' }}>Assigned Patient</th>
+                  <th style={{ background: '#ffffff', padding: '12px' }}>Assigned Customer</th>
                   <th style={{ background: '#ffffff', padding: '12px' }}>Expiration Date</th>
                   <th style={{ background: '#ffffff', padding: '12px' }}>Status</th>
                   <th style={{ background: '#ffffff', textAlign: 'right', padding: '12px' }}>Action</th>

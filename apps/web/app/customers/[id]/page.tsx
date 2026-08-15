@@ -326,7 +326,7 @@ export default function CustomerDetailPage() {
               padding: '7px 12px',
             }}
           >
-            <ArrowLeft size={15} /> Back to patients directory
+            <ArrowLeft size={15} /> Back to customer directory
           </Link>
           {customer && (
             <div style={{ display: 'flex', gap: '8px' }}>
@@ -364,7 +364,7 @@ export default function CustomerDetailPage() {
 
         {loading && (
           <div className="data-loading" style={{ margin: '40px 0' }}>
-            <RefreshCw size={18} className="spin" /> Loading patient medical profile...
+            <RefreshCw size={18} className="spin" /> Loading customer profile...
           </div>
         )}
 
@@ -372,7 +372,7 @@ export default function CustomerDetailPage() {
           <div className="data-error" style={{ margin: '30px 0' }}>
             <AlertTriangle size={20} />
             <div>
-              <strong>Patient record error</strong>
+              <strong>Customer record error</strong>
               <span>{error}</span>
             </div>
             <button className="secondary-button" onClick={() => void loadData()}>
@@ -541,7 +541,7 @@ export default function CustomerDetailPage() {
               <section className="panel" style={{ padding: '22px' }}>
                 <div className="panel-heading" style={{ marginBottom: '16px' }}>
                   <div>
-                    <p className="eyebrow">Patient Record</p>
+                    <p className="eyebrow">Customer Record</p>
                     <h2 style={{ fontSize: '16px' }}>Demographics & Contact</h2>
                   </div>
                   <button
@@ -677,7 +677,7 @@ export default function CustomerDetailPage() {
                         No sensors assigned yet
                       </h3>
                       <p style={{ fontSize: '12px', color: '#64748b', margin: '0 0 12px 0' }}>
-                        Connect an active medical telemetry device to monitor this patient.
+                        Connect an active telemetry device to monitor this customer.
                       </p>
                       <button
                         type="button"
@@ -872,7 +872,7 @@ export default function CustomerDetailPage() {
             <div className="modal-card" style={{ maxWidth: '480px' }}>
               <div className="modal-heading">
                 <div>
-                  <h2 style={{ fontSize: '18px' }}>Edit Patient Profile</h2>
+                  <h2 style={{ fontSize: '18px' }}>Edit Customer Profile</h2>
                   <p style={{ fontSize: '12px', color: '#64748b' }}>
                     Update contact information and active status.
                   </p>
@@ -925,7 +925,7 @@ export default function CustomerDetailPage() {
                     />
                   </label>
                   <label>
-                    Patient Status
+                    Customer Status
                     <select
                       className="select-control"
                       value={editStatus}
@@ -960,9 +960,9 @@ export default function CustomerDetailPage() {
             <div className="modal-card" style={{ maxWidth: '480px' }}>
               <div className="modal-heading">
                 <div>
-                  <h2 style={{ fontSize: '18px' }}>Assign Sensor to Patient</h2>
+                  <h2 style={{ fontSize: '18px' }}>Assign Sensor to Customer</h2>
                   <p style={{ fontSize: '12px', color: '#64748b' }}>
-                    Patient: <strong>{customer.firstName} {customer.lastName}</strong> ({customer.customerNumber})
+                    Customer: <strong>{customer.firstName} {customer.lastName}</strong> ({customer.customerNumber})
                   </p>
                 </div>
                 <button className="icon-button" type="button" onClick={() => setAssignOpen(false)}>

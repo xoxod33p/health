@@ -67,7 +67,7 @@ export default function CustomersPage() {
         <input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search by patient name, ID, phone, or email"
+          placeholder="Search by customer name, ID, phone, or email"
         />
       </div>
       <button className="filter-button">

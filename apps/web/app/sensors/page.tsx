@@ -365,7 +365,7 @@ export default function SensorsPage() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search serial, type, patient, manufacturer..."
+              placeholder="Search serial, type, customer, manufacturer..."
             />
           </div>
           <select
@@ -449,7 +449,7 @@ export default function SensorsPage() {
               <Activity size={18} />
             </div>
             <strong>{stats.active}</strong>
-            <small>Assigned to patients</small>
+            <small>Assigned to customers</small>
           </div>
           <div className="mini-stat mini-stat-amber">
             <div className="mini-stat-top">
@@ -513,7 +513,7 @@ export default function SensorsPage() {
                         <tr>
                           <th style={{ background: '#ffffff' }}>Serial Number</th>
                           <th style={{ background: '#ffffff' }}>Sensor Type & Model</th>
-                          <th style={{ background: '#ffffff' }}>Assigned Patient</th>
+                          <th style={{ background: '#ffffff' }}>Assigned Customer</th>
                           <th style={{ background: '#ffffff' }}>Expiration Date</th>
                           <th style={{ background: '#ffffff' }}>Status</th>
                           <th style={{ textAlign: 'right', background: '#ffffff' }}>Actions</th>
@@ -844,7 +844,7 @@ export default function SensorsPage() {
               <div className="modal-heading">
                 <div>
                   <h2 style={{ fontSize: '18px' }}>
-                    {assignSensor.customerId ? 'Reassign Sensor' : 'Assign Sensor to Patient'}
+                    {assignSensor.customerId ? 'Reassign Sensor' : 'Assign Sensor to Customer'}
                   </h2>
                   <p style={{ fontSize: '12px', color: '#64748b' }}>
                     Serial: <strong style={{ fontFamily: 'monospace' }}>{assignSensor.serialNumber}</strong> (
@@ -862,7 +862,7 @@ export default function SensorsPage() {
               <form onSubmit={handleConfirmAssign}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   <label>
-                    Select Patient <span style={{ color: '#ef4444' }}>*</span>
+                    Select Customer <span style={{ color: '#ef4444' }}>*</span>
                     <select
                       required
                       value={selectedCustomerId}
@@ -871,7 +871,7 @@ export default function SensorsPage() {
                       style={{ width: '100%', marginTop: '4px' }}
                     >
                       <option value="" disabled>
-                        Choose a patient...
+                        Choose a customer...
                       </option>
                       {customers.map((c) => (
                         <option key={c._id} value={c._id}>
@@ -934,7 +934,7 @@ export default function SensorsPage() {
               <form onSubmit={handleLogReplacement}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   <label>
-                    Customer / Patient Name <span style={{ color: '#ef4444' }}>*</span>
+                    Customer Name <span style={{ color: '#ef4444' }}>*</span>
                     <input
                       required
                       value={formCustomerName}

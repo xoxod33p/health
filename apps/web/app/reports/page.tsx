@@ -93,7 +93,7 @@ const REPORT_TYPE_CONFIG: Record<
   },
   CUSTOMER_COVERAGE: {
     label: 'Customer Device Coverage',
-    description: 'Patient/customer device distribution, unassigned profiles, and coverage rate.',
+    description: 'Customer device distribution, unassigned profiles, and coverage rate.',
     icon: Activity,
     tone: 'blue',
     color: '#2563eb',

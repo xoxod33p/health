@@ -176,7 +176,7 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
           </Link>
           <Link href="/customers" className={`mobile-nav-item ${pathname.startsWith('/customers') ? 'active' : ''}`}>
             <Users size={19} strokeWidth={pathname.startsWith('/customers') ? 2.3 : 1.8} />
-            <span>Patients</span>
+            <span>Customers</span>
           </Link>
           <Link href="/sensors" className={`mobile-nav-item ${pathname.startsWith('/sensors') ? 'active' : ''}`}>
             <Boxes size={19} strokeWidth={pathname.startsWith('/sensors') ? 2.3 : 1.8} />
