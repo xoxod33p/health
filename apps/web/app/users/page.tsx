@@ -111,8 +111,10 @@ export default function UsersPage() {
   const [newFirstName, setNewFirstName] = useState('');
   const [newLastName, setNewLastName] = useState('');
   const [newEmail, setNewEmail] = useState('');
-  const [newPassword, setNewPassword] = useState('ChangeMe123!');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [newRole, setNewRole] = useState<UserRole>('INHOUSE_STAFF');
+  const [addFormError, setAddFormError] = useState('');
 
   
   const [editRole, setEditRole] = useState<UserRole>('INHOUSE_STAFF');
@@ -230,7 +232,27 @@ export default function UsersPage() {
 
   const handleCreateUser = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!newFirstName || !newLastName || !newEmail) return;
+    setAddFormError('');
+
+    if (!newFirstName.trim() || !newLastName.trim() || !newEmail.trim()) {
+      setAddFormError('Please fill in all required fields.');
+      return;
+    }
+
+    if (!newPassword) {
+      setAddFormError('Password is required.');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setAddFormError('Password must be at least 6 characters.');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setAddFormError('Passwords do not match. Please ensure Password and Confirm Password are identical.');
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -241,7 +263,7 @@ export default function UsersPage() {
         authUserId: `user_${Date.now()}`,
         role: newRole,
         status: 'ACTIVE',
-        password: newPassword.trim() || 'ChangeMe123!',
+        password: newPassword.trim(),
         permissions: roleMatrixDefaults[newRole] ?? DEFAULT_ROLE_PERMISSIONS[newRole],
         title: ROLE_LABELS[newRole].label,
       };
@@ -253,10 +275,12 @@ export default function UsersPage() {
       setNewFirstName('');
       setNewLastName('');
       setNewEmail('');
-      setNewPassword('ChangeMe123!');
+      setNewPassword('');
+      setConfirmPassword('');
+      setAddFormError('');
       await load();
     } catch (caught) {
-      alert(caught instanceof Error ? caught.message : 'Failed to create user account');
+      setAddFormError(caught instanceof Error ? caught.message : 'Failed to create user account');
     } finally {
       setSubmitting(false);
     }
@@ -746,13 +770,23 @@ export default function UsersPage() {
         
         {addModalOpen && (
           <div className="modal-backdrop">
-            <div className="modal-card">
+            <div className="modal-card" style={{ maxWidth: '480px' }}>
               <div className="modal-heading">
-                <h2>Add Team Member</h2>
+                <div>
+                  <h2 style={{ fontSize: '18px' }}>Add New User Account</h2>
+                  <p style={{ fontSize: '12px', color: '#64748b' }}>
+                    Create a team member account and configure login credentials.
+                  </p>
+                </div>
                 <button
                   className="icon-button"
                   type="button"
-                  onClick={() => setAddModalOpen(false)}
+                  onClick={() => {
+                    setAddModalOpen(false);
+                    setAddFormError('');
+                    setNewPassword('');
+                    setConfirmPassword('');
+                  }}
                 >
                   <X size={18} />
                 </button>
@@ -761,7 +795,7 @@ export default function UsersPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                     <label>
-                      <span>First name</span>
+                      <span>First name <span style={{ color: '#ef4444' }}>*</span></span>
                       <input
                         required
                         value={newFirstName}
@@ -770,7 +804,7 @@ export default function UsersPage() {
                       />
                     </label>
                     <label>
-                      <span>Last name</span>
+                      <span>Last name <span style={{ color: '#ef4444' }}>*</span></span>
                       <input
                         required
                         value={newLastName}
@@ -780,31 +814,52 @@ export default function UsersPage() {
                     </label>
                   </div>
                   <label>
-                    <span>Email address</span>
+                    <span>Email address <span style={{ color: '#ef4444' }}>*</span></span>
                     <input
                       required
                       type="email"
                       value={newEmail}
                       onChange={(e) => setNewEmail(e.target.value)}
-                      placeholder="Email address"
+                      placeholder="e.g. user@domain.com"
                     />
                   </label>
                   <label>
-                    <span>Temporary Login Password</span>
+                    <span>Password <span style={{ color: '#ef4444' }}>*</span></span>
                     <input
                       required
                       type="password"
                       value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
+                      onChange={(e) => {
+                        setNewPassword(e.target.value);
+                        if (addFormError) setAddFormError('');
+                      }}
                       placeholder="Enter password (minimum 6 characters)"
                       minLength={6}
+                      autoComplete="new-password"
                     />
-                    <small style={{ color: '#64748b', fontSize: '11px', marginTop: '2px', display: 'block' }}>
-                      Account is activated immediately with this login password.
-                    </small>
                   </label>
                   <label>
-                    <span>Role</span>
+                    <span>Confirm password <span style={{ color: '#ef4444' }}>*</span></span>
+                    <input
+                      required
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => {
+                        setConfirmPassword(e.target.value);
+                        if (addFormError) setAddFormError('');
+                      }}
+                      placeholder="Re-enter password to confirm"
+                      minLength={6}
+                      autoComplete="new-password"
+                    />
+                    {confirmPassword && newPassword !== confirmPassword && (
+                      <small style={{ color: '#ef4444', fontSize: '11px', marginTop: '2px', display: 'block' }}>
+                        Passwords do not match.
+                      </small>
+                    )}
+                  </label>
+                  <label>
+                    <span>Role <span style={{ color: '#ef4444' }}>*</span></span>
                     <select
                       value={newRole}
                       onChange={(e) => setNewRole(e.target.value as UserRole)}
@@ -816,11 +871,34 @@ export default function UsersPage() {
                     </select>
                   </label>
                 </div>
-                <div className="modal-actions">
+
+                {addFormError && (
+                  <div
+                    className="form-error"
+                    style={{
+                      marginTop: '14px',
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      background: '#fef2f2',
+                      border: '1px solid #fecaca',
+                      color: '#b91c1c',
+                      fontSize: '12px',
+                    }}
+                  >
+                    {addFormError}
+                  </div>
+                )}
+
+                <div className="modal-actions" style={{ marginTop: '20px' }}>
                   <button
                     className="secondary-button"
                     type="button"
-                    onClick={() => setAddModalOpen(false)}
+                    onClick={() => {
+                      setAddModalOpen(false);
+                      setAddFormError('');
+                      setNewPassword('');
+                      setConfirmPassword('');
+                    }}
                   >
                     Cancel
                   </button>
