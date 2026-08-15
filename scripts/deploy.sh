@@ -94,10 +94,10 @@ if command -v nginx >/dev/null 2>&1 && systemctl is-active --quiet nginx 2>/dev/
     if [ -f "$ROOT_DIR/infra/nginx/caresignal.conf.template" ] && [ -f "$ROOT_DIR/.env" ]; then
         DOMAIN=$(grep -E '^DOMAIN_NAME=' "$ROOT_DIR/.env" | cut -d '=' -f2 | tr -d '\r"' || true)
         if [ -n "$DOMAIN" ] && [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
-            sed "s/\${DOMAIN_NAME}/$DOMAIN/g" "$ROOT_DIR/infra/nginx/caresignal.conf.template" | sudo tee /etc/nginx/sites-available/caresignal.conf >/dev/null
+            sed "s/\${DOMAIN_NAME}/$DOMAIN/g" "$ROOT_DIR/infra/nginx/caresignal.conf.template" | (tee /etc/nginx/sites-available/caresignal.conf 2>/dev/null || sudo tee /etc/nginx/sites-available/caresignal.conf 2>/dev/null || true) >/dev/null
         fi
     fi
-    sudo nginx -t && sudo systemctl reload nginx
+    (nginx -t 2>/dev/null || sudo nginx -t) && (systemctl reload nginx 2>/dev/null || sudo systemctl reload nginx 2>/dev/null || true)
 fi
 
 # 8. Print running container summary
