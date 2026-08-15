@@ -43,8 +43,57 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
     void signOut().then(() => router.replace('/login'));
   };
 
-  if (authState === 'loading') return <div className="auth-loading"><div className="brand-mark"><Activity size={19} /></div><span>Checking secure session...</span></div>;
-  if (authState === 'error') return <div className="auth-loading"><strong>Session verification failed.</strong><span>Please sign in again.</span></div>;
+  if (authState === 'loading') {
+    return (
+      <div className="auth-loading-screen">
+        <div className="auth-loading-card">
+          <div className="auth-loading-brand">
+            <div className="auth-loading-logo">
+              <Activity size={24} strokeWidth={2.5} className="pulse-heartbeat" />
+            </div>
+            <span className="brand-name">care<span>signal</span></span>
+          </div>
+
+          <div className="auth-loading-spinner-wrap">
+            <div className="auth-loading-spinner" />
+          </div>
+
+          <div className="auth-loading-text">
+            <h3>Verifying secure session</h3>
+            <p>Connecting to healthcare telemetry gateway...</p>
+          </div>
+
+          <div className="auth-loading-badge">
+            <span className="secure-dot" />
+            <span>256-bit encrypted session</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (authState === 'error') {
+    return (
+      <div className="auth-loading-screen">
+        <div className="auth-loading-card">
+          <div className="auth-loading-logo error-logo">
+            <Activity size={24} strokeWidth={2.5} />
+          </div>
+          <div className="auth-loading-text" style={{ marginTop: '16px' }}>
+            <h3>Session Verification Failed</h3>
+            <p>Your secure session could not be verified. Please sign in again.</p>
+          </div>
+          <button
+            type="button"
+            className="primary-button auth-retry-btn"
+            onClick={() => router.replace('/login')}
+          >
+            Return to Sign in
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="app-shell">
