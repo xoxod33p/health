@@ -42,10 +42,6 @@
     width: 100% !important;
   }
 
-  .menu-trigger {
-    display: inline-flex;
-  }
-
   .topbar {
     height: auto;
     min-height: 56px;
@@ -259,8 +255,7 @@
   .topbar,
   .modal-backdrop button,
   .panel-heading button,
-  .modal-actions,
-  .menu-trigger {
+  .modal-actions {
     display: none !important;
   }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { Activity, Boxes, ClipboardList, FileBarChart, LayoutDashboard, LogOut, Menu, Tag, Users, X } from 'lucide-react';
+import { Activity, Boxes, ClipboardList, FileBarChart, LayoutDashboard, LogOut, Tag, Users, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -161,7 +161,6 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
       <main className="content-shell">
         <header className="topbar">
           <div className="topbar-left">
-            <button className="icon-button menu-trigger" onClick={() => setSidebarOpen(true)} aria-label="Open navigation"><Menu size={21} /></button>
             <h1 className="topbar-title">{title ?? activeLabel}</h1>
           </div>
           {headerCenter && <div className="topbar-center">{headerCenter}</div>}
