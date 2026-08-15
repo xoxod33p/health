@@ -232,19 +232,17 @@ async function seed() {
   }
 
   await mongoose.disconnect();
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+  console.log(`✅ Production seeding completed successfully for company: ${companyId}`);
+  console.log(`   - Sensor Types: ${sensorTypeData.length}`);
+  console.log(`   - Customers: ${customerData.length}`);
+  console.log(`   - Sensors: ${sensorData.length}`);
+  console.log(`   - Replacements: ${replacementData.length}`);
+  console.log(`   - Notifications: ${notificationData.length}`);
+  console.log(`   - Audit Logs: ${auditData.length}`);
 }
 
-seed().catch(async () => {
+seed().catch(async (error) => {
+  console.error('❌ Seeding failed:', error);
   await mongoose.disconnect().catch(() => undefined);
   process.exit(1);
 });

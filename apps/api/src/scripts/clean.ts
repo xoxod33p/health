@@ -68,9 +68,11 @@ async function clean() {
   }
 
   await mongoose.disconnect();
+  console.log(`🧹 Database wiped clean for company: ${companyId} (protected root admin account preserved: ${defaultAdminEmail})`);
 }
 
-clean().catch(async () => {
+clean().catch(async (error) => {
+  console.error('❌ Clean script failed:', error);
   await mongoose.disconnect().catch(() => undefined);
   process.exit(1);
 });

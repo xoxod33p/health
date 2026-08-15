@@ -199,6 +199,26 @@ docker exec -i caresignal-mongodb mongodump \
   --archive > /backup/caresignal_db_$(date +%Y%m%d_%H%M%S).archive
 ```
 
+### Seed Demo Healthcare Telemetry Data
+```bash
+cd /opt/health
+# Option A: Using helper script
+./scripts/seed-prod.sh seed
+
+# Option B: Direct docker command
+docker compose -f /opt/health/infra/docker-compose.prod.yml exec -T api node apps/api/dist/scripts/seed.js
+```
+
+### Reset / Clean Database Data
+```bash
+cd /opt/health
+# Wipe demo data (preserves protected root administrator):
+./scripts/seed-prod.sh clean
+
+# Full reset & fresh re-seed:
+./scripts/seed-prod.sh reset
+```
+
 ### Inspect Nginx Error Logs
 ```bash
 sudo tail -f /var/log/nginx/error.log
