@@ -149,14 +149,14 @@ export class SystemService {
       notificationsRes,
       auditLogsRes,
     ] = await Promise.all([
-      this.customerModel.deleteMany(filter),
-      this.sensorModel.deleteMany(filter),
-      this.sensorTypeModel.deleteMany(filter),
-      this.sensorAssignmentModel.deleteMany(filter),
-      this.sensorReplacementModel.deleteMany(filter),
-      this.reportModel.deleteMany(filter),
-      this.notificationModel.deleteMany(filter),
-      this.auditLogModel.deleteMany(filter),
+      this.customerModel.collection.deleteMany(filter),
+      this.sensorModel.collection.deleteMany(filter),
+      this.sensorTypeModel.collection.deleteMany(filter),
+      this.sensorAssignmentModel.collection.deleteMany(filter),
+      this.sensorReplacementModel.collection.deleteMany(filter),
+      this.reportModel.collection.deleteMany(filter),
+      this.notificationModel.collection.deleteMany(filter),
+      this.auditLogModel.collection.deleteMany(filter),
     ]);
 
     // Clear physical files from storage
@@ -180,9 +180,9 @@ export class SystemService {
         clearedAt: new Date().toISOString(),
         preservedUsers: usersCount,
         preservedEmployees: employeesCount,
-        deletedCustomers: customersRes.deletedCount,
-        deletedSensors: sensorsRes.deletedCount,
-        deletedReports: reportsRes.deletedCount,
+        deletedCustomers: customersRes?.deletedCount ?? 0,
+        deletedSensors: sensorsRes?.deletedCount ?? 0,
+        deletedReports: reportsRes?.deletedCount ?? 0,
       },
     });
 
@@ -200,14 +200,14 @@ export class SystemService {
       success: true,
       message: 'All workspace data cleared successfully. All user and employee accounts preserved.',
       deletedCounts: {
-        customers: customersRes.deletedCount,
-        sensors: sensorsRes.deletedCount,
-        sensorTypes: sensorTypesRes.deletedCount,
-        sensorAssignments: assignmentsRes.deletedCount,
-        sensorReplacements: replacementsRes.deletedCount,
-        reports: reportsRes.deletedCount,
-        notifications: notificationsRes.deletedCount,
-        auditLogs: auditLogsRes.deletedCount,
+        customers: customersRes?.deletedCount ?? 0,
+        sensors: sensorsRes?.deletedCount ?? 0,
+        sensorTypes: sensorTypesRes?.deletedCount ?? 0,
+        sensorAssignments: assignmentsRes?.deletedCount ?? 0,
+        sensorReplacements: replacementsRes?.deletedCount ?? 0,
+        reports: reportsRes?.deletedCount ?? 0,
+        notifications: notificationsRes?.deletedCount ?? 0,
+        auditLogs: auditLogsRes?.deletedCount ?? 0,
       },
       preserved: {
         users: usersCount,

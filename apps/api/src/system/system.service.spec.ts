@@ -20,11 +20,17 @@ import { SystemService } from './system.service';
 describe('SystemService', () => {
   let service: SystemService;
 
-  const mockModel = () => ({
-    countDocuments: jest.fn().mockResolvedValue(5),
-    deleteMany: jest.fn().mockResolvedValue({ deletedCount: 5 }),
-    create: jest.fn().mockResolvedValue({}),
-  });
+  const mockModel = () => {
+    const delMany = jest.fn().mockResolvedValue({ deletedCount: 5 });
+    return {
+      countDocuments: jest.fn().mockResolvedValue(5),
+      deleteMany: delMany,
+      collection: {
+        deleteMany: delMany,
+      },
+      create: jest.fn().mockResolvedValue({}),
+    };
+  };
 
   const mockCustomerModel = mockModel();
   const mockSensorModel = mockModel();
@@ -119,19 +125,19 @@ describe('SystemService', () => {
 
     expect(result.success).toBe(true);
     // Operational data deleted
-    expect(mockCustomerModel.deleteMany).toHaveBeenCalledWith({ companyId: 'company_1' });
-    expect(mockSensorModel.deleteMany).toHaveBeenCalledWith({ companyId: 'company_1' });
-    expect(mockSensorTypeModel.deleteMany).toHaveBeenCalledWith({ companyId: 'company_1' });
-    expect(mockSensorAssignmentModel.deleteMany).toHaveBeenCalledWith({ companyId: 'company_1' });
-    expect(mockSensorReplacementModel.deleteMany).toHaveBeenCalledWith({ companyId: 'company_1' });
-    expect(mockReportModel.deleteMany).toHaveBeenCalledWith({ companyId: 'company_1' });
-    expect(mockNotificationModel.deleteMany).toHaveBeenCalledWith({ companyId: 'company_1' });
-    expect(mockAuditLogModel.deleteMany).toHaveBeenCalledWith({ companyId: 'company_1' });
+    expect(mockCustomerModel.collection.deleteMany).toHaveBeenCalledWith({ companyId: 'company_1' });
+    expect(mockSensorModel.collection.deleteMany).toHaveBeenCalledWith({ companyId: 'company_1' });
+    expect(mockSensorTypeModel.collection.deleteMany).toHaveBeenCalledWith({ companyId: 'company_1' });
+    expect(mockSensorAssignmentModel.collection.deleteMany).toHaveBeenCalledWith({ companyId: 'company_1' });
+    expect(mockSensorReplacementModel.collection.deleteMany).toHaveBeenCalledWith({ companyId: 'company_1' });
+    expect(mockReportModel.collection.deleteMany).toHaveBeenCalledWith({ companyId: 'company_1' });
+    expect(mockNotificationModel.collection.deleteMany).toHaveBeenCalledWith({ companyId: 'company_1' });
+    expect(mockAuditLogModel.collection.deleteMany).toHaveBeenCalledWith({ companyId: 'company_1' });
     expect(mockStorageService.clearAllStorage).toHaveBeenCalled();
 
     // Users and Employees MUST NOT be deleted
-    expect(mockUserModel.deleteMany).not.toHaveBeenCalled();
-    expect(mockEmployeeModel.deleteMany).not.toHaveBeenCalled();
+    expect(mockUserModel.collection.deleteMany).not.toHaveBeenCalled();
+    expect(mockEmployeeModel.collection.deleteMany).not.toHaveBeenCalled();
 
     // User counts queried for preservation summary
     expect(mockUserModel.countDocuments).toHaveBeenCalledWith({ companyId: 'company_1' });
