@@ -1,14 +1,18 @@
 'use client';
 
 import {
+  AlertOctagon,
   AlertTriangle,
   Check,
+  CheckCircle2,
+  Database,
   Edit2,
   KeyRound,
   Lock,
   Plus,
   RefreshCw,
   Search,
+  ShieldAlert,
   ShieldCheck,
   Trash2,
   UserPlus,
@@ -21,6 +25,40 @@ import { apiFetch, getSession } from '../../lib/api';
 import { connectPresence } from '../../lib/realtime';
 
 export type UserRole = 'SYSTEM_ADMIN' | 'MANAGER' | 'INHOUSE_STAFF' | 'OUT_EMPLOYEE';
+
+export type SystemStats = {
+  customers: number;
+  sensors: number;
+  sensorTypes: number;
+  sensorAssignments: number;
+  sensorReplacements: number;
+  reports: number;
+  notifications: number;
+  auditLogs: number;
+  users: number;
+  employees: number;
+  isDefaultAdmin: boolean;
+  defaultAdminEmail: string;
+};
+
+export type ClearDataResult = {
+  success: boolean;
+  message: string;
+  deletedCounts: {
+    customers: number;
+    sensors: number;
+    sensorTypes: number;
+    sensorAssignments: number;
+    sensorReplacements: number;
+    reports: number;
+    notifications: number;
+    auditLogs: number;
+  };
+  preserved: {
+    users: number;
+    employees: number;
+  };
+};
 
 export const ROLE_LABELS: Record<UserRole, { label: string; description: string; badgeColor: string; textColor: string; bg: string }> = {
   SYSTEM_ADMIN: { label: 'System Admin', description: 'Full System Administration & Security Controls', badgeColor: '#32776d', textColor: '#32776d', bg: '#e0efeb' },
@@ -94,20 +132,29 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, string[]> = {
 };
 
 export default function UsersPage() {
-  const [activeTab, setActiveTab] = useState<'users' | 'roles'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'roles' | 'maintenance'>('users');
   const [users, setUsers] = useState<UserMember[]>([]);
   const [query, setQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('All roles');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  
+  // Default Admin & System Maintenance States
+  const [isDefaultAdmin, setIsDefaultAdmin] = useState(false);
+  const [currentUserEmail, setCurrentUserEmail] = useState('');
+  const [systemStats, setSystemStats] = useState<SystemStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(false);
+  const [clearModalOpen, setClearModalOpen] = useState(false);
+  const [confirmClearText, setConfirmClearText] = useState('');
+  const [clearing, setClearing] = useState(false);
+  const [clearError, setClearError] = useState('');
+  const [clearSuccess, setClearSuccess] = useState<ClearDataResult | null>(null);
+
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserMember | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  
   const [newFirstName, setNewFirstName] = useState('');
   const [newLastName, setNewLastName] = useState('');
   const [newEmail, setNewEmail] = useState('');
@@ -116,16 +163,25 @@ export default function UsersPage() {
   const [newRole, setNewRole] = useState<UserRole>('INHOUSE_STAFF');
   const [addFormError, setAddFormError] = useState('');
 
-  
   const [editRole, setEditRole] = useState<UserRole>('INHOUSE_STAFF');
   const [editPermissions, setEditPermissions] = useState<string[]>([]);
 
-  
   const [deleteTarget, setDeleteTarget] = useState<UserMember | null>(null);
   const [deleteSubmitting, setDeleteSubmitting] = useState(false);
 
-  
   const [roleMatrixDefaults, setRoleMatrixDefaults] = useState<Record<UserRole, string[]>>(DEFAULT_ROLE_PERMISSIONS);
+
+  const fetchStats = async () => {
+    setStatsLoading(true);
+    try {
+      const stats = await apiFetch<SystemStats>('/system/stats');
+      setSystemStats(stats);
+    } catch {
+      // non-blocking
+    } finally {
+      setStatsLoading(false);
+    }
+  };
 
   const load = async () => {
     setLoading(true);
@@ -133,6 +189,18 @@ export default function UsersPage() {
     try {
       const { data: sessionData } = await getSession();
       const currentUser = sessionData?.session?.user;
+
+      const isDefAdmin = Boolean(
+        currentUser?.isDefaultAdmin ||
+        currentUser?.email?.toLowerCase().trim() === 'admin@localhost.test'
+      );
+      setIsDefaultAdmin(isDefAdmin);
+      if (currentUser?.email) {
+        setCurrentUserEmail(currentUser.email);
+      }
+      if (isDefAdmin) {
+        void fetchStats();
+      }
 
       const apiEmployees = await apiFetch<UserMember[]>('/employees').catch(() => []);
       let combinedList: UserMember[] = Array.isArray(apiEmployees) ? [...apiEmployees] : [];
@@ -392,6 +460,30 @@ export default function UsersPage() {
     });
   };
 
+  const handleClearAllData = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (confirmClearText.trim().toUpperCase() !== 'CLEAR ALL DATA') {
+      setClearError('Please type CLEAR ALL DATA exactly as shown to confirm.');
+      return;
+    }
+    setClearing(true);
+    setClearError('');
+    try {
+      const res = await apiFetch<ClearDataResult>('/system/clear-data', {
+        method: 'POST',
+      });
+      setClearSuccess(res);
+      setClearModalOpen(false);
+      setConfirmClearText('');
+      await load();
+      await fetchStats();
+    } catch (caught) {
+      setClearError(caught instanceof Error ? caught.message : 'Failed to clear workspace data');
+    } finally {
+      setClearing(false);
+    }
+  };
+
   const topbarCenter = (
     <div className="topbar-center-wrap">
       <div className="search-field">
@@ -418,16 +510,33 @@ export default function UsersPage() {
   );
 
   const topbarRight = (
-    <button className="primary-button" onClick={() => setAddModalOpen(true)}>
-      <Plus size={17} /> Add user
-    </button>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      {isDefaultAdmin && (
+        <button
+          type="button"
+          className="danger-button"
+          onClick={() => {
+            setClearModalOpen(true);
+            setConfirmClearText('');
+            setClearError('');
+            void fetchStats();
+          }}
+          title="Clear all system data except user accounts (Default Admin only)"
+        >
+          <Trash2 size={15} /> Clear All Data
+        </button>
+      )}
+      <button className="primary-button" onClick={() => setAddModalOpen(true)}>
+        <Plus size={17} /> Add user
+      </button>
+    </div>
   );
 
   return (
     <AppShell headerCenter={topbarCenter} headerActions={topbarRight}>
       <div className="page-content">
         
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', borderBottom: '1px solid var(--border-color, #e2e8f0)', paddingBottom: '12px' }}>
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', borderBottom: '1px solid var(--border-color, #e2e8f0)', paddingBottom: '12px', flexWrap: 'wrap' }}>
           <button
             type="button"
             className={activeTab === 'users' ? 'primary-button' : 'secondary-button'}
@@ -444,6 +553,24 @@ export default function UsersPage() {
           >
             <ShieldCheck size={16} /> Role Authorization Matrix
           </button>
+          {isDefaultAdmin && (
+            <button
+              type="button"
+              className={activeTab === 'maintenance' ? 'danger-button' : 'secondary-button'}
+              onClick={() => {
+                setActiveTab('maintenance');
+                void fetchStats();
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                ...(activeTab !== 'maintenance' ? { color: '#dc2626', borderColor: '#fecaca' } : {}),
+              }}
+            >
+              <ShieldAlert size={16} /> System Maintenance (Default Admin)
+            </button>
+          )}
         </div>
 
         {activeTab === 'users' && (
@@ -767,6 +894,151 @@ export default function UsersPage() {
           </section>
         )}
 
+        {activeTab === 'maintenance' && isDefaultAdmin && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {clearSuccess && (
+              <div
+                style={{
+                  background: '#f0fdf4',
+                  border: '1px solid #bbf7d0',
+                  borderRadius: '8px',
+                  padding: '16px 20px',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '12px',
+                }}
+              >
+                <CheckCircle2 size={20} color="#16a34a" style={{ marginTop: '2px', flexShrink: 0 }} />
+                <div>
+                  <h3 style={{ margin: '0 0 4px 0', fontSize: '15px', color: '#15803d', fontWeight: 700 }}>
+                    Workspace Data Cleared Successfully
+                  </h3>
+                  <p style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#166534' }}>
+                    {clearSuccess.message}
+                  </p>
+                  <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', fontSize: '12px', color: '#15803d' }}>
+                    <span>🗑️ Customers deleted: <strong>{clearSuccess.deletedCounts.customers}</strong></span>
+                    <span>🗑️ Sensors deleted: <strong>{clearSuccess.deletedCounts.sensors}</strong></span>
+                    <span>🗑️ Sensor types: <strong>{clearSuccess.deletedCounts.sensorTypes}</strong></span>
+                    <span>🗑️ Reports deleted: <strong>{clearSuccess.deletedCounts.reports}</strong></span>
+                    <span>🗑️ Notifications & logs: <strong>{clearSuccess.deletedCounts.notifications + clearSuccess.deletedCounts.auditLogs}</strong></span>
+                    <span>🛡️ Preserved user accounts: <strong>{clearSuccess.preserved.users}</strong></span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <section className="mini-stat-grid" style={{ marginBottom: '4px' }}>
+              <div className="mini-stat">
+                <div className="mini-stat-top">
+                  <span>Preserved Users</span>
+                  <ShieldCheck size={18} color="#059669" />
+                </div>
+                <strong style={{ color: '#059669' }}>{systemStats?.users ?? users.length}</strong>
+                <small style={{ color: '#059669', fontWeight: 600 }}>🛡️ Protected from wipe</small>
+              </div>
+              <div className="mini-stat">
+                <div className="mini-stat-top">
+                  <span>Preserved Staff</span>
+                  <UsersIcon size={18} color="#059669" />
+                </div>
+                <strong style={{ color: '#059669' }}>{systemStats?.employees ?? users.length}</strong>
+                <small style={{ color: '#059669', fontWeight: 600 }}>🛡️ Protected from wipe</small>
+              </div>
+              <div className="mini-stat mini-stat-teal">
+                <div className="mini-stat-top">
+                  <span>Customers / Patients</span>
+                  <UsersIcon size={18} />
+                </div>
+                <strong>{statsLoading ? '...' : (systemStats?.customers ?? 0)}</strong>
+                <small>Records in database</small>
+              </div>
+              <div className="mini-stat mini-stat-blue">
+                <div className="mini-stat-top">
+                  <span>Sensors in Fleet</span>
+                  <Database size={18} />
+                </div>
+                <strong>{statsLoading ? '...' : (systemStats?.sensors ?? 0)}</strong>
+                <small>Active & assigned units</small>
+              </div>
+            </section>
+
+            <section className="mini-stat-grid" style={{ marginBottom: '8px' }}>
+              <div className="mini-stat mini-stat-amber">
+                <div className="mini-stat-top">
+                  <span>Sensor Specifications</span>
+                  <Database size={18} />
+                </div>
+                <strong>{statsLoading ? '...' : (systemStats?.sensorTypes ?? 0)}</strong>
+                <small>Catalog definitions</small>
+              </div>
+              <div className="mini-stat">
+                <div className="mini-stat-top">
+                  <span>Generated Reports</span>
+                  <Database size={18} />
+                </div>
+                <strong>{statsLoading ? '...' : (systemStats?.reports ?? 0)}</strong>
+                <small>PDF / CSV clinical files</small>
+              </div>
+              <div className="mini-stat">
+                <div className="mini-stat-top">
+                  <span>Notifications & Alerts</span>
+                  <Database size={18} />
+                </div>
+                <strong>{statsLoading ? '...' : (systemStats?.notifications ?? 0)}</strong>
+                <small>System alert history</small>
+              </div>
+              <div className="mini-stat">
+                <div className="mini-stat-top">
+                  <span>Audit Logs</span>
+                  <Database size={18} />
+                </div>
+                <strong>{statsLoading ? '...' : (systemStats?.auditLogs ?? 0)}</strong>
+                <small>Compliance activity records</small>
+              </div>
+            </section>
+
+            <div className="danger-panel">
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '20px', flexWrap: 'wrap' }}>
+                <div style={{ maxWidth: '640px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                    <span className="danger-tag">
+                      <AlertOctagon size={13} /> Danger Zone
+                    </span>
+                    <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>
+                      Restricted to Default Administrator: {currentUserEmail || 'admin@localhost.test'}
+                    </span>
+                  </div>
+                  <h3 style={{ fontSize: '18px', color: '#991b1b', margin: '0 0 8px 0', fontWeight: 700 }}>
+                    Clear All Workspace Data (Keep Users & Staff)
+                  </h3>
+                  <p style={{ fontSize: '13px', color: '#475569', lineHeight: 1.6, margin: '0 0 16px 0' }}>
+                    This action will permanently delete all operational healthcare data from your workspace, including:
+                    <strong> Customers, Sensors, Sensor Types, Assignments, Replacements, Generated Reports, Notifications, and Audit Logs</strong>.
+                    <br />
+                    <span style={{ color: '#059669', fontWeight: 600 }}>
+                      ✓ All user accounts, employee logins, passwords, and assigned permissions will remain 100% untouched and protected.
+                    </span>
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="danger-button"
+                  style={{ padding: '12px 20px', fontSize: '13px' }}
+                  onClick={() => {
+                    setClearModalOpen(true);
+                    setConfirmClearText('');
+                    setClearError('');
+                    void fetchStats();
+                  }}
+                >
+                  <Trash2 size={16} /> Clear All Workspace Data
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         
         {addModalOpen && (
           <div className="modal-backdrop">
@@ -1086,6 +1358,134 @@ export default function UsersPage() {
                   {deleteSubmitting ? <RefreshCw size={16} className="spin" /> : <><Trash2 size={14} /> Permanently delete</>}
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {clearModalOpen && isDefaultAdmin && (
+          <div className="modal-backdrop" onClick={() => !clearing && setClearModalOpen(false)}>
+            <div className="modal-card" style={{ maxWidth: '540px' }} onClick={(e) => e.stopPropagation()}>
+              <div className="modal-heading" style={{ borderBottom: '1px solid #fee2e2', paddingBottom: '14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#dc2626', flexShrink: 0 }}>
+                    <AlertOctagon size={22} />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '18px', color: '#991b1b', margin: 0, fontWeight: 700 }}>
+                      Confirm Clear All Data
+                    </h2>
+                    <p style={{ fontSize: '12px', color: '#64748b', margin: '2px 0 0 0' }}>
+                      Permanent workspace wipe • Protected user accounts preserved
+                    </p>
+                  </div>
+                </div>
+                <button
+                  className="icon-button"
+                  type="button"
+                  disabled={clearing}
+                  onClick={() => setClearModalOpen(false)}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <form onSubmit={handleClearAllData}>
+                <div style={{ padding: '16px 0', fontSize: '13px', color: '#334155', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  <p style={{ margin: 0, lineHeight: 1.5 }}>
+                    Are you sure you want to clear all operational data in this workspace? This action is immediate and irreversible.
+                  </p>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '12px' }}>
+                      <div style={{ fontWeight: 700, color: '#dc2626', fontSize: '12px', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Trash2 size={13} /> Wiped Permanently:
+                      </div>
+                      <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '11px', color: '#7f1d1d', lineHeight: 1.5 }}>
+                        <li>All Customers & Patients</li>
+                        <li>All Sensors & Telemetry</li>
+                        <li>All Sensor Types</li>
+                        <li>All Assignments & Replacements</li>
+                        <li>All Reports & PDF Files</li>
+                        <li>All Notifications & Alerts</li>
+                        <li>All Audit Log Entries</li>
+                      </ul>
+                    </div>
+
+                    <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '12px' }}>
+                      <div style={{ fontWeight: 700, color: '#16a34a', fontSize: '12px', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <CheckCircle2 size={13} /> Safely Preserved:
+                      </div>
+                      <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '11px', color: '#14532d', lineHeight: 1.5 }}>
+                        <li>All User Accounts ({users.length})</li>
+                        <li>All Staff & Employee Profiles</li>
+                        <li>Root Administrator Login</li>
+                        <li>Role & Security Permissions</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px' }}>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#0f172a', marginBottom: '6px' }}>
+                      To confirm, type <strong style={{ color: '#dc2626' }}>CLEAR ALL DATA</strong> below:
+                    </label>
+                    <input
+                      type="text"
+                      value={confirmClearText}
+                      onChange={(e) => {
+                        setConfirmClearText(e.target.value);
+                        if (clearError) setClearError('');
+                      }}
+                      placeholder="Type CLEAR ALL DATA to confirm"
+                      style={{
+                        width: '100%',
+                        padding: '9px 12px',
+                        borderRadius: '6px',
+                        border: confirmClearText.trim().toUpperCase() === 'CLEAR ALL DATA' ? '1px solid #16a34a' : '1px solid #cbd5e1',
+                        background: '#ffffff',
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        letterSpacing: '0.5px',
+                        color: '#0f172a',
+                      }}
+                      autoComplete="off"
+                      disabled={clearing}
+                    />
+                  </div>
+
+                  {clearError && (
+                    <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', padding: '8px 12px', color: '#b91c1c', fontSize: '12px' }}>
+                      {clearError}
+                    </div>
+                  )}
+                </div>
+
+                <div className="modal-actions" style={{ borderTop: '1px solid #f1f5f9', paddingTop: '14px', marginTop: '4px', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    disabled={clearing}
+                    onClick={() => setClearModalOpen(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="danger-button"
+                    disabled={confirmClearText.trim().toUpperCase() !== 'CLEAR ALL DATA' || clearing}
+                    style={{ minWidth: '170px', justifyContent: 'center' }}
+                  >
+                    {clearing ? (
+                      <>
+                        <RefreshCw size={15} className="spin" /> Wiping Workspace Data...
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 size={15} /> Clear All Data (Keep Users)
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}

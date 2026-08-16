@@ -3,6 +3,7 @@ export interface AuthUser {
   email: string;
   role: string;
   companyId: string;
+  isDefaultAdmin?: boolean;
 }
 
 export interface AuthSession {

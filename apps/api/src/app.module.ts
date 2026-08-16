@@ -17,6 +17,7 @@ import { ReportsModule } from './reports/reports.module';
 import { SensorsModule } from './sensors/sensors.module';
 import { SensorTypesModule } from './sensor-types/sensor-types.module';
 import { StorageModule } from './storage/storage.module';
+import { SystemModule } from './system/system.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -50,6 +51,7 @@ import { UsersModule } from './users/users.module';
     RealtimeModule,
     ReportsModule,
     HealthModule,
+    SystemModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

@@ -129,4 +129,17 @@ export class StorageService {
   getBaseStorageDir(): string {
     return this.baseStorageDir;
   }
+
+  async clearAllStorage(): Promise<void> {
+    const defaultCategories = ['reports', 'customers', 'sensors', 'exports', 'temp'];
+    for (const cat of defaultCategories) {
+      const catPath = join(this.baseStorageDir, cat);
+      try {
+        await fs.rm(catPath, { recursive: true, force: true });
+        await fs.mkdir(catPath, { recursive: true });
+      } catch (err) {
+        this.logger.warn(`Failed to clear storage directory for category ${cat}:`, err);
+      }
+    }
+  }
 }

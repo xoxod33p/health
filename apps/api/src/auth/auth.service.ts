@@ -8,10 +8,20 @@ import { verifyPassword } from './password.util';
 
 @Injectable()
 export class AuthService {
+  private readonly defaultAdminEmail: string;
+
   constructor(
     private readonly config: ConfigService,
     @InjectModel(User.name) private readonly users: Model<UserDocument>,
-  ) {}
+  ) {
+    this.defaultAdminEmail = (
+      this.config.get<string>('DEFAULT_ADMIN_EMAIL') ||
+      process.env.DEFAULT_ADMIN_EMAIL ||
+      'admin@localhost.test'
+    )
+      .toLowerCase()
+      .trim();
+  }
 
   async login(dto: LoginDto) {
     const email = dto.email.toLowerCase().trim();
@@ -26,6 +36,7 @@ export class AuthService {
     }
 
     const token = await this.signToken(user);
+    const isDefaultAdmin = user.email.toLowerCase().trim() === this.defaultAdminEmail;
     return {
       access_token: token,
       user: {
@@ -33,6 +44,7 @@ export class AuthService {
         email: user.email,
         role: user.role,
         companyId: user.companyId,
+        isDefaultAdmin,
       },
     };
   }
@@ -40,11 +52,13 @@ export class AuthService {
   async me(authUserId: string) {
     const user = await this.users.findOne({ authUserId, status: 'ACTIVE' }).lean().exec();
     if (!user) throw new UnauthorizedException('User profile not found');
+    const isDefaultAdmin = user.email.toLowerCase().trim() === this.defaultAdminEmail;
     return {
       id: user.authUserId,
       email: user.email,
       role: user.role,
       companyId: user.companyId,
+      isDefaultAdmin,
     };
   }
 
