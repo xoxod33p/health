@@ -10,6 +10,7 @@ import { SensorAssignment, SensorAssignmentDocument } from './sensor-assignment.
 import { SensorReplacement, SensorReplacementDocument } from './sensor-replacement.schema';
 import { RealtimeGateway } from '../realtime/realtime.gateway';
 import { AuditService } from '../audit/audit.service';
+import { RedisService } from '../redis/redis.service';
 
 @Injectable()
 export class SensorsService {
@@ -21,6 +22,7 @@ export class SensorsService {
     @InjectModel(SensorType.name) private readonly sensorTypes: Model<SensorTypeDocument>,
     private readonly realtime: RealtimeGateway,
     private readonly audit: AuditService,
+    private readonly redis: RedisService,
   ) {}
 
   async create(user: AuthenticatedUser, dto: CreateSensorDto): Promise<Sensor> {
@@ -38,6 +40,7 @@ export class SensorsService {
       companyId: user.companyId,
     });
     this.realtime.broadcastCompany(user.companyId, 'sensor.changed', { action: 'created', sensorId: sensor._id.toString() });
+    await this.redis.delPattern(`dashboard:summary:${user.companyId}:*`);
     await this.audit.record(user, 'sensor.create', 'Sensor', sensor._id.toString(), {
       serialNumber: sensor.serialNumber,
       status: sensor.status,
@@ -133,6 +136,7 @@ export class SensorsService {
     sensor.expiresAt = new Date(installDate.getTime() + 15 * 24 * 60 * 60 * 1000);
     const saved = await sensor.save();
     this.realtime.broadcastCompany(user.companyId, 'sensor.changed', { action: 'assigned', sensorId: sensorId, customerId: dto.customerId });
+    await this.redis.delPattern(`dashboard:summary:${user.companyId}:*`);
     await this.audit.record(user, 'sensor.assign', 'Sensor', sensorId, {
       serialNumber: sensor.serialNumber,
       customerId: dto.customerId,
@@ -160,6 +164,7 @@ export class SensorsService {
       replacedBy: user.authUserId,
     });
     this.realtime.broadcastCompany(user.companyId, 'sensor.changed', { action: 'replacement_logged', serialNumber: dto.serialNumber });
+    await this.redis.delPattern(`dashboard:summary:${user.companyId}:*`);
     await this.audit.record(user, 'sensor.replacement', 'SensorReplacement', record._id.toString(), {
       serialNumber: dto.serialNumber,
       customerName: dto.customerName,

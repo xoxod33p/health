@@ -1,9 +1,11 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
-import { OnGatewayConnection, OnGatewayDisconnect, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { createAdapter } from '@socket.io/redis-adapter';
 import type { Model } from 'mongoose';
 import type { Server, Socket } from 'socket.io';
+import { RedisService } from '../redis/redis.service';
 import { User, UserDocument } from '../users/user.schema';
 
 interface ConnectedUser {
@@ -14,8 +16,9 @@ interface ConnectedUser {
 
 @Injectable()
 @WebSocketGateway({ namespace: '/realtime', cors: { origin: true, credentials: true } })
-export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class RealtimeGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server!: Server;
+  private readonly logger = new Logger(RealtimeGateway.name);
 
   // Track socketId -> user details
   private readonly socketUsers = new Map<string, ConnectedUser>();
@@ -26,7 +29,21 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
   constructor(
     private readonly config: ConfigService,
     @InjectModel(User.name) private readonly users: Model<UserDocument>,
+    private readonly redis: RedisService,
   ) {}
+
+  afterInit(server: Server) {
+    try {
+      const pubClient = this.redis.getClient();
+      const subClient = this.redis.createDuplicateClient();
+      if (pubClient && subClient) {
+        server.adapter(createAdapter(pubClient, subClient));
+        this.logger.log('Socket.IO initialized with Redis Pub/Sub adapter for distributed realtime events');
+      }
+    } catch (err: any) {
+      this.logger.warn(`Could not attach Socket.IO Redis adapter (${err.message}). Using in-memory adapter.`);
+    }
+  }
 
   async handleConnection(socket: Socket): Promise<void> {
     try {

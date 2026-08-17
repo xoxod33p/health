@@ -13,6 +13,7 @@ import { EmployeesModule } from './employees/employees.module';
 import { HealthModule } from './health/health.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { RealtimeModule } from './realtime/realtime.module';
+import { RedisModule } from './redis/redis.module';
 import { ReportsModule } from './reports/reports.module';
 import { SensorsModule } from './sensors/sensors.module';
 import { SensorTypesModule } from './sensor-types/sensor-types.module';
@@ -31,6 +32,7 @@ import { UsersModule } from './users/users.module';
         WEB_ORIGIN: Joi.string().empty('').default('http://localhost:3000'),
         MONGODB_URI: Joi.string().uri().empty('').default('mongodb://healthcare:healthcare_prod_secret_123!@mongodb:27017/healthcare?authSource=admin'),
         JWT_SECRET: Joi.string().min(16).empty('').default('care_signal_secure_prod_jwt_secret_99812_key!'),
+        REDIS_URL: Joi.string().empty('').optional(),
       }),
     }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 120 }]),
@@ -38,6 +40,7 @@ import { UsersModule } from './users/users.module';
       useFactory: (config: ConfigService) => ({ uri: config.getOrThrow<string>('MONGODB_URI') }),
       inject: [ConfigService],
     }),
+    RedisModule,
     StorageModule,
     UsersModule,
     AuthModule,

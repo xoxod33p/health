@@ -7,6 +7,7 @@ import { Sensor, SensorDocument } from '../sensors/sensor.schema';
 import { CreateCustomerDto, CustomerQueryDto, UpdateCustomerDto } from './customer.dto';
 import { RealtimeGateway } from '../realtime/realtime.gateway';
 import { AuditService } from '../audit/audit.service';
+import { RedisService } from '../redis/redis.service';
 
 @Injectable()
 export class CustomersService {
@@ -15,6 +16,7 @@ export class CustomersService {
     @InjectModel(Sensor.name) private readonly sensors: Model<SensorDocument>,
     private readonly realtime: RealtimeGateway,
     private readonly audit: AuditService,
+    private readonly redis: RedisService,
   ) {}
 
   async create(user: AuthenticatedUser, dto: CreateCustomerDto): Promise<Customer> {
@@ -22,6 +24,7 @@ export class CustomersService {
     const customerNumber = `CUS-${String(count + 1).padStart(5, '0')}`;
     const customer = await this.customers.create({ ...dto, customerNumber, dateOfBirth: dto.dateOfBirth ? new Date(dto.dateOfBirth) : undefined, companyId: user.companyId, createdBy: user.authUserId, updatedBy: user.authUserId });
     this.realtime.broadcastCompany(user.companyId, 'customer.changed', { action: 'created', customerId: customer._id.toString() });
+    await this.redis.delPattern(`dashboard:summary:${user.companyId}:*`);
     await this.audit.record(user, 'customer.create', 'Customer', customer._id.toString(), {
       customerNumber,
       name: `${customer.firstName} ${customer.lastName}`,
@@ -109,6 +112,7 @@ export class CustomersService {
     const customer = await this.customers.findOneAndUpdate({ _id: id, companyId: user.companyId }, { ...dto, dateOfBirth: dto.dateOfBirth ? new Date(dto.dateOfBirth) : undefined, updatedBy: user.authUserId }, { new: true }).lean().exec();
     if (!customer) throw new NotFoundException('Customer not found');
     this.realtime.broadcastCompany(user.companyId, 'customer.changed', { action: 'updated', customerId: id });
+    await this.redis.delPattern(`dashboard:summary:${user.companyId}:*`);
     await this.audit.record(user, 'customer.update', 'Customer', id, {
       customerNumber: customer.customerNumber,
       name: `${customer.firstName} ${customer.lastName}`,
