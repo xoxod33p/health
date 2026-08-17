@@ -1,9 +1,9 @@
 'use client';
 
-import { Check, ChevronDown, RefreshCw, Search, X } from 'lucide-react';
+import { Check, RefreshCw, Search, UserCheck, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AppShell } from '../../components/app-shell';
 import { apiFetch } from '../../../lib/api';
 
@@ -12,6 +12,8 @@ type CustomerItem = {
   customerNumber: string;
   firstName: string;
   lastName: string;
+  phone?: string;
+  email?: string;
 };
 
 type CustomerResponse = {
@@ -46,8 +48,11 @@ export default function NewSensorPage() {
   const [serialNumber, setSerialNumber] = useState('');
   const [installedAt, setInstalledAt] = useState(getTodayDate);
   const [expiresAt, setExpiresAt] = useState(() => addDaysToDateString(getTodayDate(), 15));
-  const [customerId, setCustomerId] = useState('');
-  const [customerQuery, setCustomerQuery] = useState('');
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerItem | null>(null);
+  const [customerSearchQuery, setCustomerSearchQuery] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -59,12 +64,14 @@ export default function NewSensorPage() {
   };
 
   const filteredCustomers = useMemo(() => {
-    const q = customerQuery.trim().toLowerCase();
+    const q = customerSearchQuery.trim().toLowerCase();
     if (!q) return customers;
     return customers.filter((c) =>
-      `${c.firstName} ${c.lastName} ${c.customerNumber}`.toLowerCase().includes(q)
+      `${c.firstName} ${c.lastName} ${c.customerNumber} ${c.phone ?? ''} ${c.email ?? ''}`
+        .toLowerCase()
+        .includes(q)
     );
-  }, [customers, customerQuery]);
+  }, [customers, customerSearchQuery]);
 
   useEffect(() => {
     let mounted = true;
@@ -79,12 +86,26 @@ export default function NewSensorPage() {
       }
     }
     void loadCustomers();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!serialNumber) return;
+    if (!serialNumber.trim()) return;
 
     setSaving(true);
     setError('');
@@ -105,11 +126,11 @@ export default function NewSensorPage() {
         }),
       });
 
-      if (customerId && createdSensor?._id) {
+      if (selectedCustomer && createdSensor?._id) {
         await apiFetch(`/sensors/${createdSensor._id}/assign`, {
           method: 'POST',
           body: JSON.stringify({
-            customerId,
+            customerId: selectedCustomer._id,
             installedAt: installDateIso,
           }),
         }).catch(() => null);
@@ -126,8 +147,8 @@ export default function NewSensorPage() {
   return (
     <AppShell title="Add a sensor">
       <div className="page-content">
-        <section className="panel" style={{ maxWidth: '680px', margin: '0 auto', padding: '22px 24px' }}>
-          <div className="panel-heading" style={{ marginBottom: '18px' }}>
+        <section className="panel" style={{ maxWidth: '640px', margin: '0 auto', padding: '24px 26px' }}>
+          <div className="panel-heading" style={{ marginBottom: '20px' }}>
             <div>
               <p className="eyebrow">Hardware telemetry register</p>
               <h2>Add New Sensor</h2>
@@ -135,103 +156,335 @@ export default function NewSensorPage() {
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div className="form-grid">
-              <label style={{ gridColumn: 'span 2' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+              <label>
                 Serial number <span style={{ color: '#ef4444' }}>*</span>
                 <input
                   required
                   placeholder="e.g. CGM-44105 or ECG-88902"
                   value={serialNumber}
                   onChange={(e) => setSerialNumber(e.target.value)}
+                  style={{ marginTop: '5px' }}
                 />
               </label>
 
-              <label>
-                Installation Date <span style={{ color: '#ef4444' }}>*</span>
-                <input
-                  type="date"
-                  required
-                  value={installedAt}
-                  onChange={(e) => handleInstalledAtChange(e.target.value)}
-                />
-                <span style={{ fontSize: '11px', color: '#64748b', marginTop: '3px', display: 'block' }}>
-                  Date installed on customer
-                </span>
-              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                <label>
+                  Installation Date <span style={{ color: '#ef4444' }}>*</span>
+                  <input
+                    type="date"
+                    required
+                    value={installedAt}
+                    onChange={(e) => handleInstalledAtChange(e.target.value)}
+                    style={{ marginTop: '5px' }}
+                  />
+                  <span style={{ fontSize: '11px', color: '#64748b', marginTop: '3px', display: 'block' }}>
+                    Date installed on customer
+                  </span>
+                </label>
 
-              <label>
-                Expiration Date <span style={{ color: '#ef4444' }}>*</span>
-                <input
-                  type="date"
-                  required
-                  value={expiresAt}
-                  onChange={(e) => setExpiresAt(e.target.value)}
-                />
-                <span style={{ fontSize: '11px', color: '#0f766e', fontWeight: 500, marginTop: '3px', display: 'block' }}>
-                  Auto-calculated (15 days from installation)
-                </span>
-              </label>
+                <label>
+                  Expiration Date <span style={{ color: '#ef4444' }}>*</span>
+                  <input
+                    type="date"
+                    required
+                    value={expiresAt}
+                    onChange={(e) => setExpiresAt(e.target.value)}
+                    style={{ marginTop: '5px' }}
+                  />
+                  <span style={{ fontSize: '11px', color: '#0f766e', fontWeight: 600, marginTop: '3px', display: 'block' }}>
+                    Auto-calculated (15 days)
+                  </span>
+                </label>
+              </div>
 
-              <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '4px' }}>
+              {/* Modern Customer Combobox Picker */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <label style={{ margin: 0, fontWeight: 500 }}>
-                    Link to Customer (optional)
+                  <label style={{ margin: 0, fontWeight: 600, fontSize: '13px', color: '#1e293b' }}>
+                    Link to Customer <span style={{ fontWeight: 400, color: '#64748b', fontSize: '12px' }}>(Optional)</span>
                   </label>
-                  {customerQuery && (
-                    <span style={{ fontSize: '11px', color: '#64748b' }}>
-                      {filteredCustomers.length} {filteredCustomers.length === 1 ? 'match' : 'matches'}
+                  {selectedCustomer && (
+                    <span style={{ fontSize: '11px', color: '#0f766e', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                      <UserCheck size={12} /> Customer selected
                     </span>
                   )}
                 </div>
 
-                <div className="search-field" style={{ width: '100%', maxWidth: '100%', position: 'relative' }}>
-                  <Search size={15} />
-                  <input
-                    type="text"
-                    value={customerQuery}
-                    onChange={(e) => setCustomerQuery(e.target.value)}
-                    placeholder="Search customer name or ID..."
-                    style={{ height: '36px', fontSize: '13px', width: '100%', paddingRight: customerQuery ? '28px' : '10px' }}
-                  />
-                  {customerQuery && (
+                {selectedCustomer ? (
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '10px 14px',
+                      background: '#f0fdfa',
+                      border: '1.5px solid #0f766e',
+                      borderRadius: '8px',
+                      boxShadow: '0 1px 3px rgba(15, 118, 110, 0.08)',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div
+                        style={{
+                          width: '34px',
+                          height: '34px',
+                          borderRadius: '50%',
+                          background: '#ccfbf1',
+                          color: '#0f766e',
+                          fontWeight: 700,
+                          fontSize: '11.5px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                          textTransform: 'uppercase',
+                        }}
+                      >
+                        {[selectedCustomer.firstName?.[0], selectedCustomer.lastName?.[0]].filter(Boolean).join('') || 'C'}
+                      </div>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <strong style={{ fontSize: '13.5px', color: '#0f172a', fontWeight: 600 }}>
+                            {selectedCustomer.firstName} {selectedCustomer.lastName}
+                          </strong>
+                          <span className="id-badge">
+                            {selectedCustomer.customerNumber}
+                          </span>
+                        </div>
+                        {(selectedCustomer.phone || selectedCustomer.email) && (
+                          <div style={{ fontSize: '11px', color: '#64748b', marginTop: '1px' }}>
+                            {[selectedCustomer.phone, selectedCustomer.email].filter(Boolean).join(' • ')}
+                          </div>
+                        )}
+                      </div>
+                    </div>
                     <button
                       type="button"
-                      onClick={() => setCustomerQuery('')}
+                      onClick={() => {
+                        setSelectedCustomer(null);
+                        setCustomerSearchQuery('');
+                        setIsDropdownOpen(true);
+                      }}
                       style={{
-                        position: 'absolute',
-                        right: '8px',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        background: 'transparent',
-                        border: 'none',
-                        color: '#94a3b8',
+                        background: '#ffffff',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '6px',
+                        color: '#475569',
+                        padding: '5px 10px',
+                        fontSize: '11.5px',
+                        fontWeight: 600,
                         cursor: 'pointer',
-                        padding: '4px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        transition: 'all 0.15s',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = '#ef4444';
+                        e.currentTarget.style.color = '#ef4444';
+                        e.currentTarget.style.background = '#fef2f2';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = '#cbd5e1';
+                        e.currentTarget.style.color = '#475569';
+                        e.currentTarget.style.background = '#ffffff';
+                      }}
+                    >
+                      <X size={13} /> Change
+                    </button>
+                  </div>
+                ) : (
+                  <div ref={dropdownRef} style={{ position: 'relative', width: '100%' }}>
+                    <div
+                      style={{
+                        position: 'relative',
                         display: 'flex',
                         alignItems: 'center',
+                        width: '100%',
                       }}
-                      aria-label="Clear customer search"
                     >
-                      <X size={14} />
-                    </button>
-                  )}
-                </div>
+                      <Search
+                        size={15}
+                        style={{
+                          position: 'absolute',
+                          left: '12px',
+                          color: isDropdownOpen ? '#0f766e' : '#94a3b8',
+                          pointerEvents: 'none',
+                          transition: 'color 0.2s',
+                        }}
+                      />
+                      <input
+                        type="text"
+                        value={customerSearchQuery}
+                        onChange={(e) => {
+                          setCustomerSearchQuery(e.target.value);
+                          setIsDropdownOpen(true);
+                        }}
+                        onFocus={() => setIsDropdownOpen(true)}
+                        placeholder="Search and select customer (or leave unassigned)..."
+                        style={{
+                          width: '100%',
+                          height: '40px',
+                          paddingLeft: '36px',
+                          paddingRight: customerSearchQuery ? '32px' : '14px',
+                          fontSize: '13px',
+                          borderRadius: '8px',
+                          border: isDropdownOpen ? '1.5px solid #0f766e' : '1px solid #cbd5e1',
+                          outline: 'none',
+                          boxShadow: isDropdownOpen ? '0 0 0 3px rgba(15, 118, 110, 0.1)' : 'none',
+                          transition: 'all 0.2s',
+                          background: '#ffffff',
+                        }}
+                      />
+                      {customerSearchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setCustomerSearchQuery('')}
+                          style={{
+                            position: 'absolute',
+                            right: '10px',
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#94a3b8',
+                            cursor: 'pointer',
+                            padding: '4px',
+                            display: 'flex',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <X size={14} />
+                        </button>
+                      )}
+                    </div>
 
-                <div className="select-wrap" style={{ marginTop: '2px' }}>
-                  <select
-                    value={customerId}
-                    onChange={(e) => setCustomerId(e.target.value)}
-                    disabled={loading}
-                  >
-                    <option value="">None — keep as unassigned inventory</option>
-                    {filteredCustomers.map((c) => (
-                      <option key={c._id} value={c._id}>
-                        {c.firstName} {c.lastName} ({c.customerNumber})
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown size={15} />
-                </div>
+                    {isDropdownOpen && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: 'calc(100% + 4px)',
+                          left: 0,
+                          right: 0,
+                          zIndex: 50,
+                          background: '#ffffff',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '8px',
+                          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05)',
+                          maxHeight: '250px',
+                          overflowY: 'auto',
+                        }}
+                        className="custom-scrollbar"
+                      >
+                        <div
+                          onClick={() => {
+                            setSelectedCustomer(null);
+                            setCustomerSearchQuery('');
+                            setIsDropdownOpen(false);
+                          }}
+                          style={{
+                            padding: '10px 14px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            borderBottom: '1px solid #f1f5f9',
+                            background: '#fafafa',
+                            color: '#64748b',
+                            fontSize: '12.5px',
+                            fontWeight: 500,
+                          }}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = '#f1f5f9')}
+                          onMouseLeave={(e) => (e.currentTarget.style.background = '#fafafa')}
+                        >
+                          <div
+                            style={{
+                              width: '28px',
+                              height: '28px',
+                              borderRadius: '50%',
+                              background: '#e2e8f0',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: '#64748b',
+                              fontSize: '11px',
+                            }}
+                          >
+                            —
+                          </div>
+                          <span>None — Keep sensor as unassigned inventory</span>
+                        </div>
+
+                        {loading ? (
+                          <div style={{ padding: '16px', textAlign: 'center', color: '#94a3b8', fontSize: '12.5px' }}>
+                            Loading customer directory...
+                          </div>
+                        ) : filteredCustomers.length === 0 ? (
+                          <div style={{ padding: '16px', textAlign: 'center', color: '#94a3b8', fontSize: '12.5px' }}>
+                            No customers found matching "{customerSearchQuery}"
+                          </div>
+                        ) : (
+                          filteredCustomers.map((c) => {
+                            const initials = [c.firstName?.[0], c.lastName?.[0]].filter(Boolean).join('').toUpperCase() || 'C';
+                            return (
+                              <div
+                                key={c._id}
+                                onClick={() => {
+                                  setSelectedCustomer(c);
+                                  setCustomerSearchQuery('');
+                                  setIsDropdownOpen(false);
+                                }}
+                                style={{
+                                  padding: '10px 14px',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  borderBottom: '1px solid #f8fafc',
+                                  transition: 'background 0.12s',
+                                }}
+                                onMouseEnter={(e) => (e.currentTarget.style.background = '#f0fdfa')}
+                                onMouseLeave={(e) => (e.currentTarget.style.background = '#ffffff')}
+                              >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                  <div
+                                    style={{
+                                      width: '32px',
+                                      height: '32px',
+                                      borderRadius: '50%',
+                                      background: '#e0f2fe',
+                                      color: '#0369a1',
+                                      fontWeight: 700,
+                                      fontSize: '11px',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      flexShrink: 0,
+                                    }}
+                                  >
+                                    {initials}
+                                  </div>
+                                  <div>
+                                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>
+                                      {c.firstName} {c.lastName}
+                                    </div>
+                                    {(c.phone || c.email) && (
+                                      <div style={{ fontSize: '11px', color: '#64748b', marginTop: '1px' }}>
+                                        {[c.phone, c.email].filter(Boolean).join(' • ')}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                <span className="id-badge">
+                                  {c.customerNumber}
+                                </span>
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -239,7 +492,7 @@ export default function NewSensorPage() {
               <div className="form-error" style={{ marginTop: '16px', marginBottom: '8px' }}>{error}</div>
             )}
 
-            <div className="form-actions" style={{ marginTop: '20px' }}>
+            <div className="form-actions" style={{ marginTop: '24px' }}>
               <Link className="secondary-button" href="/sensors">Cancel</Link>
               <button className="primary-button" type="submit" disabled={saving}>
                 {saving ? <RefreshCw size={16} className="spin" /> : <><Check size={16} /> Save sensor</>}
