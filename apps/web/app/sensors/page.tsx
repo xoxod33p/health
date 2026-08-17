@@ -882,8 +882,8 @@ export default function SensorsPage() {
                     {assignSensor.customerId ? 'Reinstall / Reassign Sensor' : 'Install Sensor for Customer'}
                   </h2>
                   <p style={{ fontSize: '12px', color: '#64748b' }}>
-                    Serial: <strong style={{ fontFamily: 'monospace' }}>{assignSensor.serialNumber}</strong> (
-                    {assignSensor.sensorTypeName || assignSensor.sensorTypeId})
+                    Serial: <strong style={{ fontFamily: 'monospace' }}>{assignSensor.serialNumber}</strong>
+                    {assignSensor.sensorTypeName && assignSensor.sensorTypeName !== 'default' ? ` (${assignSensor.sensorTypeName})` : ''}
                   </p>
                 </div>
                 <button
@@ -1110,8 +1110,8 @@ export default function SensorsPage() {
                 <div>
                   <h2 style={{ fontSize: '18px' }}>Assignment & Telemetry History</h2>
                   <p style={{ fontSize: '12px', color: '#64748b' }}>
-                    Sensor: <strong style={{ fontFamily: 'monospace' }}>{historySensor.serialNumber}</strong> (
-                    {historySensor.sensorTypeName || historySensor.sensorTypeId})
+                    Sensor: <strong style={{ fontFamily: 'monospace' }}>{historySensor.serialNumber}</strong>
+                    {historySensor.sensorTypeName && historySensor.sensorTypeName !== 'default' ? ` (${historySensor.sensorTypeName})` : ''}
                   </p>
                 </div>
                 <button

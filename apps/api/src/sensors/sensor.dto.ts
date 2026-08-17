@@ -2,7 +2,7 @@ import { IsDateString, IsEnum, IsOptional, IsString, MaxLength, MinLength } from
 
 export class CreateSensorDto {
   @IsString() @MinLength(1) @MaxLength(100) serialNumber!: string;
-  @IsString() @MinLength(1) @MaxLength(100) sensorTypeId!: string;
+  @IsOptional() @IsString() @MaxLength(100) sensorTypeId?: string;
   @IsOptional() @IsString() @MaxLength(100) manufacturer?: string;
   @IsOptional() @IsString() @MaxLength(100) model?: string;
   @IsOptional() @IsDateString() expiresAt?: string;

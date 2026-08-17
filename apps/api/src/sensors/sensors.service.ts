@@ -22,10 +22,15 @@ export class SensorsService {
   ) {}
 
   async create(user: AuthenticatedUser, dto: CreateSensorDto): Promise<Sensor> {
-    const expiresAt = dto.expiresAt ? new Date(dto.expiresAt) : new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
     const activatedAt = dto.installedAt || dto.activatedAt ? new Date(dto.installedAt || dto.activatedAt!) : undefined;
+    const expiresAt = dto.expiresAt
+      ? new Date(dto.expiresAt)
+      : activatedAt
+      ? new Date(activatedAt.getTime() + 15 * 24 * 60 * 60 * 1000)
+      : new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
     const sensor = await this.sensors.create({
       ...dto,
+      sensorTypeId: dto.sensorTypeId || 'default',
       expiresAt,
       ...(activatedAt ? { activatedAt } : {}),
       companyId: user.companyId,
@@ -54,7 +59,9 @@ export class SensorsService {
       .map((s) => s.customerId)
       .filter((id): id is Types.ObjectId => !!id && Types.ObjectId.isValid(id as any));
 
-    const sensorTypeIds = Array.from(new Set(rawSensors.map((s) => s.sensorTypeId).filter(Boolean)));
+    const sensorTypeIds = Array.from(
+      new Set(rawSensors.map((s) => s.sensorTypeId).filter((id): id is string => !!id)),
+    );
 
     const validObjectIds = sensorTypeIds.filter((id) => Types.ObjectId.isValid(id));
 
@@ -81,12 +88,12 @@ export class SensorsService {
 
     const data = rawSensors.map((s) => {
       const cust = s.customerId ? customerMap.get(s.customerId.toString()) : undefined;
-      const st = sensorTypeMap.get(s.sensorTypeId);
+      const st = s.sensorTypeId ? sensorTypeMap.get(s.sensorTypeId) : undefined;
       return {
         ...s,
         customerName: cust ? `${cust.firstName} ${cust.lastName}` : undefined,
         customerNumber: cust?.customerNumber,
-        sensorTypeName: st?.name || s.sensorTypeId,
+        sensorTypeName: st?.name || (s.sensorTypeId && s.sensorTypeId !== 'default' ? s.sensorTypeId : undefined),
         sensorTypeCode: st?.code,
         installedAt: s.activatedAt,
       };
@@ -116,6 +123,7 @@ export class SensorsService {
     sensor.customerId = customer._id;
     sensor.status = 'ASSIGNED';
     sensor.activatedAt = installDate;
+    sensor.expiresAt = new Date(installDate.getTime() + 15 * 24 * 60 * 60 * 1000);
     const saved = await sensor.save();
     this.realtime.broadcastCompany(user.companyId, 'sensor.changed', { action: 'assigned', sensorId: sensorId, customerId: dto.customerId });
     return saved;

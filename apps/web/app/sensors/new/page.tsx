@@ -18,24 +18,19 @@ type CustomerResponse = {
   data: CustomerItem[];
 };
 
-type SensorTypeItem = {
-  _id: string;
-  name: string;
-  code: string;
-  status: string;
-};
-
-function getDefaultExpiryDate() {
+function getTodayDate(): string {
   const d = new Date();
-  d.setDate(d.getDate() + 15);
   const year = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
 
-function getTodayDate() {
-  const d = new Date();
+function addDaysToDateString(dateStr: string, days = 15): string {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '';
+  d.setDate(d.getDate() + days);
   const year = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
@@ -45,18 +40,23 @@ function getTodayDate() {
 export default function NewSensorPage() {
   const router = useRouter();
   const [customers, setCustomers] = useState<CustomerItem[]>([]);
-  const [sensorTypes, setSensorTypes] = useState<SensorTypeItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Form State
   const [serialNumber, setSerialNumber] = useState('');
-  const [sensorTypeId, setSensorTypeId] = useState('');
-  const [expiresAt, setExpiresAt] = useState(getDefaultExpiryDate);
-  const [customerId, setCustomerId] = useState('');
   const [installedAt, setInstalledAt] = useState(getTodayDate);
+  const [expiresAt, setExpiresAt] = useState(() => addDaysToDateString(getTodayDate(), 15));
+  const [customerId, setCustomerId] = useState('');
   const [customerQuery, setCustomerQuery] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
+  const handleInstalledAtChange = (newDate: string) => {
+    setInstalledAt(newDate);
+    if (newDate) {
+      setExpiresAt(addDaysToDateString(newDate, 15));
+    }
+  };
 
   const filteredCustomers = useMemo(() => {
     const q = customerQuery.trim().toLowerCase();
@@ -68,25 +68,17 @@ export default function NewSensorPage() {
 
   useEffect(() => {
     let mounted = true;
-    async function loadData() {
+    async function loadCustomers() {
       try {
-        const [cRes, stRes] = await Promise.all([
-          apiFetch<CustomerResponse>('/customers?limit=100').catch(() => ({ data: [] })),
-          apiFetch<SensorTypeItem[]>('/sensor-types').catch(() => []),
-        ]);
+        const cRes = await apiFetch<CustomerResponse>('/customers?limit=100').catch(() => ({ data: [] }));
         if (mounted) {
           setCustomers(cRes.data || []);
-          const activeTypes = Array.isArray(stRes) ? stRes.filter((t) => t.status === 'ACTIVE') : [];
-          setSensorTypes(activeTypes);
-          if (activeTypes.length > 0 && activeTypes[0]?._id) {
-            setSensorTypeId(activeTypes[0]._id);
-          }
         }
       } finally {
         if (mounted) setLoading(false);
       }
     }
-    void loadData();
+    void loadCustomers();
     return () => { mounted = false; };
   }, []);
 
@@ -98,14 +90,18 @@ export default function NewSensorPage() {
     setError('');
 
     try {
+      const installDateIso = installedAt ? new Date(installedAt).toISOString() : new Date().toISOString();
+      const expireDateIso = expiresAt
+        ? new Date(expiresAt).toISOString()
+        : new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString();
+
       const createdSensor = await apiFetch<{ _id: string }>('/sensors', {
         method: 'POST',
         body: JSON.stringify({
           serialNumber: serialNumber.trim(),
-          sensorTypeId: sensorTypeId || 'default',
-          expiresAt: expiresAt
-            ? new Date(expiresAt).toISOString()
-            : new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+          sensorTypeId: 'default',
+          installedAt: installDateIso,
+          expiresAt: expireDateIso,
         }),
       });
 
@@ -114,7 +110,7 @@ export default function NewSensorPage() {
           method: 'POST',
           body: JSON.stringify({
             customerId,
-            installedAt: installedAt ? new Date(installedAt).toISOString() : new Date().toISOString(),
+            installedAt: installDateIso,
           }),
         }).catch(() => null);
       }
@@ -130,8 +126,8 @@ export default function NewSensorPage() {
   return (
     <AppShell title="Add a sensor">
       <div className="page-content">
-        <section className="panel" style={{ maxWidth: '680px', margin: '0 auto', padding: '20px 22px' }}>
-          <div className="panel-heading" style={{ marginBottom: '16px' }}>
+        <section className="panel" style={{ maxWidth: '680px', margin: '0 auto', padding: '22px 24px' }}>
+          <div className="panel-heading" style={{ marginBottom: '18px' }}>
             <div>
               <p className="eyebrow">Hardware telemetry register</p>
               <h2>Add New Sensor</h2>
@@ -140,7 +136,7 @@ export default function NewSensorPage() {
 
           <form onSubmit={handleSubmit}>
             <div className="form-grid">
-              <label>
+              <label style={{ gridColumn: 'span 2' }}>
                 Serial number <span style={{ color: '#ef4444' }}>*</span>
                 <input
                   required
@@ -151,43 +147,35 @@ export default function NewSensorPage() {
               </label>
 
               <label>
-                Sensor type
-                <div className="select-wrap">
-                  <select
-                    value={sensorTypeId}
-                    onChange={(e) => setSensorTypeId(e.target.value)}
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <option value="">Loading...</option>
-                    ) : sensorTypes.length === 0 ? (
-                      <option value="">No types defined</option>
-                    ) : (
-                      sensorTypes.map((st) => (
-                        <option key={st._id} value={st._id}>
-                          {st.name} ({st.code})
-                        </option>
-                      ))
-                    )}
-                  </select>
-                  <ChevronDown size={15} />
-                </div>
+                Installation Date <span style={{ color: '#ef4444' }}>*</span>
+                <input
+                  type="date"
+                  required
+                  value={installedAt}
+                  onChange={(e) => handleInstalledAtChange(e.target.value)}
+                />
+                <span style={{ fontSize: '11px', color: '#64748b', marginTop: '3px', display: 'block' }}>
+                  Date installed on customer
+                </span>
               </label>
 
               <label>
-                Expiration date <span style={{ color: '#ef4444' }}>*</span>
+                Expiration Date <span style={{ color: '#ef4444' }}>*</span>
                 <input
                   type="date"
                   required
                   value={expiresAt}
                   onChange={(e) => setExpiresAt(e.target.value)}
                 />
+                <span style={{ fontSize: '11px', color: '#0f766e', fontWeight: 500, marginTop: '3px', display: 'block' }}>
+                  Auto-calculated (15 days from installation)
+                </span>
               </label>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '4px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <label style={{ margin: 0, fontWeight: 500 }}>
-                    Link to customer (optional)
+                    Link to Customer (optional)
                   </label>
                   {customerQuery && (
                     <span style={{ fontSize: '11px', color: '#64748b' }}>
@@ -244,17 +232,6 @@ export default function NewSensorPage() {
                   </select>
                   <ChevronDown size={15} />
                 </div>
-
-                {customerId && (
-                  <label style={{ marginTop: '8px' }}>
-                    Installation Date
-                    <input
-                      type="date"
-                      value={installedAt}
-                      onChange={(e) => setInstalledAt(e.target.value)}
-                    />
-                  </label>
-                )}
               </div>
             </div>
 
@@ -262,7 +239,7 @@ export default function NewSensorPage() {
               <div className="form-error" style={{ marginTop: '16px', marginBottom: '8px' }}>{error}</div>
             )}
 
-            <div className="form-actions">
+            <div className="form-actions" style={{ marginTop: '20px' }}>
               <Link className="secondary-button" href="/sensors">Cancel</Link>
               <button className="primary-button" type="submit" disabled={saving}>
                 {saving ? <RefreshCw size={16} className="spin" /> : <><Check size={16} /> Save sensor</>}

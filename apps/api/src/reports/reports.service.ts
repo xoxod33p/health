@@ -377,7 +377,7 @@ export class ReportsService {
       const cId = s.customerId ? s.customerId.toString() : '';
       return {
         serialNumber: s.serialNumber,
-        sensorType: typeMap.get(s.sensorTypeId) ?? (s.sensorTypeId ? s.sensorTypeId : '—'),
+        sensorType: (s.sensorTypeId ? typeMap.get(s.sensorTypeId) : undefined) ?? (s.sensorTypeId && s.sensorTypeId !== 'default' ? s.sensorTypeId : '—'),
         status: s.status,
         customerName: customerMap.get(cId) ?? (s.customerId ? String(s.customerId) : 'Unassigned'),
         customerNumber: customerNoMap.get(cId) ?? '—',

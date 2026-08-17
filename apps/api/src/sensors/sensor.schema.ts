@@ -7,7 +7,7 @@ export type SensorDocument = HydratedDocument<Sensor>;
 export class Sensor {
   @Prop({ required: true, index: true }) companyId!: string;
   @Prop({ required: true }) serialNumber!: string;
-  @Prop({ required: true }) sensorTypeId!: string;
+  @Prop({ default: 'default' }) sensorTypeId?: string;
   @Prop({ default: '' }) manufacturer?: string;
   @Prop({ default: '' }) model?: string;
   @Prop({ type: Types.ObjectId, ref: 'Customer' }) customerId?: Types.ObjectId;

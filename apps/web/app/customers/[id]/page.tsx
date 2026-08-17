@@ -1011,7 +1011,7 @@ export default function CustomerDetailPage() {
                           <option value="" disabled>Choose a sensor...</option>
                           {availableSensors.map((s) => (
                             <option key={s._id} value={s._id}>
-                              {s.serialNumber} — {s.sensorTypeName || s.sensorTypeId} ({s.manufacturer || ''})
+                              {s.serialNumber}{s.sensorTypeName && s.sensorTypeName !== 'default' ? ` — ${s.sensorTypeName}` : ''}
                             </option>
                           ))}
                         </select>
