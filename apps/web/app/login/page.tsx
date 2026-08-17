@@ -4,7 +4,6 @@ import { Activity, ArrowRight, Lock, Mail } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from '../../lib/api';
-import { ThemeToggle } from '../components/theme-toggle';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -30,10 +29,6 @@ export default function LoginPage() {
 
   return (
     <main className="login-page">
-      <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 10 }}>
-        <ThemeToggle variant="icon" />
-      </div>
-
       <div className="login-container">
         <div className="login-brand">
           <div className="brand-mark">

@@ -6,13 +6,8 @@ import {
   Laptop, 
   Moon, 
   Palette, 
-  Save, 
   ShieldCheck, 
-  Sparkles, 
-  Sun, 
-  Volume2, 
-  Wifi, 
-  Radio
+  Sun 
 } from 'lucide-react';
 import { AppShell } from '../components/app-shell';
 import { useTheme, type Theme } from '../components/theme-provider';
@@ -21,12 +16,6 @@ import { getCachedSession, getSession } from '../../lib/api';
 export default function SettingsPage() {
   const { theme, resolvedTheme, setTheme } = useTheme();
   const [currentUser, setCurrentUser] = useState<{ email?: string; role?: string; name?: string } | null>(null);
-  
-  // Local interface preferences
-  const [autoRefresh, setAutoRefresh] = useState(true);
-  const [soundAlerts, setSoundAlerts] = useState(true);
-  const [denseTables, setDenseTables] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
     // Load session info
@@ -38,45 +27,13 @@ export default function SettingsPage() {
         if (data?.session?.user) setCurrentUser(data.session.user);
       });
     }
-
-    // Load stored preferences
-    try {
-      const storedAuto = localStorage.getItem('caresignal-autorefresh');
-      if (storedAuto !== null) setAutoRefresh(storedAuto === 'true');
-
-      const storedSound = localStorage.getItem('caresignal-sound');
-      if (storedSound !== null) setSoundAlerts(storedSound === 'true');
-
-      const storedDense = localStorage.getItem('caresignal-dense');
-      if (storedDense !== null) setDenseTables(storedDense === 'true');
-    } catch {}
   }, []);
-
-  const handleSavePreferences = () => {
-    try {
-      localStorage.setItem('caresignal-autorefresh', String(autoRefresh));
-      localStorage.setItem('caresignal-sound', String(soundAlerts));
-      localStorage.setItem('caresignal-dense', String(denseTables));
-      
-      setToastMessage('Preferences saved successfully');
-      setTimeout(() => setToastMessage(null), 3000);
-    } catch {
-      setToastMessage('Failed to save preferences');
-      setTimeout(() => setToastMessage(null), 3000);
-    }
-  };
 
   const themeOptions: { id: Theme; label: string; desc: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
     {
-      id: 'system',
-      label: 'Device Preference',
-      desc: 'Automatically synchronizes with your operating system light / dark settings',
-      icon: Laptop,
-    },
-    {
       id: 'light',
       label: 'Light Mode',
-      desc: 'Clean, high-visibility medical daylight interface optimized for bright environments',
+      desc: 'Clean, high-visibility medical daylight interface optimized for bright environments (Default)',
       icon: Sun,
     },
     {
@@ -85,26 +42,25 @@ export default function SettingsPage() {
       desc: 'Deep obsidian contrast theme designed for low-light clinical control centers',
       icon: Moon,
     },
+    {
+      id: 'system',
+      label: 'Device Preference',
+      desc: 'Automatically synchronizes with your operating system light / dark settings',
+      icon: Laptop,
+    },
   ];
 
   return (
     <AppShell title="Platform Settings">
       <div className="page-content">
-        <div className="page-header-row">
+        <div className="page-header-row" style={{ marginBottom: '24px' }}>
           <div>
-            <p className="eyebrow">Customization & Preferences</p>
-            <h1 className="page-title-text">Platform Settings</h1>
+            <p className="eyebrow">Interface & Configuration</p>
+            <h1 className="page-title-text">Settings</h1>
           </div>
-          <button 
-            type="button" 
-            className="primary-button"
-            onClick={handleSavePreferences}
-          >
-            <Save size={16} /> Save Preferences
-          </button>
         </div>
 
-        {/* Section 1: Appearance & Theme Mode */}
+        {/* Theme Settings Section */}
         <section className="panel form-panel" style={{ marginBottom: '24px' }}>
           <div className="panel-heading" style={{ marginBottom: '20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -123,16 +79,16 @@ export default function SettingsPage() {
               <div>
                 <h2 style={{ fontSize: '17px', margin: 0, color: 'var(--ink-heading)' }}>Appearance & Theme</h2>
                 <p style={{ margin: '2px 0 0', fontSize: '13px', color: 'var(--muted)' }}>
-                  Configure how the CareSignal application displays across your workstations.
+                  Select your preferred color theme across the platform.
                 </p>
               </div>
             </div>
             <span className="id-badge" style={{ textTransform: 'capitalize' }}>
-              Current: {theme === 'system' ? `System (${resolvedTheme})` : resolvedTheme}
+              Active: {theme === 'system' ? `Device Preference (${resolvedTheme})` : resolvedTheme}
             </span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginBottom: '8px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
             {themeOptions.map((opt) => {
               const Icon = opt.icon;
               const isSelected = theme === opt.id;
@@ -144,7 +100,7 @@ export default function SettingsPage() {
                     border: isSelected ? '2px solid var(--teal)' : '1px solid var(--line)',
                     background: isSelected ? 'var(--teal-soft)' : 'var(--white)',
                     borderRadius: '10px',
-                    padding: '16px 18px',
+                    padding: '18px 20px',
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
                     display: 'flex',
@@ -155,10 +111,10 @@ export default function SettingsPage() {
                   }}
                 >
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
                       <div style={{
-                        width: '32px',
-                        height: '32px',
+                        width: '34px',
+                        height: '34px',
                         borderRadius: '7px',
                         background: isSelected ? 'var(--teal)' : 'var(--surface-hover)',
                         color: isSelected ? '#ffffff' : 'var(--ink)',
@@ -166,12 +122,12 @@ export default function SettingsPage() {
                         alignItems: 'center',
                         justifyContent: 'center',
                       }}>
-                        <Icon size={16} />
+                        <Icon size={17} />
                       </div>
                       {isSelected && (
                         <div style={{
-                          width: '20px',
-                          height: '20px',
+                          width: '22px',
+                          height: '22px',
                           borderRadius: '50%',
                           background: 'var(--teal)',
                           color: '#ffffff',
@@ -179,11 +135,11 @@ export default function SettingsPage() {
                           alignItems: 'center',
                           justifyContent: 'center',
                         }}>
-                          <Check size={12} strokeWidth={3} />
+                          <Check size={13} strokeWidth={3} />
                         </div>
                       )}
                     </div>
-                    <strong style={{ fontSize: '14px', color: 'var(--ink-heading)', display: 'block', marginBottom: '4px' }}>
+                    <strong style={{ fontSize: '14px', color: 'var(--ink-heading)', display: 'block', marginBottom: '6px' }}>
                       {opt.label}
                     </strong>
                     <p style={{ fontSize: '12px', color: 'var(--muted)', margin: 0, lineHeight: 1.45 }}>
@@ -196,80 +152,7 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        {/* Section 2: Workspace & Operational Preferences */}
-        <section className="panel form-panel" style={{ marginBottom: '24px' }}>
-          <div className="panel-heading" style={{ marginBottom: '20px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '8px',
-                background: 'rgba(79, 121, 199, 0.15)',
-                color: 'var(--blue)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-                <Radio size={18} />
-              </div>
-              <div>
-                <h2 style={{ fontSize: '17px', margin: 0, color: 'var(--ink-heading)' }}>Operational Telemetry</h2>
-                <p style={{ margin: '2px 0 0', fontSize: '13px', color: 'var(--muted)' }}>
-                  Manage real-time streaming, alerting sounds, and table densities.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="toggle-list" style={{ margin: 0 }}>
-            <label className="toggle-card">
-              <div className="toggle-info">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Wifi size={16} style={{ color: 'var(--teal)' }} />
-                  <strong>Real-Time Telemetry Streaming</strong>
-                </div>
-                <small>Automatically receive live sensor readings and operational status via SSE streams</small>
-              </div>
-              <input
-                type="checkbox"
-                checked={autoRefresh}
-                onChange={(e) => setAutoRefresh(e.target.checked)}
-              />
-            </label>
-
-            <label className="toggle-card">
-              <div className="toggle-info">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Volume2 size={16} style={{ color: 'var(--amber)' }} />
-                  <strong>Critical Threshold Audio Alarms</strong>
-                </div>
-                <small>Play subtle audible notification tone when sensors trigger critical telemetry status</small>
-              </div>
-              <input
-                type="checkbox"
-                checked={soundAlerts}
-                onChange={(e) => setSoundAlerts(e.target.checked)}
-              />
-            </label>
-
-            <label className="toggle-card">
-              <div className="toggle-info">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Sparkles size={16} style={{ color: 'var(--blue)' }} />
-                  <strong>Compact Data Grid Mode</strong>
-                </div>
-                <small>Increase information density on sensor, audit, and customer data tables</small>
-              </div>
-              <input
-                type="checkbox"
-                checked={denseTables}
-                onChange={(e) => setDenseTables(e.target.checked)}
-              />
-            </label>
-          </div>
-        </section>
-
-        {/* Section 3: Account & Session Info */}
+        {/* Account Details Section */}
         <section className="panel form-panel">
           <div className="panel-heading" style={{ marginBottom: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -318,19 +201,11 @@ export default function SettingsPage() {
                 Platform Version
               </span>
               <strong style={{ fontSize: '13.5px', color: 'var(--ink)' }}>
-                CareSignal v2.4.0 (PWA Ready)
+                CareSignal v2.4.0
               </strong>
             </div>
           </div>
         </section>
-
-        {/* Floating Toast Notification */}
-        {toastMessage && (
-          <div className="toast">
-            <Check size={16} style={{ color: 'var(--teal)' }} />
-            <span>{toastMessage}</span>
-          </div>
-        )}
       </div>
     </AppShell>
   );

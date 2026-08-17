@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { getCachedSession, getSession, signOut } from '../../lib/api';
-import { ThemeToggle } from './theme-toggle';
 
 const navigation = [
   { label: 'Overview', href: '/', icon: LayoutDashboard },
@@ -162,10 +161,7 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
             <h1 className="topbar-title">{title ?? activeLabel}</h1>
           </div>
           {headerCenter && <div className="topbar-center">{headerCenter}</div>}
-          <div className="topbar-right">
-            {headerActions}
-            <ThemeToggle variant="icon" />
-          </div>
+          {headerActions && <div className="topbar-right">{headerActions}</div>}
         </header>
         {children}
 
