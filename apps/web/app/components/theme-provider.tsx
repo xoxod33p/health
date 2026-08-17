@@ -13,7 +13,7 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: 'system',
+  theme: 'light',
   resolvedTheme: 'light',
   setTheme: () => {},
   toggleTheme: () => {},
@@ -22,21 +22,21 @@ const ThemeContext = createContext<ThemeContextType>({
 const THEME_STORAGE_KEY = 'caresignal-theme';
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('system');
+  const [theme, setThemeState] = useState<Theme>('light');
   const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>('light');
   const [, startTransition] = useTransition();
 
-  // 1. Initial read from localStorage or system preference on client mount
+  // 1. Initial read from localStorage on client mount (defaults to 'light')
   useEffect(() => {
     try {
       const stored = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null;
       if (stored === 'light' || stored === 'dark' || stored === 'system') {
         setThemeState(stored);
       } else {
-        setThemeState('system');
+        setThemeState('light');
       }
     } catch {
-      setThemeState('system');
+      setThemeState('light');
     }
   }, []);
 

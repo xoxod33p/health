@@ -41,7 +41,7 @@ const themeInitScript = `
   try {
     var stored = localStorage.getItem('caresignal-theme');
     var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    var resolved = (stored === 'dark' || (!stored && systemDark) || (stored === 'system' && systemDark)) ? 'dark' : 'light';
+    var resolved = (stored === 'dark' || (stored === 'system' && systemDark)) ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', resolved);
     document.documentElement.classList.add(resolved);
     document.documentElement.style.colorScheme = resolved;
