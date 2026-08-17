@@ -174,13 +174,10 @@ docker compose -f /opt/health/infra/docker-compose.prod.yml restart
 
 ### Seed Demo Healthcare Telemetry Data
 ```bash
-cd /opt/health
-./scripts/seed-prod.sh seed
+docker compose -f /opt/health/infra/docker-compose.prod.yml exec -T api node apps/api/dist/scripts/seed.js
 ```
 
 ### Reset / Clean Database Data
 ```bash
-cd /opt/health
-# Wipe demo data (preserves protected root administrator):
-./scripts/clean-prod.sh
+docker compose -f /opt/health/infra/docker-compose.prod.yml exec -T api node apps/api/dist/scripts/clean.js
 ```

@@ -147,11 +147,11 @@ docker compose -f infra/docker-compose.prod.yml up -d --build
 # View container logs
 docker compose -f infra/docker-compose.prod.yml logs -f api
 
-# Reset demo data (preserves admin user)
-./scripts/clean-prod.sh
+# Seed realistic demo telemetry data
+docker compose -f infra/docker-compose.prod.yml exec -T api node apps/api/dist/scripts/seed.js
 
-# Seed realistic demo data
-./scripts/seed-prod.sh seed
+# Reset demo data (preserves protected admin)
+docker compose -f infra/docker-compose.prod.yml exec -T api node apps/api/dist/scripts/clean.js
 ```
 
 ---
