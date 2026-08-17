@@ -131,24 +131,8 @@ export default function SensorTypesPage() {
     }
   };
 
-  const topbarCenter = (
-    <div className="topbar-center-wrap">
-      <div className="search-field">
-        <Search size={16} />
-        <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search types..." />
-      </div>
-      <span className="result-count">{filtered.length} types</span>
-    </div>
-  );
-
-  const topbarRight = (
-    <button className="primary-button" onClick={() => { resetCreate(); setCreateOpen(true); }}>
-      <Plus size={17} /> New sensor type
-    </button>
-  );
-
   return (
-    <AppShell headerCenter={topbarCenter} headerActions={topbarRight}>
+    <AppShell>
       <div className="page-content">
 
         
@@ -175,10 +159,20 @@ export default function SensorTypesPage() {
 
         {!loading && !error && (
           <section className="panel">
-            <div className="panel-heading">
+            <div className="panel-heading" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
               <div>
                 <p className="eyebrow">Type registry</p>
                 <h2>Sensor Types</h2>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <div className="search-field" style={{ width: '250px', maxWidth: '100%' }}>
+                  <Search size={16} />
+                  <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search types..." />
+                </div>
+                <span className="result-count">{filtered.length} types</span>
+                <button className="primary-button" onClick={() => { resetCreate(); setCreateOpen(true); }} style={{ padding: '7px 14px', fontSize: '13px' }}>
+                  <Plus size={15} /> New sensor type
+                </button>
               </div>
             </div>
 

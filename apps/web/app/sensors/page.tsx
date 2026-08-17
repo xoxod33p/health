@@ -385,47 +385,6 @@ export default function SensorsPage() {
     }
   };
 
-  const topbarCenter = (
-    <div className="topbar-center-wrap">
-      {activeTab === 'inventory' ? (
-        <>
-          <div className="search-field">
-            <Search size={16} />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search serial, type, customer, manufacturer..."
-            />
-          </div>
-          <select
-            className="select-control"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="All statuses">All statuses</option>
-            <option value="ACTIVE">ACTIVE</option>
-            <option value="EXPIRING_SOON">EXPIRING SOON</option>
-            <option value="AVAILABLE">AVAILABLE (Unassigned)</option>
-            <option value="EXPIRED">EXPIRED</option>
-          </select>
-          <span className="result-count">{filteredSensors.length} loaded</span>
-        </>
-      ) : (
-        <>
-          <div className="search-field">
-            <Search size={16} />
-            <input
-              value={replQuery}
-              onChange={(e) => setReplQuery(e.target.value)}
-              placeholder="Search customer, serial or issue..."
-            />
-          </div>
-          <span className="result-count">{filteredReplacements.length} records</span>
-        </>
-      )}
-    </div>
-  );
-
   const topbarRight = (
     <div className="header-actions-group" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
       <button
@@ -460,7 +419,7 @@ export default function SensorsPage() {
   );
 
   return (
-    <AppShell headerCenter={topbarCenter} headerActions={topbarRight}>
+    <AppShell headerActions={topbarRight}>
       <div className="page-content">
         {/* Metric Summary KPI Cards */}
         <section className="mini-stat-grid" style={{ marginBottom: '20px' }}>
@@ -516,10 +475,33 @@ export default function SensorsPage() {
             )}
             {!loading && !error && (
               <section className="panel" style={{ padding: '20px 22px', marginBottom: '24px' }}>
-                <div className="panel-heading" style={{ marginBottom: '16px' }}>
+                <div className="panel-heading" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', marginBottom: '16px' }}>
                   <div>
                     <p className="eyebrow">Inventory telemetry register</p>
                     <h2>Hardware Sensors & Deployments</h2>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    <div className="search-field" style={{ width: '280px', maxWidth: '100%' }}>
+                      <Search size={16} />
+                      <input
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder="Search serial, type, customer..."
+                      />
+                    </div>
+                    <select
+                      className="select-control"
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      style={{ width: 'auto', minWidth: '150px' }}
+                    >
+                      <option value="All statuses">All statuses</option>
+                      <option value="ACTIVE">ACTIVE</option>
+                      <option value="EXPIRING_SOON">EXPIRING SOON</option>
+                      <option value="AVAILABLE">AVAILABLE (Unassigned)</option>
+                      <option value="EXPIRED">EXPIRED</option>
+                    </select>
+                    <span className="result-count">{filteredSensors.length} loaded</span>
                   </div>
                 </div>
                 {filteredSensors.length === 0 ? (
@@ -750,32 +732,43 @@ export default function SensorsPage() {
             )}
             {!replacementsLoading && !replacementsError && (
               <section className="panel" style={{ padding: '20px 22px', marginBottom: '24px' }}>
-                <div className="panel-heading" style={{ marginBottom: '16px' }}>
+                <div className="panel-heading" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', marginBottom: '16px' }}>
                   <div>
                     <p className="eyebrow">Issue & Maintenance Log</p>
                     <h2>Sensor Replacement Records</h2>
                   </div>
-                  <button
-                    type="button"
-                    className="primary-button"
-                    onClick={() => {
-                      setFormCustomerName('');
-                      setFormSerial('');
-                      setFormDate(new Date().toISOString().split('T')[0] ?? '');
-                      setFormIssue('');
-                      setFormNotes('');
-                      setModalOpen(true);
-                    }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      background: '#d97706',
-                      borderColor: '#d97706',
-                    }}
-                  >
-                    <Plus size={16} /> Log replacement
-                  </button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    <div className="search-field" style={{ width: '260px', maxWidth: '100%' }}>
+                      <Search size={16} />
+                      <input
+                        value={replQuery}
+                        onChange={(e) => setReplQuery(e.target.value)}
+                        placeholder="Search customer, serial or issue..."
+                      />
+                    </div>
+                    <span className="result-count">{filteredReplacements.length} records</span>
+                    <button
+                      type="button"
+                      className="primary-button"
+                      onClick={() => {
+                        setFormCustomerName('');
+                        setFormSerial('');
+                        setFormDate(new Date().toISOString().split('T')[0] ?? '');
+                        setFormIssue('');
+                        setFormNotes('');
+                        setModalOpen(true);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        background: '#d97706',
+                        borderColor: '#d97706',
+                      }}
+                    >
+                      <Plus size={16} /> Log replacement
+                    </button>
+                  </div>
                 </div>
                 {filteredReplacements.length === 0 ? (
                   <div className="empty-panel">

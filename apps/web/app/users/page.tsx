@@ -484,31 +484,6 @@ export default function UsersPage() {
     }
   };
 
-  const topbarCenter = (
-    <div className="topbar-center-wrap">
-      <div className="search-field">
-        <Search size={16} />
-        <input
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search accounts & roles..."
-        />
-      </div>
-      <select
-        className="select-control"
-        value={roleFilter}
-        onChange={(event) => setRoleFilter(event.target.value)}
-      >
-        <option>All roles</option>
-        <option value="SYSTEM_ADMIN">System Admin</option>
-        <option value="MANAGER">Manager</option>
-        <option value="INHOUSE_STAFF">Inhouse Employee</option>
-        <option value="OUT_EMPLOYEE">Out Employee</option>
-      </select>
-      <span className="result-count">{filtered.length} users</span>
-    </div>
-  );
-
   const topbarRight = (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
       {isDefaultAdmin && (
@@ -533,7 +508,7 @@ export default function UsersPage() {
   );
 
   return (
-    <AppShell headerCenter={topbarCenter} headerActions={topbarRight}>
+    <AppShell headerActions={topbarRight}>
       <div className="page-content">
         
         <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', borderBottom: '1px solid var(--border-color, #e2e8f0)', paddingBottom: '12px', flexWrap: 'wrap' }}>
@@ -565,7 +540,8 @@ export default function UsersPage() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '6px',
-                ...(activeTab !== 'maintenance' ? { color: '#dc2626', borderColor: '#fecaca' } : {}),
+                borderColor: '#fca5a5',
+                color: '#dc2626',
               }}
             >
               <ShieldAlert size={16} /> System Maintenance (Default Admin)
@@ -628,10 +604,33 @@ export default function UsersPage() {
 
             {!loading && !error && (
               <section className="panel">
-                <div className="panel-heading">
+                <div className="panel-heading" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
                   <div>
                     <p className="eyebrow">User Directory</p>
                     <h2>System Users & Assigned Permissions</h2>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    <div className="search-field" style={{ width: '250px', maxWidth: '100%' }}>
+                      <Search size={16} />
+                      <input
+                        value={query}
+                        onChange={(event) => setQuery(event.target.value)}
+                        placeholder="Search accounts & roles..."
+                      />
+                    </div>
+                    <select
+                      className="select-control"
+                      value={roleFilter}
+                      onChange={(event) => setRoleFilter(event.target.value)}
+                      style={{ width: 'auto', minWidth: '150px' }}
+                    >
+                      <option>All roles</option>
+                      <option value="SYSTEM_ADMIN">System Admin</option>
+                      <option value="MANAGER">Manager</option>
+                      <option value="INHOUSE_STAFF">Inhouse Employee</option>
+                      <option value="OUT_EMPLOYEE">Out Employee</option>
+                    </select>
+                    <span className="result-count">{filtered.length} users</span>
                   </div>
                 </div>
 

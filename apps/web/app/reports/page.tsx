@@ -219,45 +219,8 @@ export default function ReportsPage() {
     }
   };
 
-  const topbarCenter = (
-    <div className="topbar-center-wrap">
-      <div className="search-field">
-        <Search size={16} />
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search reports by title or author"
-        />
-      </div>
-      <select
-        className="select-control"
-        value={typeFilter}
-        onChange={(e) => setTypeFilter(e.target.value)}
-      >
-        <option value="ALL">All report types</option>
-        <option value="SENSOR_INVENTORY">Sensor Inventory</option>
-        <option value="EXPIRATION_REPLACEMENT">Expiration & Replacements</option>
-        <option value="CUSTOMER_COVERAGE">Customer Coverage</option>
-        <option value="OPERATIONAL_SUMMARY">Operational Summary</option>
-      </select>
-      <span className="result-count">{filteredReports.length} reports</span>
-    </div>
-  );
-
-  const topbarRight = (
-    <button
-      className="primary-button"
-      onClick={() => {
-        setCreateError('');
-        setCreateOpen(true);
-      }}
-    >
-      <Plus size={17} /> Generate report
-    </button>
-  );
-
   return (
-    <AppShell headerCenter={topbarCenter} headerActions={topbarRight}>
+    <AppShell>
       <div className="page-content">
 
         
@@ -313,20 +276,44 @@ export default function ReportsPage() {
 
         {!loading && !error && (
           <section className="panel">
-            <div className="panel-heading">
+            <div className="panel-heading" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
               <div>
                 <p className="eyebrow">Export & Intelligence</p>
                 <h2>Generated Reports History</h2>
               </div>
-              <button
-                className="ghost-button"
-                onClick={() => {
-                  setCreateError('');
-                  setCreateOpen(true);
-                }}
-              >
-                + New report <span>→</span>
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <div className="search-field" style={{ width: '250px', maxWidth: '100%' }}>
+                  <Search size={16} />
+                  <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Search reports..."
+                  />
+                </div>
+                <select
+                  className="select-control"
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value)}
+                  style={{ width: 'auto', minWidth: '160px' }}
+                >
+                  <option value="ALL">All report types</option>
+                  <option value="SENSOR_INVENTORY">Sensor Inventory</option>
+                  <option value="EXPIRATION_REPLACEMENT">Expiration & Replacements</option>
+                  <option value="CUSTOMER_COVERAGE">Customer Coverage</option>
+                  <option value="OPERATIONAL_SUMMARY">Operational Summary</option>
+                </select>
+                <span className="result-count">{filteredReports.length} reports</span>
+                <button
+                  className="primary-button"
+                  onClick={() => {
+                    setCreateError('');
+                    setCreateOpen(true);
+                  }}
+                  style={{ padding: '7px 14px', fontSize: '13px' }}
+                >
+                  <Plus size={15} /> Generate report
+                </button>
+              </div>
             </div>
 
             {filteredReports.length === 0 ? (
