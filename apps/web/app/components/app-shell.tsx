@@ -1,6 +1,6 @@
 'use client';
 
-import { Activity, Boxes, ClipboardList, FileBarChart, LayoutDashboard, LogOut, MoreHorizontal, ShieldCheck, Tag, Users, X } from 'lucide-react';
+import { Activity, Boxes, ClipboardList, FileBarChart, LayoutDashboard, LogOut, MoreHorizontal, ShieldCheck, Users, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -14,10 +14,6 @@ const navigation = [
   { label: 'Reports', href: '/reports', icon: FileBarChart },
 ];
 
-const catalog = [
-  { label: 'Sensor Types', href: '/sensor-types', icon: Tag },
-];
-
 export function AppShell({ children, title, headerCenter, headerActions }: Readonly<{ children: React.ReactNode; title?: string; headerCenter?: React.ReactNode; headerActions?: React.ReactNode }>) {
   const pathname = usePathname();
   const router = useRouter();
@@ -25,7 +21,7 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
   const [moreSheetOpen, setMoreSheetOpen] = useState(false);
   const cachedSession = getCachedSession();
   const [authState, setAuthState] = useState<'loading' | 'ready' | 'error'>(cachedSession ? 'ready' : 'loading');
-  const activeLabel = navigation.find((item) => item.href === pathname)?.label ?? (pathname.startsWith('/users') ? 'User management' : pathname.startsWith('/sensor-types') ? 'Sensor Types' : 'Workspace');
+  const activeLabel = navigation.find((item) => item.href === pathname)?.label ?? (pathname.startsWith('/users') ? 'User management' : 'Workspace');
 
   useEffect(() => {
     let mounted = true;
@@ -118,13 +114,6 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
               <span style={{ fontWeight: 500, letterSpacing: '-0.1px' }}>{label}</span>
             </Link>
           ))}
-          <span className="nav-label nav-label-spaced">Catalog</span>
-          {catalog.map(({ label, href, icon: Icon }) => (
-            <Link key={label} href={href} className={`nav-item ${activeLabel === label ? 'nav-active' : ''}`} onClick={() => setSidebarOpen(false)}>
-              <Icon size={17} strokeWidth={1.8} />
-              <span style={{ fontWeight: 500, letterSpacing: '-0.1px' }}>{label}</span>
-            </Link>
-          ))}
           <span className="nav-label nav-label-spaced">Manage</span>
           <Link className={`nav-item ${activeLabel === 'User management' ? 'nav-active' : ''}`} href="/users" onClick={() => setSidebarOpen(false)}>
             <Users size={17} strokeWidth={1.8} />
@@ -187,18 +176,6 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
 
               <div className="mobile-more-links">
                 <Link
-                  href="/sensor-types"
-                  className={`mobile-more-item ${pathname.startsWith('/sensor-types') ? 'active' : ''}`}
-                  onClick={() => setMoreSheetOpen(false)}
-                >
-                  <div className="mobile-more-icon"><Tag size={18} /></div>
-                  <div className="mobile-more-text">
-                    <strong>Sensor Types</strong>
-                    <small>Device specifications & hardware catalog</small>
-                  </div>
-                </Link>
-
-                <Link
                   href="/audit"
                   className={`mobile-more-item ${pathname.startsWith('/audit') ? 'active' : ''}`}
                   onClick={() => setMoreSheetOpen(false)}
@@ -256,11 +233,11 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
           </Link>
           <button
             type="button"
-            className={`mobile-nav-item ${moreSheetOpen || pathname.startsWith('/sensor-types') || pathname.startsWith('/audit') || pathname.startsWith('/users') ? 'active' : ''}`}
+            className={`mobile-nav-item ${moreSheetOpen || pathname.startsWith('/audit') || pathname.startsWith('/users') ? 'active' : ''}`}
             onClick={() => setMoreSheetOpen(!moreSheetOpen)}
             aria-label="More navigation options"
           >
-            <MoreHorizontal size={19} strokeWidth={moreSheetOpen || pathname.startsWith('/sensor-types') || pathname.startsWith('/audit') || pathname.startsWith('/users') ? 2.3 : 1.8} />
+            <MoreHorizontal size={19} strokeWidth={moreSheetOpen || pathname.startsWith('/audit') || pathname.startsWith('/users') ? 2.3 : 1.8} />
             <span>More</span>
           </button>
         </nav>
