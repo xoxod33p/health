@@ -4,6 +4,7 @@ import { Activity, ClipboardList, Download, RefreshCw, Search, Shield } from 'lu
 import { useEffect, useMemo, useState } from 'react';
 import { AppShell } from '../components/app-shell';
 import { apiFetch } from '../../lib/api';
+import { connectRealtime } from '../../lib/realtime';
 
 type AuditEvent = {
   _id: string;
@@ -50,6 +51,13 @@ export default function AuditPage() {
 
   useEffect(() => {
     loadLogs();
+    let disconnect: (() => void) | undefined;
+    void connectRealtime(() => {
+      loadLogs();
+    }).then((cleanup) => {
+      disconnect = cleanup;
+    });
+    return () => disconnect?.();
   }, []);
 
   const filtered = useMemo(

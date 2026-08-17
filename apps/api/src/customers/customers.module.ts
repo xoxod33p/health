@@ -6,11 +6,13 @@ import { Sensor, SensorSchema } from '../sensors/sensor.schema';
 import { CustomersController } from './customers.controller';
 import { CustomersService } from './customers.service';
 import { RealtimeModule } from '../realtime/realtime.module';
+import { AuditModule } from '../audit/audit.module';
 
 @Module({
   imports: [
     AuthModule,
     RealtimeModule,
+    AuditModule,
     MongooseModule.forFeature([
       { name: Customer.name, schema: CustomerSchema },
       { name: Sensor.name, schema: SensorSchema },

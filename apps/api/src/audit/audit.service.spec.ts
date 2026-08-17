@@ -57,8 +57,12 @@ describe('AuditService', () => {
     }),
   };
 
+  const mockRealtimeGateway: Record<string, any> = {
+    broadcastCompany: jest.fn(),
+  };
+
   it('records an audit log with actor user information', async () => {
-    const service = new AuditService(mockAuditLogsModel as any, mockEmployeesModel as any, mockUsersModel as any);
+    const service = new AuditService(mockAuditLogsModel as any, mockEmployeesModel as any, mockUsersModel as any, mockRealtimeGateway as any);
     const result = await service.record(mockUser, 'sensor.assign', 'Sensor', '507f1f77bcf86cd799439011');
 
     expect(result).toBeDefined();
@@ -73,7 +77,7 @@ describe('AuditService', () => {
   });
 
   it('enriches audit logs with human names and roles on findAll', async () => {
-    const service = new AuditService(mockAuditLogsModel as any, mockEmployeesModel as any, mockUsersModel as any);
+    const service = new AuditService(mockAuditLogsModel as any, mockEmployeesModel as any, mockUsersModel as any, mockRealtimeGateway as any);
     const logs = await service.findAll(mockUser, {});
 
     expect(logs).toHaveLength(1);

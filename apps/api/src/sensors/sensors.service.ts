@@ -9,6 +9,7 @@ import { Sensor, SensorDocument } from './sensor.schema';
 import { SensorAssignment, SensorAssignmentDocument } from './sensor-assignment.schema';
 import { SensorReplacement, SensorReplacementDocument } from './sensor-replacement.schema';
 import { RealtimeGateway } from '../realtime/realtime.gateway';
+import { AuditService } from '../audit/audit.service';
 
 @Injectable()
 export class SensorsService {
@@ -19,6 +20,7 @@ export class SensorsService {
     @InjectModel(Customer.name) private readonly customers: Model<CustomerDocument>,
     @InjectModel(SensorType.name) private readonly sensorTypes: Model<SensorTypeDocument>,
     private readonly realtime: RealtimeGateway,
+    private readonly audit: AuditService,
   ) {}
 
   async create(user: AuthenticatedUser, dto: CreateSensorDto): Promise<Sensor> {
@@ -36,6 +38,11 @@ export class SensorsService {
       companyId: user.companyId,
     });
     this.realtime.broadcastCompany(user.companyId, 'sensor.changed', { action: 'created', sensorId: sensor._id.toString() });
+    await this.audit.record(user, 'sensor.create', 'Sensor', sensor._id.toString(), {
+      serialNumber: sensor.serialNumber,
+      status: sensor.status,
+      expiresAt: sensor.expiresAt?.toISOString(),
+    }).catch(() => null);
     return sensor;
   }
 
@@ -126,6 +133,14 @@ export class SensorsService {
     sensor.expiresAt = new Date(installDate.getTime() + 15 * 24 * 60 * 60 * 1000);
     const saved = await sensor.save();
     this.realtime.broadcastCompany(user.companyId, 'sensor.changed', { action: 'assigned', sensorId: sensorId, customerId: dto.customerId });
+    await this.audit.record(user, 'sensor.assign', 'Sensor', sensorId, {
+      serialNumber: sensor.serialNumber,
+      customerId: dto.customerId,
+      customerNumber: customer.customerNumber,
+      customerName: `${customer.firstName} ${customer.lastName}`,
+      installedAt: installDate.toISOString(),
+      reason: dto.reason,
+    }).catch(() => null);
     return saved;
   }
 
@@ -145,6 +160,11 @@ export class SensorsService {
       replacedBy: user.authUserId,
     });
     this.realtime.broadcastCompany(user.companyId, 'sensor.changed', { action: 'replacement_logged', serialNumber: dto.serialNumber });
+    await this.audit.record(user, 'sensor.replacement', 'SensorReplacement', record._id.toString(), {
+      serialNumber: dto.serialNumber,
+      customerName: dto.customerName,
+      issueType: dto.issueType,
+    }).catch(() => null);
     return record;
   }
 

@@ -9,11 +9,13 @@ import { SensorReplacement, SensorReplacementSchema } from './sensor-replacement
 import { SensorsController } from './sensors.controller';
 import { SensorsService } from './sensors.service';
 import { RealtimeModule } from '../realtime/realtime.module';
+import { AuditModule } from '../audit/audit.module';
 
 @Module({
   imports: [
     AuthModule,
     RealtimeModule,
+    AuditModule,
     MongooseModule.forFeature([
       { name: Sensor.name, schema: SensorSchema },
       { name: SensorAssignment.name, schema: SensorAssignmentSchema },

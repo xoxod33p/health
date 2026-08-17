@@ -8,6 +8,7 @@ import { RealtimeGateway } from '../realtime/realtime.gateway';
 import { User, UserDocument } from '../users/user.schema';
 import { CreateEmployeeDto, UpdateEmployeeDto } from './employee.dto';
 import { Employee, EmployeeDocument } from './employee.schema';
+import { AuditService } from '../audit/audit.service';
 
 @Injectable()
 export class EmployeesService {
@@ -18,6 +19,7 @@ export class EmployeesService {
     @InjectModel(User.name) private readonly users: Model<UserDocument>,
     private readonly config: ConfigService,
     private readonly realtime: RealtimeGateway,
+    private readonly audit: AuditService,
   ) {
     this.defaultAdminEmail = (
       this.config.get<string>('DEFAULT_ADMIN_EMAIL') ||
@@ -53,12 +55,18 @@ export class EmployeesService {
       await existingUser.save();
     }
 
-    return this.employees.create({
+    const created = await this.employees.create({
       ...dto,
       email,
       status,
       companyId: user.companyId,
     });
+    await this.audit.record(user, 'employee.create', 'Employee', created._id.toString(), {
+      email,
+      role: dto.role,
+      name: `${dto.firstName} ${dto.lastName}`,
+    }).catch(() => null);
+    return created;
   }
 
   async findAll(user: AuthenticatedUser): Promise<Array<Employee & { isProtected: boolean; isOnline: boolean }>> {
@@ -113,6 +121,11 @@ export class EmployeesService {
       ).exec();
     }
 
+    await this.audit.record(user, 'employee.update', 'Employee', id, {
+      email: existing.email,
+      ...dto,
+    }).catch(() => null);
+
     return employee;
   }
 
@@ -137,6 +150,10 @@ export class EmployeesService {
       this.employees.deleteOne({ _id: id, companyId: user.companyId }).exec(),
       this.users.deleteOne({ email: existing.email.toLowerCase().trim() }).exec(),
     ]);
+
+    await this.audit.record(user, 'employee.delete', 'Employee', id, {
+      email: existing.email,
+    }).catch(() => null);
 
     return { deleted: true };
   }

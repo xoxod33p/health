@@ -4,6 +4,7 @@ import { Model, Types } from 'mongoose';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { Employee, EmployeeDocument } from '../employees/employee.schema';
 import { User, UserDocument } from '../users/user.schema';
+import { RealtimeGateway } from '../realtime/realtime.gateway';
 import { AuditQueryDto } from './audit.dto';
 import { AuditLog, AuditLogDocument } from './audit.schema';
 
@@ -13,6 +14,7 @@ export class AuditService {
     @InjectModel(AuditLog.name) private readonly auditLogs: Model<AuditLogDocument>,
     @InjectModel(Employee.name) private readonly employees: Model<EmployeeDocument>,
     @InjectModel(User.name) private readonly users: Model<UserDocument>,
+    private readonly realtime: RealtimeGateway,
   ) {}
 
   async record(
@@ -24,7 +26,7 @@ export class AuditService {
     oldValues?: Record<string, unknown>,
   ): Promise<AuditLog> {
     const rawEntityId = entityId && Types.ObjectId.isValid(entityId) ? new Types.ObjectId(entityId) : undefined;
-    return this.auditLogs.create({
+    const log = await this.auditLogs.create({
       companyId: user.companyId,
       actorUserId: user.authUserId,
       actorEmail: user.email,
@@ -34,6 +36,13 @@ export class AuditService {
       newValues,
       oldValues,
     });
+    this.realtime.broadcastCompany(user.companyId, 'audit.created', {
+      action,
+      entityType,
+      entityId,
+      logId: log._id.toString(),
+    });
+    return log;
   }
 
   async findAll(user: AuthenticatedUser, query: AuditQueryDto): Promise<any[]> {
