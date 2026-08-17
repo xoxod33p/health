@@ -95,12 +95,12 @@ export default function AuditPage() {
   return (
     <AppShell>
       <div className="page-content">
-        <div className="page-header-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
-          <div>
+        <div className="page-header-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', marginBottom: '20px' }}>
+          <div className="panel-title-wrap">
             <p className="eyebrow">Compliance & Traceability</p>
-            <h1 className="page-title-text">System Audit Log</h1>
+            <h1 className="page-title-text" style={{ margin: 0 }}>System Audit Log</h1>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <div className="panel-toolbar">
             <div className="search-field" style={{ width: '280px', maxWidth: '100%' }}>
               <Search size={16} />
               <input
@@ -109,13 +109,15 @@ export default function AuditPage() {
                 placeholder="Search by user name, email, action..."
               />
             </div>
-            <span className="result-count">{filtered.length} entries</span>
-            <button className="secondary-button" type="button" onClick={loadLogs}>
-              <RefreshCw size={14} className={loading ? 'spin' : ''} /> Refresh
-            </button>
-            <button className="secondary-button" type="button" onClick={handleExportCsv} disabled={events.length === 0}>
-              <Download size={15} /> Export CSV
-            </button>
+            <div className="panel-toolbar-actions">
+              <span className="result-count">{filtered.length} entries</span>
+              <button className="secondary-button" type="button" onClick={loadLogs}>
+                <RefreshCw size={14} className={loading ? 'spin' : ''} /> Refresh
+              </button>
+              <button className="secondary-button" type="button" onClick={handleExportCsv} disabled={events.length === 0}>
+                <Download size={15} /> Export CSV
+              </button>
+            </div>
           </div>
         </div>
 

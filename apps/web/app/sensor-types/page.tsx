@@ -159,20 +159,22 @@ export default function SensorTypesPage() {
 
         {!loading && !error && (
           <section className="panel">
-            <div className="panel-heading" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
-              <div>
+            <div className="panel-heading">
+              <div className="panel-title-wrap">
                 <p className="eyebrow">Type registry</p>
                 <h2>Sensor Types</h2>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <div className="panel-toolbar">
                 <div className="search-field" style={{ width: '250px', maxWidth: '100%' }}>
                   <Search size={16} />
                   <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search types..." />
                 </div>
-                <span className="result-count">{filtered.length} types</span>
-                <button className="primary-button" onClick={() => { resetCreate(); setCreateOpen(true); }} style={{ padding: '7px 14px', fontSize: '13px' }}>
-                  <Plus size={15} /> New sensor type
-                </button>
+                <div className="panel-toolbar-actions">
+                  <span className="result-count">{filtered.length} types</span>
+                  <button className="primary-button" onClick={() => { resetCreate(); setCreateOpen(true); }} style={{ padding: '7px 14px', fontSize: '13px' }}>
+                    <Plus size={15} /> New sensor type
+                  </button>
+                </div>
               </div>
             </div>
 

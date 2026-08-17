@@ -88,12 +88,12 @@ export default function CustomersPage() {
 
         {!loading && !error && (
           <section className="panel">
-            <div className="panel-heading" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
-              <div>
+            <div className="panel-heading">
+              <div className="panel-title-wrap">
                 <p className="eyebrow">All records</p>
                 <h2>Customer directory</h2>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <div className="panel-toolbar">
                 <div className="search-field" style={{ width: '320px', maxWidth: '100%' }}>
                   <Search size={16} />
                   <input
@@ -102,10 +102,12 @@ export default function CustomersPage() {
                     placeholder="Search by customer name, ID, phone, or email"
                   />
                 </div>
-                <button className="filter-button" type="button">
-                  <SlidersHorizontal size={15} /> Filter
-                </button>
-                <span className="result-count">{filtered.length} customers</span>
+                <div className="panel-toolbar-actions">
+                  <button className="filter-button" type="button">
+                    <SlidersHorizontal size={15} /> Filter
+                  </button>
+                  <span className="result-count">{filtered.length} customers</span>
+                </div>
               </div>
             </div>
             {filtered.length === 0 ? (

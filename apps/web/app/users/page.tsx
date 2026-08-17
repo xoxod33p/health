@@ -604,12 +604,12 @@ export default function UsersPage() {
 
             {!loading && !error && (
               <section className="panel">
-                <div className="panel-heading" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
-                  <div>
+                <div className="panel-heading">
+                  <div className="panel-title-wrap">
                     <p className="eyebrow">User Directory</p>
                     <h2>System Users & Assigned Permissions</h2>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                  <div className="panel-toolbar">
                     <div className="search-field" style={{ width: '250px', maxWidth: '100%' }}>
                       <Search size={16} />
                       <input
@@ -618,19 +618,21 @@ export default function UsersPage() {
                         placeholder="Search accounts & roles..."
                       />
                     </div>
-                    <select
-                      className="select-control"
-                      value={roleFilter}
-                      onChange={(event) => setRoleFilter(event.target.value)}
-                      style={{ width: 'auto', minWidth: '150px' }}
-                    >
-                      <option>All roles</option>
-                      <option value="SYSTEM_ADMIN">System Admin</option>
-                      <option value="MANAGER">Manager</option>
-                      <option value="INHOUSE_STAFF">Inhouse Employee</option>
-                      <option value="OUT_EMPLOYEE">Out Employee</option>
-                    </select>
-                    <span className="result-count">{filtered.length} users</span>
+                    <div className="panel-toolbar-actions">
+                      <select
+                        className="select-control"
+                        value={roleFilter}
+                        onChange={(event) => setRoleFilter(event.target.value)}
+                        style={{ width: 'auto', minWidth: '150px' }}
+                      >
+                        <option>All roles</option>
+                        <option value="SYSTEM_ADMIN">System Admin</option>
+                        <option value="MANAGER">Manager</option>
+                        <option value="INHOUSE_STAFF">Inhouse Employee</option>
+                        <option value="OUT_EMPLOYEE">Out Employee</option>
+                      </select>
+                      <span className="result-count">{filtered.length} users</span>
+                    </div>
                   </div>
                 </div>
 
