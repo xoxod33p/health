@@ -10,7 +10,6 @@ import { Notification, NotificationDocument } from '../notifications/notificatio
 import { RealtimeGateway } from '../realtime/realtime.gateway';
 import { Sensor, SensorDocument } from '../sensors/sensor.schema';
 import { SensorReplacement, SensorReplacementDocument } from '../sensors/sensor-replacement.schema';
-import { SensorType, SensorTypeDocument } from '../sensor-types/sensor-type.schema';
 import { StorageService } from '../storage/storage.service';
 import { CreateReportDto, ReportQueryDto } from './report.dto';
 import { Report, ReportDocument, StoredReportFile } from './report.schema';
@@ -28,7 +27,6 @@ export class ReportsService {
     @InjectModel(Sensor.name) private readonly sensors: Model<SensorDocument>,
     @InjectModel(SensorReplacement.name) private readonly replacements: Model<SensorReplacementDocument>,
     @InjectModel(Customer.name) private readonly customers: Model<CustomerDocument>,
-    @InjectModel(SensorType.name) private readonly sensorTypes: Model<SensorTypeDocument>,
     @InjectModel(Notification.name) private readonly notifications: Model<NotificationDocument>,
     private readonly audit: AuditService,
     private readonly realtime: RealtimeGateway,
@@ -344,22 +342,19 @@ export class ReportsService {
   ): Promise<{ columns: Array<{ key: string; header: string }>; summary: Record<string, unknown>; data: Array<Record<string, unknown>> }> {
     const filter: FilterQuery<SensorDocument> = { companyId };
     if (dto.statusFilter && dto.statusFilter !== 'ALL') filter.status = dto.statusFilter;
-    if (dto.sensorTypeId) filter.sensorTypeId = dto.sensorTypeId;
     if (range.from) filter.createdAt = { $gte: range.from, $lte: range.to ?? new Date() };
 
-    const [sensorsList, customersList, sensorTypesList] = await Promise.all([
+    const [sensorsList, customersList] = await Promise.all([
       this.sensors.find(filter).sort({ expiresAt: 1 }).lean().exec(),
       this.customers.find({ companyId }).lean().exec(),
-      this.sensorTypes.find({ companyId }).lean().exec(),
     ]);
 
     const customerMap = new Map(customersList.map((c) => [c._id.toString(), `${c.firstName} ${c.lastName}`]));
     const customerNoMap = new Map(customersList.map((c) => [c._id.toString(), c.customerNumber]));
-    const typeMap = new Map(sensorTypesList.map((t) => [t._id.toString(), `${t.name} (${t.code})`]));
 
     const now = Date.now();
     let activeSensors = 0;
-    let expiringIn30Days = 0;
+    let expiringIn15Days = 0;
     let expiredSensors = 0;
     let unassignedSensors = 0;
 
@@ -367,43 +362,47 @@ export class ReportsService {
       const isAssigned = Boolean(s.customerId);
       const isExpired = s.expiresAt ? new Date(s.expiresAt).getTime() < now : false;
       const daysRemaining = s.expiresAt ? Math.ceil((new Date(s.expiresAt).getTime() - now) / 86400000) : 0;
-      const isExpiringSoon = daysRemaining >= 0 && daysRemaining <= 30 && s.status !== 'DISABLED' && s.status !== 'REPLACED';
+      const isExpiringSoon = daysRemaining >= 0 && daysRemaining <= 15 && s.status !== 'DISABLED' && s.status !== 'REPLACED';
 
       if (s.status === 'ACTIVE' || s.status === 'ASSIGNED') activeSensors++;
-      if (isExpiringSoon) expiringIn30Days++;
+      if (isExpiringSoon) expiringIn15Days++;
       if (isExpired && s.status !== 'DISABLED' && s.status !== 'REPLACED') expiredSensors++;
       if (!isAssigned) unassignedSensors++;
 
       const cId = s.customerId ? s.customerId.toString() : '';
+      const installedDate = s.activatedAt
+        ? new Date(s.activatedAt).toLocaleDateString('en-US')
+        : (s as any).installedAt
+        ? new Date((s as any).installedAt).toLocaleDateString('en-US')
+        : (s as any).createdAt
+        ? new Date((s as any).createdAt).toLocaleDateString('en-US')
+        : '—';
+
       return {
         serialNumber: s.serialNumber,
-        sensorType: (s.sensorTypeId ? typeMap.get(s.sensorTypeId) : undefined) ?? (s.sensorTypeId && s.sensorTypeId !== 'default' ? s.sensorTypeId : '—'),
-        status: s.status,
-        customerName: customerMap.get(cId) ?? (s.customerId ? String(s.customerId) : 'Unassigned'),
         customerNumber: customerNoMap.get(cId) ?? '—',
-        manufacturer: s.manufacturer || '—',
-        model: s.model || '—',
+        customerName: customerMap.get(cId) ?? (s.customerId ? String(s.customerId) : 'Unassigned'),
+        status: s.status,
+        installedAt: installedDate,
         expiresAt: s.expiresAt ? new Date(s.expiresAt).toLocaleDateString('en-US') : '—',
-        daysRemaining: s.expiresAt ? `${daysRemaining} days` : '—',
+        daysRemaining: s.expiresAt ? (daysRemaining < 0 ? `Expired (${Math.abs(daysRemaining)}d ago)` : `${daysRemaining} days`) : '—',
       };
     });
 
     const columns = [
-      { key: 'serialNumber', header: 'Serial Number' },
-      { key: 'sensorType', header: 'Sensor Type' },
-      { key: 'status', header: 'Status' },
-      { key: 'customerName', header: 'Assigned Customer' },
+      { key: 'serialNumber', header: 'Sensor Serial Number' },
       { key: 'customerNumber', header: 'Customer ID' },
-      { key: 'manufacturer', header: 'Manufacturer' },
-      { key: 'model', header: 'Model' },
-      { key: 'expiresAt', header: 'Expires At' },
+      { key: 'customerName', header: 'Assigned Customer' },
+      { key: 'status', header: 'Status' },
+      { key: 'installedAt', header: 'Installed Date' },
+      { key: 'expiresAt', header: 'Expiration Date (15-day)' },
       { key: 'daysRemaining', header: 'Days Remaining' },
     ];
 
     const summary = {
       totalSensors: sensorsList.length,
       activeSensors,
-      expiringIn30Days,
+      expiringIn15Days,
       expiredSensors,
       unassignedSensors,
     };
@@ -415,7 +414,7 @@ export class ReportsService {
     companyId: string,
     range: { from?: Date; to?: Date }
   ): Promise<{ columns: Array<{ key: string; header: string }>; summary: Record<string, unknown>; data: Array<Record<string, unknown>> }> {
-    const thirtyDaysFromNow = new Date(Date.now() + 30 * 86400000);
+    const fifteenDaysFromNow = new Date(Date.now() + 15 * 86400000);
 
     const replFilter: FilterQuery<SensorReplacementDocument> = { companyId };
     if (range.from) replFilter.createdAt = { $gte: range.from, $lte: range.to ?? new Date() };
@@ -424,7 +423,7 @@ export class ReportsService {
       this.sensors
         .find({
           companyId,
-          expiresAt: { $lte: thirtyDaysFromNow },
+          expiresAt: { $lte: fifteenDaysFromNow },
           status: { $nin: ['DISABLED', 'REPLACED'] },
         })
         .sort({ expiresAt: 1 })
@@ -435,6 +434,7 @@ export class ReportsService {
     ]);
 
     const customerMap = new Map(customersList.map((c) => [c._id.toString(), `${c.firstName} ${c.lastName}`]));
+    const customerNoMap = new Map(customersList.map((c) => [c._id.toString(), c.customerNumber]));
 
     const now = Date.now();
     let expiredCount = 0;
@@ -442,7 +442,6 @@ export class ReportsService {
 
     const data: Array<Record<string, unknown>> = [];
 
-    
     for (const s of expiringSensorsList) {
       const expDate = new Date(s.expiresAt);
       const isPast = expDate.getTime() < now;
@@ -452,20 +451,21 @@ export class ReportsService {
 
       const cId = s.customerId ? s.customerId.toString() : '';
       data.push({
-        recordType: isPast ? 'EXPIRED SENSOR' : 'EXPIRING SOON',
+        recordType: isPast ? 'EXPIRED SENSOR' : 'EXPIRING (15-DAY CYCLE)',
         serialNumber: s.serialNumber,
+        customerNumber: customerNoMap.get(cId) ?? '—',
         customerName: customerMap.get(cId) ?? 'Unassigned',
         eventDate: expDate.toLocaleDateString('en-US'),
         statusOrReason: isPast ? `Expired (${Math.abs(days)}d ago)` : `Expires in ${days} days`,
-        notes: isPast ? 'Immediate replacement required' : 'Schedule replacement dispatch',
+        notes: isPast ? 'Immediate replacement required' : 'Schedule 15-day sensor replacement',
       });
     }
 
-    
     for (const r of replacementsList) {
       data.push({
         recordType: 'MAINTENANCE REPLACEMENT',
         serialNumber: r.serialNumber,
+        customerNumber: '—',
         customerName: r.customerName || '—',
         eventDate: new Date(r.replacedDate).toLocaleDateString('en-US'),
         statusOrReason: r.issueType || '—',
@@ -475,8 +475,9 @@ export class ReportsService {
 
     const columns = [
       { key: 'recordType', header: 'Record Type' },
-      { key: 'serialNumber', header: 'Serial Number' },
-      { key: 'customerName', header: 'Customer' },
+      { key: 'serialNumber', header: 'Sensor Serial' },
+      { key: 'customerNumber', header: 'Customer ID' },
+      { key: 'customerName', header: 'Customer Name' },
       { key: 'eventDate', header: 'Event Date' },
       { key: 'statusOrReason', header: 'Status / Reason' },
       { key: 'notes', header: 'Notes & Actions' },
@@ -500,7 +501,6 @@ export class ReportsService {
       this.sensors.find({ companyId, customerId: { $exists: true, $ne: null } }).lean().exec(),
     ]);
 
-    
     const sensorByCustomer = new Map<string, string[]>();
     for (const s of sensorsList) {
       if (!s.customerId) continue;
@@ -518,11 +518,11 @@ export class ReportsService {
       return {
         customerNumber: c.customerNumber,
         fullName: `${c.firstName} ${c.lastName}`,
-        email: c.email ?? 'No email',
-        phone: c.phone ?? '—',
-        status: c.status,
-        assignedCount: assigned.length,
         sensorSerials: assigned.length > 0 ? assigned.join(', ') : 'None',
+        assignedCount: assigned.length,
+        phone: c.phone ?? '—',
+        email: c.email ?? 'No email',
+        status: c.status,
         createdAt: c.createdAt ? new Date(c.createdAt).toLocaleDateString('en-US') : '—',
       };
     });
@@ -530,11 +530,11 @@ export class ReportsService {
     const columns = [
       { key: 'customerNumber', header: 'Customer ID' },
       { key: 'fullName', header: 'Customer Name' },
-      { key: 'email', header: 'Email' },
+      { key: 'sensorSerials', header: 'Attached Sensor Serial' },
+      { key: 'assignedCount', header: 'Active Sensors' },
       { key: 'phone', header: 'Phone' },
+      { key: 'email', header: 'Email' },
       { key: 'status', header: 'Account Status' },
-      { key: 'assignedCount', header: 'Assigned Sensors' },
-      { key: 'sensorSerials', header: 'Linked Devices' },
       { key: 'createdAt', header: 'Registered On' },
     ];
 
@@ -552,7 +552,7 @@ export class ReportsService {
   private async buildOperationalSummaryData(
     companyId: string
   ): Promise<{ columns: Array<{ key: string; header: string }>; summary: Record<string, unknown>; data: Array<Record<string, unknown>> }> {
-    const [totalCustomers, activeCustomers, totalSensors, activeSensors, expiringSoon, expired, typesCount, replacementsCount] =
+    const [totalCustomers, activeCustomers, totalSensors, activeSensors, expiringSoon, expired, replacementsCount] =
       await Promise.all([
         this.customers.countDocuments({ companyId }).exec(),
         this.customers.countDocuments({ companyId, status: 'ACTIVE' }).exec(),
@@ -561,12 +561,11 @@ export class ReportsService {
         this.sensors
           .countDocuments({
             companyId,
-            expiresAt: { $gte: new Date(), $lte: new Date(Date.now() + 30 * 86400000) },
+            expiresAt: { $gte: new Date(), $lte: new Date(Date.now() + 15 * 86400000) },
             status: { $nin: ['DISABLED', 'REPLACED'] },
           })
           .exec(),
         this.sensors.countDocuments({ companyId, expiresAt: { $lt: new Date() }, status: { $nin: ['DISABLED', 'REPLACED'] } }).exec(),
-        this.sensorTypes.countDocuments({ companyId }).exec(),
         this.replacements.countDocuments({ companyId }).exec(),
       ]);
 
@@ -577,9 +576,8 @@ export class ReportsService {
       { category: 'Customers', metric: 'Active Customer Accounts', value: activeCustomers, status: 'Healthy', notes: 'In regular clinical service' },
       { category: 'Sensors', metric: 'Total Sensor Inventory', value: totalSensors, status: 'Operational', notes: 'Total devices in registry' },
       { category: 'Sensors', metric: 'Active Devices Deployed', value: activeSensors, status: 'Optimal', notes: `${deploymentRate} utilization` },
-      { category: 'Lifecycle', metric: 'Sensors Expiring (<=30 Days)', value: expiringSoon, status: expiringSoon > 0 ? 'Warning' : 'Healthy', notes: 'Scheduled for maintenance' },
+      { category: 'Lifecycle', metric: 'Sensors Expiring (<=15 Days)', value: expiringSoon, status: expiringSoon > 0 ? 'Warning' : 'Healthy', notes: 'Scheduled for 15-day replacement' },
       { category: 'Lifecycle', metric: 'Expired Sensor Units', value: expired, status: expired > 0 ? 'Action Needed' : 'Healthy', notes: 'Overdue for replacement' },
-      { category: 'Catalog', metric: 'Registered Sensor Types', value: typesCount, status: 'Optimal', notes: 'Hardware models supported' },
       { category: 'Maintenance', metric: 'Total Replacements Logged', value: replacementsCount, status: 'Operational', notes: 'Completed device field replacements' },
     ];
 
@@ -598,12 +596,11 @@ export class ReportsService {
       expiringSoon,
       expired,
       deploymentRate,
+      replacementsCount,
     };
 
     return { columns, summary, data };
   }
-
-  
 
   private generateCsvString(report: Report): string {
     const headers = report.columns.map((c) => `"${c.header.replace(/"/g, '""')}"`).join(',');

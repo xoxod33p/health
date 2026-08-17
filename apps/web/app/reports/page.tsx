@@ -77,15 +77,15 @@ const REPORT_TYPE_CONFIG: Record<
 > = {
   SENSOR_INVENTORY: {
     label: 'Sensor Inventory & Lifecycle',
-    description: 'Hardware registry, active deployment, model breakdown, and life expectancy.',
+    description: 'Hardware registry, active deployment, customer assignment, and 15-day lifecycle tracking.',
     icon: Boxes,
     tone: 'teal',
     color: '#0f766e',
     badgeClass: 'status-healthy',
   },
   EXPIRATION_REPLACEMENT: {
-    label: 'Expiration & Maintenance Log',
-    description: 'Imminent sensor expirations (30/60/90 days), past-due units, and replacement records.',
+    label: 'Expiration & Replacement Log',
+    description: '15-day sensor expiration tracking, past-due units, and maintenance replacement records.',
     icon: Clock,
     tone: 'amber',
     color: '#d97706',
@@ -93,7 +93,7 @@ const REPORT_TYPE_CONFIG: Record<
   },
   CUSTOMER_COVERAGE: {
     label: 'Customer Device Coverage',
-    description: 'Customer device distribution, unassigned profiles, and coverage rate.',
+    description: 'Customer directory coverage, attached sensor serial numbers, and device distribution.',
     icon: Activity,
     tone: 'blue',
     color: '#2563eb',
@@ -101,7 +101,7 @@ const REPORT_TYPE_CONFIG: Record<
   },
   OPERATIONAL_SUMMARY: {
     label: 'Platform Operational Summary',
-    description: 'Executive overview of clinical platform health, device utilization, and alerts.',
+    description: 'Executive overview of clinical platform health, 15-day device utilization, and telemetry status.',
     icon: FileBarChart,
     tone: 'coral',
     color: '#e11d48',

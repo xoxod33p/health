@@ -111,15 +111,6 @@ describe('ReportsService', () => {
     countDocuments: jest.fn<any>().mockReturnValue({ exec: jest.fn<any>().mockResolvedValue(1) }),
   };
 
-  const mockSensorTypesModel: Record<string, any> = {
-    find: jest.fn<any>().mockReturnValue({
-      lean: jest.fn<any>().mockReturnValue({
-        exec: jest.fn<any>().mockResolvedValue([{ _id: 't1', name: 'Pulse Oximeter', code: 'SPO2' }]),
-      }),
-    }),
-    countDocuments: jest.fn<any>().mockReturnValue({ exec: jest.fn<any>().mockResolvedValue(1) }),
-  };
-
   const mockNotificationsModel: Record<string, any> = {
     create: jest.fn<any>().mockResolvedValue({}),
   };
@@ -151,7 +142,6 @@ describe('ReportsService', () => {
       mockSensorsModel as any,
       mockReplacementsModel as any,
       mockCustomersModel as any,
-      mockSensorTypesModel as any,
       mockNotificationsModel as any,
       mockAuditService as any,
       mockRealtimeGateway as any,
