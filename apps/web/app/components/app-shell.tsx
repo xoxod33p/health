@@ -122,11 +122,7 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
           </Link>
         </nav>
 
-        <div className="sidebar-footer" style={{ padding: '12px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <div style={{ padding: '2px 0' }}>
-            <span className="nav-label" style={{ padding: '0 0 6px', display: 'block', color: 'rgba(255,255,255,0.45)' }}>Theme</span>
-            <ThemeToggle variant="segmented" />
-          </div>
+        <div className="sidebar-footer" style={{ padding: '12px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
           <button
             type="button"
             onClick={handleSignOut}
