@@ -14,7 +14,6 @@ import {
   Printer,
   RefreshCw,
   Search,
-  SlidersHorizontal,
   Trash2,
   X,
 } from 'lucide-react';
@@ -230,20 +229,17 @@ export default function ReportsPage() {
           placeholder="Search reports by title or author"
         />
       </div>
-      <div className="select-wrap">
-        <select
-          className="select-control"
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-        >
-          <option value="ALL">All report types</option>
-          <option value="SENSOR_INVENTORY">Sensor Inventory</option>
-          <option value="EXPIRATION_REPLACEMENT">Expiration & Replacements</option>
-          <option value="CUSTOMER_COVERAGE">Customer Coverage</option>
-          <option value="OPERATIONAL_SUMMARY">Operational Summary</option>
-        </select>
-        <SlidersHorizontal size={14} />
-      </div>
+      <select
+        className="select-control"
+        value={typeFilter}
+        onChange={(e) => setTypeFilter(e.target.value)}
+      >
+        <option value="ALL">All report types</option>
+        <option value="SENSOR_INVENTORY">Sensor Inventory</option>
+        <option value="EXPIRATION_REPLACEMENT">Expiration & Replacements</option>
+        <option value="CUSTOMER_COVERAGE">Customer Coverage</option>
+        <option value="OPERATIONAL_SUMMARY">Operational Summary</option>
+      </select>
       <span className="result-count">{filteredReports.length} reports</span>
     </div>
   );
