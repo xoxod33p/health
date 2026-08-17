@@ -29,9 +29,9 @@ import { UsersModule } from './users/users.module';
       validationSchema: Joi.object({
         NODE_ENV: Joi.string().valid('development', 'test', 'staging', 'production').default('development'),
         PORT: Joi.number().port().default(3001),
-        WEB_ORIGIN: Joi.string().empty('').default('http://localhost:3000'),
-        MONGODB_URI: Joi.string().uri().empty('').default('mongodb://healthcare:healthcare_prod_secret_123!@mongodb:27017/healthcare?authSource=admin'),
-        JWT_SECRET: Joi.string().min(16).empty('').default('care_signal_secure_prod_jwt_secret_99812_key!'),
+        WEB_ORIGIN: Joi.string().empty('').optional(),
+        MONGODB_URI: Joi.string().uri().required(),
+        JWT_SECRET: Joi.string().min(16).required(),
         REDIS_URL: Joi.string().empty('').optional(),
         REDIS_PASSWORD: Joi.string().empty('').optional(),
         REDIS_HOST: Joi.string().empty('').optional(),
