@@ -58,7 +58,6 @@ export default function LoginPage() {
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   autoComplete="email"
-                  placeholder="Enter your email"
                   required
                 />
               </div>
@@ -73,7 +72,6 @@ export default function LoginPage() {
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   autoComplete="current-password"
-                  placeholder="Enter your password"
                   required
                 />
               </div>

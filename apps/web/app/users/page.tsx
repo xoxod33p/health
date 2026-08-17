@@ -1072,7 +1072,6 @@ export default function UsersPage() {
                         required
                         value={newFirstName}
                         onChange={(e) => setNewFirstName(e.target.value)}
-                        placeholder="First name"
                       />
                     </label>
                     <label>
@@ -1081,7 +1080,6 @@ export default function UsersPage() {
                         required
                         value={newLastName}
                         onChange={(e) => setNewLastName(e.target.value)}
-                        placeholder="Last name"
                       />
                     </label>
                   </div>
@@ -1092,7 +1090,6 @@ export default function UsersPage() {
                       type="email"
                       value={newEmail}
                       onChange={(e) => setNewEmail(e.target.value)}
-                      placeholder="user@domain.com"
                     />
                   </label>
                   <label>
@@ -1105,7 +1102,6 @@ export default function UsersPage() {
                         setNewPassword(e.target.value);
                         if (addFormError) setAddFormError('');
                       }}
-                      placeholder="Enter password (minimum 6 characters)"
                       minLength={6}
                       autoComplete="new-password"
                     />
@@ -1120,7 +1116,6 @@ export default function UsersPage() {
                         setConfirmPassword(e.target.value);
                         if (addFormError) setAddFormError('');
                       }}
-                      placeholder="Re-enter password to confirm"
                       minLength={6}
                       autoComplete="new-password"
                     />

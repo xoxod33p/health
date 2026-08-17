@@ -726,7 +726,6 @@ export default function ReportsPage() {
                     <input
                       value={customTitle}
                       onChange={(e) => setCustomTitle(e.target.value)}
-                      placeholder="Enter custom report title"
                     />
                   </label>
 

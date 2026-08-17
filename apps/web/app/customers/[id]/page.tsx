@@ -1031,7 +1031,6 @@ export default function CustomerDetailPage() {
                         <input
                           value={assignReason}
                           onChange={(e) => setAssignReason(e.target.value)}
-                          placeholder="Routine continuous telemetry monitoring"
                           style={{ marginTop: '4px' }}
                         />
                       </label>
@@ -1105,7 +1104,6 @@ export default function CustomerDetailPage() {
                       required
                       value={replaceIssue}
                       onChange={(e) => setReplaceIssue(e.target.value)}
-                      placeholder="Sensor electrode adhesive degradation / expired"
                     />
                   </label>
                   <label>
