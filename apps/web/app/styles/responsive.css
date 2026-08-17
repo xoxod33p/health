@@ -20,6 +20,31 @@
 
 /* Tablet Portrait & Mobile */
 @media (max-width: 768px) {
+  /* Prevent automatic mobile browser zoom on touch/focus */
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea,
+  .search-field input,
+  .modal-card input:not([type="checkbox"]):not([type="radio"]),
+  .modal-card select,
+  .modal-card textarea,
+  .form-grid input:not([type="checkbox"]):not([type="radio"]),
+  .form-grid select,
+  .form-grid textarea,
+  .select-control {
+    font-size: 16px !important;
+  }
+
+  html,
+  body,
+  button,
+  input,
+  select,
+  textarea,
+  a {
+    touch-action: manipulation;
+  }
+
   .sidebar {
     position: fixed;
     left: -290px;
