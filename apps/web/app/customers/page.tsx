@@ -308,27 +308,27 @@ function CustomerForm({ onClose, onCreated }: { onClose: () => void; onCreated: 
           </button>
         </div>
         <label>
-          First name <span style={{ color: '#ef4444' }}>*</span>
+          <span>First name <span style={{ color: '#ef4444' }}>*</span></span>
           <input name="firstName" required />
         </label>
         <label>
-          Last name <span style={{ color: '#ef4444' }}>*</span>
+          <span>Last name <span style={{ color: '#ef4444' }}>*</span></span>
           <input name="lastName" required />
         </label>
         <label>
-          Mobile / Phone number
+          <span>Mobile / Phone number</span>
           <input name="phone" type="tel" />
         </label>
         <label>
-          Email (optional)
+          <span>Email (optional)</span>
           <input name="email" type="email" />
         </label>
         <label>
-          Address (optional)
+          <span>Address (optional)</span>
           <input name="address" />
         </label>
         <label>
-          Notes / Medical remarks (optional)
+          <span>Notes / Medical remarks (optional)</span>
           <textarea
             name="description"
             rows={2}

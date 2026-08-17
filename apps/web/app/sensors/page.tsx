@@ -1023,7 +1023,7 @@ export default function SensorsPage() {
               <form onSubmit={handleLogReplacement}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   <label>
-                    Customer Name <span style={{ color: '#ef4444' }}>*</span>
+                    <span>Customer Name <span style={{ color: '#ef4444' }}>*</span></span>
                     <input
                       required
                       value={formCustomerName}
@@ -1031,7 +1031,7 @@ export default function SensorsPage() {
                     />
                   </label>
                   <label>
-                    Serial Number <span style={{ color: '#ef4444' }}>*</span>
+                    <span>Serial Number <span style={{ color: '#ef4444' }}>*</span></span>
                     <input
                       required
                       value={formSerial}
@@ -1040,7 +1040,7 @@ export default function SensorsPage() {
                     />
                   </label>
                   <label>
-                    Replacement / Issue Date <span style={{ color: '#ef4444' }}>*</span>
+                    <span>Replacement / Issue Date <span style={{ color: '#ef4444' }}>*</span></span>
                     <input
                       required
                       type="date"
@@ -1049,7 +1049,7 @@ export default function SensorsPage() {
                     />
                   </label>
                   <label>
-                    Issue Type <span style={{ color: '#ef4444' }}>*</span>
+                    <span>Issue Type <span style={{ color: '#ef4444' }}>*</span></span>
                     <input
                       required
                       value={formIssue}

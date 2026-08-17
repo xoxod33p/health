@@ -493,12 +493,23 @@ td {
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   display: flex;
-  inset: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100dvh;
   justify-content: center;
   padding: 20px;
-  position: fixed;
-  z-index: 100;
-  animation: fadeIn 0.2s ease;
+  z-index: 1000;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  animation: fadeIn 0.18s ease;
+  box-sizing: border-box;
 }
 
 .modal-card {
@@ -510,6 +521,11 @@ td {
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  box-sizing: border-box;
+  position: relative;
 }
 
 .modal-heading {
@@ -534,13 +550,18 @@ td {
 .modal-card label,
 .form-grid label {
   color: #334155;
-  display: flex;
-  flex-direction: column;
+  display: block;
   font-size: 12px;
   font-weight: 600;
-  gap: 6px;
   width: 100%;
   text-align: left;
+  line-height: 1.4;
+}
+
+.modal-card label > span,
+.form-grid label > span {
+  display: inline-block;
+  margin-bottom: 6px;
 }
 
 .modal-card input:not([type="checkbox"]):not([type="radio"]),
@@ -560,6 +581,8 @@ td {
   width: 100%;
   transition: border-color 0.2s, box-shadow 0.2s;
   box-sizing: border-box;
+  margin-top: 6px;
+  display: block;
 }
 
 .modal-card input:focus,

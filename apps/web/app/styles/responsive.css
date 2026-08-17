@@ -452,18 +452,32 @@
   .modal-backdrop {
     padding: 0;
     align-items: flex-end;
-    z-index: 120 !important;
+    justify-content: center;
+    z-index: 1000 !important;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
   }
 
   .modal-card {
-    max-width: 100%;
+    max-width: 100% !important;
+    width: 100% !important;
     border-radius: 18px 18px 0 0;
     padding: 20px 16px calc(24px + env(safe-area-inset-bottom, 16px));
-    max-height: calc(100dvh - 24px);
-    animation: slideUp 0.25s cubic-bezier(0.2, 0.9, 0.3, 1);
+    max-height: 85dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    box-sizing: border-box;
+    margin: 0 !important;
+    transform: translateZ(0);
+    -webkit-overflow-scrolling: touch;
+    animation: slideUpModal 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  @keyframes slideUp {
+  @keyframes slideUpModal {
     from { transform: translateY(100%); }
     to { transform: translateY(0); }
   }

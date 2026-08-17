@@ -1081,7 +1081,7 @@ export default function CustomerDetailPage() {
               <form onSubmit={handleSaveReplacement}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <label>
-                    Serial Number <span style={{ color: '#ef4444' }}>*</span>
+                    <span>Serial Number <span style={{ color: '#ef4444' }}>*</span></span>
                     <input
                       required
                       value={replaceSerial}
@@ -1090,7 +1090,7 @@ export default function CustomerDetailPage() {
                     />
                   </label>
                   <label>
-                    Replaced Date <span style={{ color: '#ef4444' }}>*</span>
+                    <span>Replaced Date <span style={{ color: '#ef4444' }}>*</span></span>
                     <input
                       required
                       type="date"
@@ -1099,7 +1099,7 @@ export default function CustomerDetailPage() {
                     />
                   </label>
                   <label>
-                    Issue Type <span style={{ color: '#ef4444' }}>*</span>
+                    <span>Issue Type <span style={{ color: '#ef4444' }}>*</span></span>
                     <input
                       required
                       value={replaceIssue}
