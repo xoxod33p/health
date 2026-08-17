@@ -1,6 +1,6 @@
 services:
   mongodb:
-    image: mongo:8.0.4
+    image: mongo:4.4.29
     restart: unless-stopped
     env_file:
       - path: ../.env
@@ -16,7 +16,7 @@ services:
     networks:
       - health-network
     healthcheck:
-      test: ["CMD-SHELL", "mongosh -u \"$${MONGO_INITDB_ROOT_USERNAME:-healthcare}\" -p \"$${MONGO_INITDB_ROOT_PASSWORD:-healthcare_prod_secret_123!}\" --authenticationDatabase admin --eval \"db.adminCommand('ping').ok\" || mongosh --eval \"db.adminCommand('ping').ok\" || exit 1"]
+      test: ["CMD-SHELL", "mongo -u \"$${MONGO_INITDB_ROOT_USERNAME:-healthcare}\" -p \"$${MONGO_INITDB_ROOT_PASSWORD:-healthcare_prod_secret_123!}\" --authenticationDatabase admin --eval \"db.adminCommand('ping').ok\" || mongosh -u \"$${MONGO_INITDB_ROOT_USERNAME:-healthcare}\" -p \"$${MONGO_INITDB_ROOT_PASSWORD:-healthcare_prod_secret_123!}\" --authenticationDatabase admin --eval \"db.adminCommand('ping').ok\" || mongo --eval \"db.adminCommand('ping').ok\" || mongosh --eval \"db.adminCommand('ping').ok\" || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
