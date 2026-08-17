@@ -1,12 +1,28 @@
-# Security decisions
+# 🔐 Security Architecture & Principles
 
-- Supabase Auth is authentication only. MongoDB is the application system of record.
-- JWT verification and membership lookup happen server-side.
-- Role and company identifiers from the client are ignored for authorization.
-- Tenant-owned data access is repository-scoped by authenticated `companyId`.
-- All request DTOs use whitelist validation; unknown fields are rejected or stripped at the API boundary.
-- Helmet, constrained CORS, rate limiting, structured request logs, and immutable audit writes belong to the API.
-- MinIO objects are private. Downloads use short-lived signed URLs after an API authorization check.
-- MongoDB, Redis, and MinIO bind to loopback in local Compose and are not public application dependencies.
-- Production secrets must be injected at runtime and must never be bundled into Next.js client code.
-- Cross-tenant API tests are mandatory for customers, employees, sensors, reports, notifications, files, and audit logs.
+CareSignal is designed with strict healthcare data confidentiality, role isolation, and self-hosted privacy standards.
+
+---
+
+## Key Security Controls
+
+1. **Native Self-Hosted Authentication**:
+   - Zero third-party SaaS dependencies (Supabase, Firebase, Auth0 are not used).
+   - High-security cryptographic JWT verification with `jose` and `bcrypt` password hashing.
+   - Root protected administrator safeguards (`admin@caresignal.local`) prevents accidental deletion or demotion.
+
+2. **Server-Enforced Tenant Context (`companyId`)**:
+   - Client-provided identifiers are ignored.
+   - All MongoDB queries enforce `{ companyId: user.companyId }` filtering.
+   - Role permissions (`SYSTEM_ADMIN`, `MANAGER`, `INHOUSE_STAFF`, `OUT_EMPLOYEE`) are verified strictly server-side.
+
+3. **Rate Limiting & Brute Force Mitigation**:
+   - Distributed NestJS `ThrottlerGuard` protects login and sensitive API endpoints.
+   - Fallback-safe connection pooling to Redis.
+
+4. **Private Storage & Download Tokens**:
+   - Categorized storage files (`storage/reports/`, `storage/sensors/`) are not directly accessible from the web.
+   - Downloads require an authenticated API request with streaming response headers.
+
+5. **Immutable Audit Logging**:
+   - All destructive actions, user updates, sensor assignments, and data clearances produce an immutable audit log entry in the `audit_logs` collection.
