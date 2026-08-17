@@ -148,7 +148,7 @@ export default function NewSensorPage() {
     <AppShell title="Add a sensor">
       <div className="page-content">
         <section className="panel" style={{ maxWidth: '640px', margin: '0 auto', padding: '24px 26px' }}>
-          <div className="panel-heading" style={{ marginBottom: '20px' }}>
+          <div className="panel-heading" style={{ marginBottom: '18px' }}>
             <div>
               <p className="eyebrow">Hardware telemetry register</p>
               <h2>Add New Sensor</h2>
@@ -156,54 +156,49 @@ export default function NewSensorPage() {
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-              <label>
-                Serial number <span style={{ color: '#ef4444' }}>*</span>
+            <div className="form-grid">
+              <label style={{ gridColumn: 'span 2' }}>
+                <span>Serial number <span style={{ color: '#ef4444' }}>*</span></span>
                 <input
                   required
                   placeholder="e.g. CGM-44105 or ECG-88902"
                   value={serialNumber}
                   onChange={(e) => setSerialNumber(e.target.value)}
-                  style={{ marginTop: '5px' }}
                 />
               </label>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                <label>
-                  Installation Date <span style={{ color: '#ef4444' }}>*</span>
-                  <input
-                    type="date"
-                    required
-                    value={installedAt}
-                    onChange={(e) => handleInstalledAtChange(e.target.value)}
-                    style={{ marginTop: '5px' }}
-                  />
-                  <span style={{ fontSize: '11px', color: '#64748b', marginTop: '3px', display: 'block' }}>
-                    Date installed on customer
-                  </span>
-                </label>
+              <label>
+                <span>Installation Date <span style={{ color: '#ef4444' }}>*</span></span>
+                <input
+                  type="date"
+                  required
+                  value={installedAt}
+                  onChange={(e) => handleInstalledAtChange(e.target.value)}
+                />
+                <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 400, marginTop: '2px' }}>
+                  Date installed on customer
+                </span>
+              </label>
 
-                <label>
-                  Expiration Date <span style={{ color: '#ef4444' }}>*</span>
-                  <input
-                    type="date"
-                    required
-                    value={expiresAt}
-                    onChange={(e) => setExpiresAt(e.target.value)}
-                    style={{ marginTop: '5px' }}
-                  />
-                  <span style={{ fontSize: '11px', color: '#0f766e', fontWeight: 600, marginTop: '3px', display: 'block' }}>
-                    Auto-calculated (15 days)
-                  </span>
-                </label>
-              </div>
+              <label>
+                <span>Expiration Date <span style={{ color: '#ef4444' }}>*</span></span>
+                <input
+                  type="date"
+                  required
+                  value={expiresAt}
+                  onChange={(e) => setExpiresAt(e.target.value)}
+                />
+                <span style={{ fontSize: '11px', color: '#0f766e', fontWeight: 600, marginTop: '2px' }}>
+                  Auto-calculated (15 days)
+                </span>
+              </label>
 
               {/* Modern Customer Combobox Picker */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '6px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <label style={{ margin: 0, fontWeight: 600, fontSize: '13px', color: '#1e293b' }}>
-                    Link to Customer <span style={{ fontWeight: 400, color: '#64748b', fontSize: '12px' }}>(Optional)</span>
-                  </label>
+                  <span style={{ fontWeight: 600, fontSize: '12px', color: '#334155' }}>
+                    Link to Customer <span style={{ fontWeight: 400, color: '#64748b' }}>(Optional)</span>
+                  </span>
                   {selectedCustomer && (
                     <span style={{ fontSize: '11px', color: '#0f766e', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                       <UserCheck size={12} /> Customer selected
@@ -329,7 +324,7 @@ export default function NewSensorPage() {
                           paddingLeft: '36px',
                           paddingRight: customerSearchQuery ? '32px' : '14px',
                           fontSize: '13px',
-                          borderRadius: '8px',
+                          borderRadius: '7px',
                           border: isDropdownOpen ? '1.5px solid #0f766e' : '1px solid #cbd5e1',
                           outline: 'none',
                           boxShadow: isDropdownOpen ? '0 0 0 3px rgba(15, 118, 110, 0.1)' : 'none',
