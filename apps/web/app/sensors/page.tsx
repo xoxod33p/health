@@ -975,7 +975,7 @@ export default function SensorsPage() {
                     <input
                       value={assignReason}
                       onChange={(e) => setAssignReason(e.target.value)}
-                      placeholder="e.g. Routine continuous telemetry monitoring"
+                      placeholder="Routine continuous telemetry monitoring"
                       style={{ marginTop: '4px' }}
                     />
                   </label>
@@ -1029,7 +1029,7 @@ export default function SensorsPage() {
                       required
                       value={formCustomerName}
                       onChange={(e) => setFormCustomerName(e.target.value)}
-                      placeholder="e.g. Arthur Pendleton"
+                      placeholder="Customer full name"
                     />
                   </label>
                   <label>
@@ -1038,7 +1038,7 @@ export default function SensorsPage() {
                       required
                       value={formSerial}
                       onChange={(e) => setFormSerial(e.target.value.toUpperCase())}
-                      placeholder="e.g. CGM-44102"
+                      placeholder="CGM-44102"
                       style={{ fontFamily: 'monospace', fontWeight: 600, letterSpacing: '0.05em' }}
                     />
                   </label>
@@ -1057,7 +1057,7 @@ export default function SensorsPage() {
                       required
                       value={formIssue}
                       onChange={(e) => setFormIssue(e.target.value)}
-                      placeholder="e.g. Sensor electrode adhesive degradation"
+                      placeholder="Sensor electrode adhesive degradation / expired"
                     />
                     <small style={{ color: '#94a3b8', fontSize: '11px', marginTop: '2px', display: 'block' }}>
                       Describe the specific hardware issue, wear expiration, or reason

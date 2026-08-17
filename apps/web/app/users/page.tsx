@@ -1092,7 +1092,7 @@ export default function UsersPage() {
                       type="email"
                       value={newEmail}
                       onChange={(e) => setNewEmail(e.target.value)}
-                      placeholder="e.g. user@domain.com"
+                      placeholder="user@domain.com"
                     />
                   </label>
                   <label>

@@ -161,7 +161,7 @@ export default function NewSensorPage() {
                 <span>Serial number <span style={{ color: '#ef4444' }}>*</span></span>
                 <input
                   required
-                  placeholder="e.g. CGM-44105 or ECG-88902"
+                  placeholder="Enter sensor serial number (CGM-44105)"
                   value={serialNumber}
                   onChange={(e) => setSerialNumber(e.target.value)}
                 />

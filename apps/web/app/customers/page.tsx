@@ -317,15 +317,15 @@ function CustomerForm({ onClose, onCreated }: { onClose: () => void; onCreated: 
         </label>
         <label>
           Mobile / Phone number
-          <input name="phone" type="tel" placeholder="e.g. +1 (555) 888-9900" />
+          <input name="phone" type="tel" placeholder="+1 (555) 888-9900" />
         </label>
         <label>
           Email (optional)
-          <input name="email" type="email" placeholder="e.g. user@example.com" />
+          <input name="email" type="email" placeholder="user@example.com" />
         </label>
         <label>
           Address (optional)
-          <input name="address" placeholder="e.g. 204 Highland Ave, Chicago" />
+          <input name="address" placeholder="Street address, city, state" />
         </label>
         <label>
           Notes / Medical remarks (optional)
