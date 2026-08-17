@@ -160,7 +160,7 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
           {headerCenter && <div className="topbar-center">{headerCenter}</div>}
           <div className="topbar-right">
             {headerActions}
-            <ThemeToggle variant="dropdown" />
+            <ThemeToggle variant="icon" />
           </div>
         </header>
         {children}

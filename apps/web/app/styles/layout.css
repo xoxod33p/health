@@ -141,12 +141,14 @@
   background: var(--white);
   border-bottom: 1px solid var(--line);
   display: flex;
-  height: 60px;
+  min-height: 60px;
   justify-content: space-between;
-  padding: 0 28px;
+  padding: 8px 28px;
   position: sticky;
   top: 0;
   z-index: 30;
+  gap: 12px;
+  box-sizing: border-box;
 }
 
 .topbar-left {
