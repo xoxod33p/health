@@ -36,6 +36,8 @@ type Sensor = {
   customerName?: string;
   customerNumber?: string;
   status: string;
+  activatedAt?: string;
+  installedAt?: string;
   expiresAt: string;
 };
 type SensorResponse = { data: Sensor[]; total: number };
@@ -72,7 +74,7 @@ type AssignmentRecord = {
   reason?: string;
 };
 
-function formatDate(value: string) {
+function formatDate(value?: string) {
   if (!value) return '—';
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',
@@ -175,6 +177,13 @@ export default function SensorsPage() {
   const [assignSensor, setAssignSensor] = useState<Sensor | null>(null);
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
   const [assignCustomerQuery, setAssignCustomerQuery] = useState('');
+  const [assignInstalledDate, setAssignInstalledDate] = useState(() => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  });
   const [assignReason, setAssignReason] = useState('Standard clinical telemetry monitoring');
   const [assignSubmitting, setAssignSubmitting] = useState(false);
 
@@ -291,6 +300,11 @@ export default function SensorsPage() {
     setAssignSensor(sensor);
     setSelectedCustomerId(sensor.customerId || (customers[0]?._id ?? ''));
     setAssignCustomerQuery('');
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    setAssignInstalledDate(`${year}-${month}-${day}`);
     setAssignReason('Standard clinical telemetry monitoring');
     setAssignModalOpen(true);
   };
@@ -304,6 +318,7 @@ export default function SensorsPage() {
         method: 'POST',
         body: JSON.stringify({
           customerId: selectedCustomerId,
+          installedAt: assignInstalledDate ? new Date(assignInstalledDate).toISOString() : new Date().toISOString(),
           reason: assignReason.trim() || undefined,
         }),
       });
@@ -528,6 +543,7 @@ export default function SensorsPage() {
                           <th style={{ background: '#ffffff' }}>Serial Number</th>
                           <th style={{ background: '#ffffff' }}>Sensor Type & Model</th>
                           <th style={{ background: '#ffffff' }}>Assigned Customer</th>
+                          <th style={{ background: '#ffffff' }}>Installed Date</th>
                           <th style={{ background: '#ffffff' }}>Expiration Date</th>
                           <th style={{ background: '#ffffff' }}>Status</th>
                           <th style={{ textAlign: 'right', background: '#ffffff' }}>Actions</th>
@@ -591,6 +607,11 @@ export default function SensorsPage() {
                                   Unassigned
                                 </span>
                               )}
+                            </td>
+                            <td>
+                              <span style={{ fontWeight: 500, color: '#334155', fontSize: '13px' }}>
+                                {formatDate(sensor.installedAt || sensor.activatedAt)}
+                              </span>
                             </td>
                             <td>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -858,7 +879,7 @@ export default function SensorsPage() {
               <div className="modal-heading">
                 <div>
                   <h2 style={{ fontSize: '18px' }}>
-                    {assignSensor.customerId ? 'Reassign Sensor' : 'Assign Sensor to Customer'}
+                    {assignSensor.customerId ? 'Reinstall / Reassign Sensor' : 'Install Sensor for Customer'}
                   </h2>
                   <p style={{ fontSize: '12px', color: '#64748b' }}>
                     Serial: <strong style={{ fontFamily: 'monospace' }}>{assignSensor.serialNumber}</strong> (
@@ -939,7 +960,18 @@ export default function SensorsPage() {
                   </div>
 
                   <label>
-                    Assignment Clinical Reason
+                    Installation Date <span style={{ color: '#ef4444' }}>*</span>
+                    <input
+                      type="date"
+                      required
+                      value={assignInstalledDate}
+                      onChange={(e) => setAssignInstalledDate(e.target.value)}
+                      style={{ marginTop: '4px' }}
+                    />
+                  </label>
+
+                  <label>
+                    Installation Clinical Reason
                     <input
                       value={assignReason}
                       onChange={(e) => setAssignReason(e.target.value)}
@@ -964,7 +996,7 @@ export default function SensorsPage() {
                       <RefreshCw size={16} className="spin" />
                     ) : (
                       <>
-                        <UserCheck size={15} /> Confirm Assignment
+                        <UserCheck size={15} /> Confirm Installation
                       </>
                     )}
                   </button>

@@ -3,9 +3,11 @@ import { IsDateString, IsEnum, IsOptional, IsString, MaxLength, MinLength } from
 export class CreateSensorDto {
   @IsString() @MinLength(1) @MaxLength(100) serialNumber!: string;
   @IsString() @MinLength(1) @MaxLength(100) sensorTypeId!: string;
-  @IsString() @MinLength(1) @MaxLength(100) manufacturer!: string;
-  @IsString() @MinLength(1) @MaxLength(100) model!: string;
-  @IsDateString() expiresAt!: string;
+  @IsOptional() @IsString() @MaxLength(100) manufacturer?: string;
+  @IsOptional() @IsString() @MaxLength(100) model?: string;
+  @IsOptional() @IsDateString() expiresAt?: string;
+  @IsOptional() @IsDateString() installedAt?: string;
+  @IsOptional() @IsDateString() activatedAt?: string;
 }
 
 export class SensorQueryDto {
@@ -17,6 +19,8 @@ export class SensorQueryDto {
 
 export class AssignSensorDto {
   @IsString() customerId!: string;
+  @IsOptional() @IsDateString() installedAt?: string;
+  @IsOptional() @IsDateString() assignedAt?: string;
   @IsOptional() @IsString() @MaxLength(500) reason?: string;
 }
 

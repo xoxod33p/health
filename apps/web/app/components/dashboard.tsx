@@ -38,6 +38,8 @@ type Sensor = {
   customerName?: string;
   customerNumber?: string;
   status: string;
+  activatedAt?: string;
+  installedAt?: string;
   expiresAt: string;
 };
 
@@ -46,7 +48,8 @@ type SensorResponse = {
   total: number;
 };
 
-function formatDate(value: string) {
+function formatDate(value?: string) {
+  if (!value) return '—';
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',

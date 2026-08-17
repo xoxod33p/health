@@ -25,6 +25,23 @@ type SensorTypeItem = {
   status: string;
 };
 
+function getDefaultExpiryDate() {
+  const d = new Date();
+  d.setDate(d.getDate() + 15);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function getTodayDate() {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export default function NewSensorPage() {
   const router = useRouter();
   const [customers, setCustomers] = useState<CustomerItem[]>([]);
@@ -34,10 +51,9 @@ export default function NewSensorPage() {
   // Form State
   const [serialNumber, setSerialNumber] = useState('');
   const [sensorTypeId, setSensorTypeId] = useState('');
-  const [manufacturer, setManufacturer] = useState('');
-  const [model, setModel] = useState('');
-  const [expiresAt, setExpiresAt] = useState('');
+  const [expiresAt, setExpiresAt] = useState(getDefaultExpiryDate);
   const [customerId, setCustomerId] = useState('');
+  const [installedAt, setInstalledAt] = useState(getTodayDate);
   const [customerQuery, setCustomerQuery] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -87,16 +103,19 @@ export default function NewSensorPage() {
         body: JSON.stringify({
           serialNumber: serialNumber.trim(),
           sensorTypeId: sensorTypeId || 'default',
-          manufacturer: manufacturer.trim() || 'Unknown',
-          model: model.trim() || 'Unknown',
-          expiresAt: expiresAt ? new Date(expiresAt).toISOString() : new Date('2028-12-31').toISOString(),
+          expiresAt: expiresAt
+            ? new Date(expiresAt).toISOString()
+            : new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
         }),
       });
 
       if (customerId && createdSensor?._id) {
         await apiFetch(`/sensors/${createdSensor._id}/assign`, {
           method: 'POST',
-          body: JSON.stringify({ customerId }),
+          body: JSON.stringify({
+            customerId,
+            installedAt: installedAt ? new Date(installedAt).toISOString() : new Date().toISOString(),
+          }),
         }).catch(() => null);
       }
 
@@ -153,24 +172,6 @@ export default function NewSensorPage() {
                   </select>
                   <ChevronDown size={15} />
                 </div>
-              </label>
-
-              <label>
-                Manufacturer
-                <input
-                  placeholder="e.g. Abbott, Dexcom, Philips"
-                  value={manufacturer}
-                  onChange={(e) => setManufacturer(e.target.value)}
-                />
-              </label>
-
-              <label>
-                Model
-                <input
-                  placeholder="e.g. FreeStyle Libre 3"
-                  value={model}
-                  onChange={(e) => setModel(e.target.value)}
-                />
               </label>
 
               <label>
@@ -243,6 +244,17 @@ export default function NewSensorPage() {
                   </select>
                   <ChevronDown size={15} />
                 </div>
+
+                {customerId && (
+                  <label style={{ marginTop: '8px' }}>
+                    Installation Date
+                    <input
+                      type="date"
+                      value={installedAt}
+                      onChange={(e) => setInstalledAt(e.target.value)}
+                    />
+                  </label>
+                )}
               </div>
             </div>
 

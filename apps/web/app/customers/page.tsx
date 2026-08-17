@@ -129,29 +129,39 @@ export default function CustomersPage() {
                 <table className="rich-table">
                   <thead style={{ position: 'sticky', top: 0, background: '#ffffff', zIndex: 3, boxShadow: '0 1px 0 #edf1f1' }}>
                     <tr>
-                      <th style={{ background: '#ffffff' }}>Customer</th>
+                      <th style={{ background: '#ffffff' }}>Customer ID</th>
+                      <th style={{ background: '#ffffff' }}>Customer Name</th>
                       <th style={{ background: '#ffffff' }}>Contact & Mobile</th>
                       <th style={{ background: '#ffffff' }}>Status</th>
                       <th style={{ background: '#ffffff', textAlign: 'right' }}>Action</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filtered.map((customer) => (
-                      <tr key={customer._id}>
-                        <td>
-                          <div className="entity-cell">
-                            <div className="entity-avatar">
-                              {customer.firstName[0]}
-                              {customer.lastName[0]}
+                    {filtered.map((customer) => {
+                      const initials = [customer.firstName?.[0], customer.lastName?.[0]]
+                        .filter(Boolean)
+                        .join('')
+                        .toUpperCase() || (customer.firstName?.[0] ? customer.firstName[0].toUpperCase() : 'C');
+
+                      return (
+                        <tr key={customer._id}>
+                          <td>
+                            <span className="id-badge">
+                              {customer.customerNumber}
+                            </span>
+                          </td>
+                          <td>
+                            <div className="entity-cell">
+                              <div className="entity-avatar">
+                                {initials}
+                              </div>
+                              <div>
+                                <strong>
+                                  {customer.firstName} {customer.lastName}
+                                </strong>
+                              </div>
                             </div>
-                            <div>
-                              <strong>
-                                {customer.firstName} {customer.lastName}
-                              </strong>
-                              <span>{customer.customerNumber}</span>
-                            </div>
-                          </div>
-                        </td>
+                          </td>
                         <td>
                           <div>
                             {customer.phone ? (
@@ -195,7 +205,8 @@ export default function CustomersPage() {
                           </Link>
                         </td>
                       </tr>
-                    ))}
+                    );
+                  })}
                   </tbody>
                 </table>
               </div>

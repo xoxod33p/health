@@ -22,7 +22,14 @@ export class SensorsService {
   ) {}
 
   async create(user: AuthenticatedUser, dto: CreateSensorDto): Promise<Sensor> {
-    const sensor = await this.sensors.create({ ...dto, expiresAt: new Date(dto.expiresAt), companyId: user.companyId });
+    const expiresAt = dto.expiresAt ? new Date(dto.expiresAt) : new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
+    const activatedAt = dto.installedAt || dto.activatedAt ? new Date(dto.installedAt || dto.activatedAt!) : undefined;
+    const sensor = await this.sensors.create({
+      ...dto,
+      expiresAt,
+      ...(activatedAt ? { activatedAt } : {}),
+      companyId: user.companyId,
+    });
     this.realtime.broadcastCompany(user.companyId, 'sensor.changed', { action: 'created', sensorId: sensor._id.toString() });
     return sensor;
   }
@@ -81,6 +88,7 @@ export class SensorsService {
         customerNumber: cust?.customerNumber,
         sensorTypeName: st?.name || s.sensorTypeId,
         sensorTypeCode: st?.code,
+        installedAt: s.activatedAt,
       };
     });
 
@@ -95,10 +103,19 @@ export class SensorsService {
     ]);
     if (!sensor || !customer) throw new NotFoundException('Sensor or customer not found');
     if (sensor.status === 'DISABLED' || sensor.status === 'REPLACED') throw new BadRequestException('Sensor cannot be assigned');
-    await this.assignments.updateMany({ companyId: user.companyId, sensorId: sensor._id, unassignedAt: { $exists: false } }, { unassignedAt: new Date() }).exec();
-    await this.assignments.create({ companyId: user.companyId, sensorId: sensor._id, customerId: customer._id, assignedBy: user.authUserId, assignedAt: new Date(), reason: dto.reason });
+    const installDate = dto.installedAt || dto.assignedAt ? new Date(dto.installedAt || dto.assignedAt!) : new Date();
+    await this.assignments.updateMany({ companyId: user.companyId, sensorId: sensor._id, unassignedAt: { $exists: false } }, { unassignedAt: installDate }).exec();
+    await this.assignments.create({
+      companyId: user.companyId,
+      sensorId: sensor._id,
+      customerId: customer._id,
+      assignedBy: user.authUserId,
+      assignedAt: installDate,
+      reason: dto.reason,
+    });
     sensor.customerId = customer._id;
     sensor.status = 'ASSIGNED';
+    sensor.activatedAt = installDate;
     const saved = await sensor.save();
     this.realtime.broadcastCompany(user.companyId, 'sensor.changed', { action: 'assigned', sensorId: sensorId, customerId: dto.customerId });
     return saved;

@@ -8,12 +8,12 @@ export class Sensor {
   @Prop({ required: true, index: true }) companyId!: string;
   @Prop({ required: true }) serialNumber!: string;
   @Prop({ required: true }) sensorTypeId!: string;
-  @Prop({ required: true }) manufacturer!: string;
-  @Prop({ required: true }) model!: string;
+  @Prop({ default: '' }) manufacturer?: string;
+  @Prop({ default: '' }) model?: string;
   @Prop({ type: Types.ObjectId, ref: 'Customer' }) customerId?: Types.ObjectId;
   @Prop({ required: true, enum: ['AVAILABLE', 'ASSIGNED', 'ACTIVE', 'EXPIRING_SOON', 'EXPIRED', 'DISABLED', 'REPLACED'], default: 'AVAILABLE' }) status!: string;
   @Prop() activatedAt?: Date;
-  @Prop({ required: true, index: true }) expiresAt!: Date;
+  @Prop({ required: true, index: true, default: () => new Date(Date.now() + 15 * 24 * 60 * 60 * 1000) }) expiresAt!: Date;
 }
 
 export const SensorSchema = SchemaFactory.createForClass(Sensor);
