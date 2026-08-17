@@ -1,14 +1,19 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { Customer, CustomerDocument } from './customer.schema';
+import { Sensor, SensorDocument } from '../sensors/sensor.schema';
 import { CreateCustomerDto, CustomerQueryDto, UpdateCustomerDto } from './customer.dto';
 import { RealtimeGateway } from '../realtime/realtime.gateway';
 
 @Injectable()
 export class CustomersService {
-  constructor(@InjectModel(Customer.name) private readonly customers: Model<CustomerDocument>, private readonly realtime: RealtimeGateway) {}
+  constructor(
+    @InjectModel(Customer.name) private readonly customers: Model<CustomerDocument>,
+    @InjectModel(Sensor.name) private readonly sensors: Model<SensorDocument>,
+    private readonly realtime: RealtimeGateway,
+  ) {}
 
   async create(user: AuthenticatedUser, dto: CreateCustomerDto): Promise<Customer> {
     const count = await this.customers.countDocuments({ companyId: user.companyId }).exec();
@@ -18,16 +23,70 @@ export class CustomersService {
     return customer;
   }
 
-  async findAll(user: AuthenticatedUser, query: CustomerQueryDto): Promise<{ data: Customer[]; total: number; page: number; limit: number }> {
+  async findAll(user: AuthenticatedUser, query: CustomerQueryDto): Promise<{ data: any[]; total: number; page: number; limit: number }> {
     const page = Math.max(1, Number(query.page) || 1);
     const limit = Math.min(100, Math.max(1, Number(query.limit) || 25));
     const filter: FilterQuery<CustomerDocument> = { companyId: user.companyId };
     if (query.status) filter.status = query.status;
     if (query.search) {
       const search = query.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      filter.$or = [{ firstName: new RegExp(search, 'i') }, { lastName: new RegExp(search, 'i') }, { customerNumber: new RegExp(search, 'i') }];
+      const matchingSensors = await this.sensors
+        .find({
+          companyId: user.companyId,
+          serialNumber: new RegExp(search, 'i'),
+          customerId: { $exists: true },
+        })
+        .select('customerId')
+        .lean()
+        .exec();
+      const customerIdsFromSensors = matchingSensors
+        .map((s) => s.customerId)
+        .filter((id): id is Types.ObjectId => !!id);
+
+      filter.$or = [
+        { firstName: new RegExp(search, 'i') },
+        { lastName: new RegExp(search, 'i') },
+        { customerNumber: new RegExp(search, 'i') },
+        ...(customerIdsFromSensors.length > 0 ? [{ _id: { $in: customerIdsFromSensors } }] : []),
+      ];
     }
-    const [data, total] = await Promise.all([this.customers.find(filter).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).lean().exec(), this.customers.countDocuments(filter).exec()]);
+    const [rawCustomers, total] = await Promise.all([
+      this.customers.find(filter).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).lean().exec(),
+      this.customers.countDocuments(filter).exec(),
+    ]);
+
+    const customerIds = rawCustomers.map((c) => c._id);
+    const activeSensors = customerIds.length > 0
+      ? await this.sensors
+          .find({
+            companyId: user.companyId,
+            customerId: { $in: customerIds },
+            status: { $nin: ['DISABLED', 'REPLACED'] },
+          })
+          .sort({ activatedAt: -1, createdAt: -1 })
+          .lean()
+          .exec()
+      : [];
+
+    const sensorMap = new Map<string, string[]>();
+    activeSensors.forEach((s) => {
+      if (s.customerId) {
+        const key = s.customerId.toString();
+        const list = sensorMap.get(key) || [];
+        list.push(s.serialNumber);
+        sensorMap.set(key, list);
+      }
+    });
+
+    const data = rawCustomers.map((c) => {
+      const attachedSerials = sensorMap.get(c._id.toString()) || [];
+      return {
+        ...c,
+        attachedSensorSerial: attachedSerials[0] || undefined,
+        attachedSensorSerials: attachedSerials,
+      };
+    });
+
     return { data, total, page, limit };
   }
 

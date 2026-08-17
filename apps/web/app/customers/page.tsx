@@ -1,6 +1,6 @@
 'use client';
 
-import { Mail, Phone, Plus, RefreshCw, Search, SlidersHorizontal, UserRound, X } from 'lucide-react';
+import { Mail, Phone, Plus, Radio, RefreshCw, Search, SlidersHorizontal, UserRound, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { AppShell } from '../components/app-shell';
@@ -16,6 +16,8 @@ type Customer = {
   email?: string;
   address?: string;
   status: string;
+  attachedSensorSerial?: string;
+  attachedSensorSerials?: string[];
 };
 type CustomerResponse = { data: Customer[]; total: number; page: number; limit: number };
 
@@ -51,7 +53,7 @@ export default function CustomersPage() {
   const filtered = useMemo(
     () =>
       customers.filter((customer) =>
-        `${customer.firstName} ${customer.lastName} ${customer.customerNumber} ${customer.phone ?? ''} ${
+        `${customer.firstName} ${customer.lastName} ${customer.customerNumber} ${customer.attachedSensorSerial ?? ''} ${customer.phone ?? ''} ${
           customer.email ?? ''
         } ${customer.address ?? ''}`
           .toLowerCase()
@@ -132,7 +134,7 @@ export default function CustomersPage() {
                       <th style={{ background: '#ffffff' }}>Customer ID</th>
                       <th style={{ background: '#ffffff' }}>Customer Name</th>
                       <th style={{ background: '#ffffff' }}>Contact & Mobile</th>
-                      <th style={{ background: '#ffffff' }}>Status</th>
+                      <th style={{ background: '#ffffff' }}>Attached Sensor</th>
                       <th style={{ background: '#ffffff', textAlign: 'right' }}>Action</th>
                     </tr>
                   </thead>
@@ -181,10 +183,46 @@ export default function CustomersPage() {
                           </div>
                         </td>
                         <td>
-                          <span className={`status status-${customer.status.toLowerCase()}`}>
-                            <i />
-                            {customer.status}
-                          </span>
+                          {customer.attachedSensorSerial ? (
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                              <span
+                                style={{
+                                  fontFamily: "'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                                  fontWeight: 600,
+                                  fontSize: '12px',
+                                  color: '#0f766e',
+                                  background: '#f0fdf4',
+                                  padding: '3px 8px',
+                                  borderRadius: '5px',
+                                  border: '1px solid #bbf7d0',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '5px',
+                                }}
+                              >
+                                <Radio size={12} style={{ color: '#0f766e' }} />
+                                {customer.attachedSensorSerial}
+                              </span>
+                              {customer.attachedSensorSerials && customer.attachedSensorSerials.length > 1 && (
+                                <span
+                                  style={{
+                                    fontSize: '10.5px',
+                                    color: '#64748b',
+                                    background: '#f1f5f9',
+                                    padding: '2px 6px',
+                                    borderRadius: '4px',
+                                    fontWeight: 600,
+                                  }}
+                                >
+                                  +{customer.attachedSensorSerials.length - 1} more
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="muted-cell" style={{ fontStyle: 'italic', fontSize: '12px' }}>
+                              No sensor attached
+                            </span>
+                          )}
                         </td>
                         <td style={{ textAlign: 'right' }}>
                           <Link
