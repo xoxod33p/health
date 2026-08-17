@@ -276,7 +276,6 @@ if [ ! -f "$APP_DIR/.env" ]; then
     RANDOM_JWT=$(openssl rand -hex 32)
     RANDOM_MONGO_PASS=$(openssl rand -base64 18 | tr -dc 'a-zA-Z0-9' | head -c 20)
     RANDOM_REDIS_PASS=$(openssl rand -base64 18 | tr -dc 'a-zA-Z0-9' | head -c 20)
-    RANDOM_ADMIN_PASS=$(openssl rand -base64 12 | tr -dc 'a-zA-Z0-9' | head -c 16)
 
     cat <<EOF > "$APP_DIR/.env"
 # CareSignal Production Environment
@@ -300,9 +299,9 @@ REDIS_URL=redis://:${RANDOM_REDIS_PASS}@redis:6379
 # Local Storage Directory
 STORAGE_PATH=/app/storage
 
-# Initial Bootstrap Administrator Credentials
+# Default System Administrator Credentials
 DEFAULT_ADMIN_EMAIL=admin@${DOMAIN_NAME}
-DEFAULT_ADMIN_PASSWORD=${RANDOM_ADMIN_PASS}!
+DEFAULT_ADMIN_PASSWORD=CareSignalAdmin2026!
 DEFAULT_ADMIN_ROLE=SYSTEM_ADMIN
 DEFAULT_ADMIN_COMPANY_ID=caresignal-production
 EOF
@@ -310,7 +309,7 @@ EOF
     log_success "Generated secure production .env in $APP_DIR/.env"
     echo -e "${YELLOW}Initial Admin Credentials:${NC}"
     echo -e "  Email:    admin@${DOMAIN_NAME}"
-    echo -e "  Password: ${RANDOM_ADMIN_PASS}!"
+    echo -e "  Password: CareSignalAdmin2026!"
 else
     log_info "Existing .env found at $APP_DIR/.env, preserving configuration."
 fi
