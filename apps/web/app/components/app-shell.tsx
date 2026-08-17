@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { getCachedSession, getSession, signOut } from '../../lib/api';
+import { ThemeToggle } from './theme-toggle';
 
 const navigation = [
   { label: 'Overview', href: '/', icon: LayoutDashboard },
@@ -62,8 +63,8 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
           <div className="brand-mark-simple error">
             <Activity size={24} strokeWidth={2.5} />
           </div>
-          <h3 style={{ margin: '14px 0 6px', fontSize: '17px', color: '#0f172a', fontWeight: 600 }}>Session Expired</h3>
-          <p style={{ margin: '0 0 16px', fontSize: '14px', color: '#64748b' }}>Please sign in to continue.</p>
+          <h3 style={{ margin: '14px 0 6px', fontSize: '17px', color: 'var(--ink-heading)', fontWeight: 600 }}>Session Expired</h3>
+          <p style={{ margin: '0 0 16px', fontSize: '14px', color: 'var(--muted)' }}>Please sign in to continue.</p>
           <button
             type="button"
             className="primary-button"
@@ -121,8 +122,11 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
           </Link>
         </nav>
 
-        
-        <div className="sidebar-footer" style={{ padding: '12px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+        <div className="sidebar-footer" style={{ padding: '12px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ padding: '2px 0' }}>
+            <span className="nav-label" style={{ padding: '0 0 6px', display: 'block', color: 'rgba(255,255,255,0.45)' }}>Theme</span>
+            <ThemeToggle variant="segmented" />
+          </div>
           <button
             type="button"
             onClick={handleSignOut}
@@ -154,7 +158,10 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
             <h1 className="topbar-title">{title ?? activeLabel}</h1>
           </div>
           {headerCenter && <div className="topbar-center">{headerCenter}</div>}
-          {headerActions && <div className="topbar-right">{headerActions}</div>}
+          <div className="topbar-right">
+            {headerActions}
+            <ThemeToggle variant="dropdown" />
+          </div>
         </header>
         {children}
 
@@ -198,6 +205,13 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
                     <small>Team accounts & role matrix</small>
                   </div>
                 </Link>
+              </div>
+
+              <div style={{ padding: '16px 20px', borderTop: '1px solid var(--line)' }}>
+                <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.8px', display: 'block', marginBottom: '8px' }}>
+                  Interface Theme
+                </span>
+                <ThemeToggle variant="segmented" />
               </div>
 
               <div className="mobile-more-footer">

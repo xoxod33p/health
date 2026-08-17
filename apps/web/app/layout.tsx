@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { PwaRegister } from './components/pwa-register';
+import { ThemeProvider } from './components/theme-provider';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -35,6 +36,21 @@ export const viewport: Viewport = {
   themeColor: '#1b8b83',
 };
 
+const themeInitScript = `
+(function() {
+  try {
+    var stored = localStorage.getItem('caresignal-theme');
+    var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var resolved = (stored === 'dark' || (!stored && systemDark) || (stored === 'system' && systemDark)) ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', resolved);
+    document.documentElement.classList.add(resolved);
+    document.documentElement.style.colorScheme = resolved;
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', resolved === 'dark' ? '#0a1014' : '#1b8b83');
+  } catch (e) {}
+})();
+`;
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -43,10 +59,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <meta name="apple-touch-fullscreen" content="yes" />
         <meta name="theme-color" content="#1b8b83" />
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body suppressHydrationWarning>
-        <PwaRegister />
-        {children}
+        <ThemeProvider>
+          <PwaRegister />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
