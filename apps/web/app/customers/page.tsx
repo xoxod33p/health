@@ -62,23 +62,6 @@ export default function CustomersPage() {
     [customers, query]
   );
 
-  const topbarCenter = (
-    <div className="topbar-center-wrap">
-      <div className="search-field">
-        <Search size={16} />
-        <input
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search by customer name, ID, phone, or email"
-        />
-      </div>
-      <button className="filter-button">
-        <SlidersHorizontal size={16} /> Filter
-      </button>
-      <span className="result-count">{filtered.length} customers</span>
-    </div>
-  );
-
   const topbarRight = (
     <button className="primary-button" onClick={() => setShowForm(true)}>
       <Plus size={17} /> Add customer
@@ -86,7 +69,7 @@ export default function CustomersPage() {
   );
 
   return (
-    <AppShell headerCenter={topbarCenter} headerActions={topbarRight}>
+    <AppShell headerActions={topbarRight}>
       <div className="page-content">
         {loading && (
           <div className="data-loading">
@@ -105,10 +88,24 @@ export default function CustomersPage() {
 
         {!loading && !error && (
           <section className="panel">
-            <div className="panel-heading">
+            <div className="panel-heading" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
               <div>
                 <p className="eyebrow">All records</p>
                 <h2>Customer directory</h2>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <div className="search-field" style={{ width: '320px', maxWidth: '100%' }}>
+                  <Search size={16} />
+                  <input
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    placeholder="Search by customer name, ID, phone, or email"
+                  />
+                </div>
+                <button className="filter-button" type="button">
+                  <SlidersHorizontal size={15} /> Filter
+                </button>
+                <span className="result-count">{filtered.length} customers</span>
               </div>
             </div>
             {filtered.length === 0 ? (
