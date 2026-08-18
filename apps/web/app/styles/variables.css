@@ -2,8 +2,7 @@
    DESIGN TOKENS, CSS VARIABLES & BASE RESET
    ============================================================================== */
 
-:root,
-[data-theme="light"] {
+:root {
   --ink: #17272d;
   --ink-heading: #0f172a;
   --muted: #718087;
@@ -44,49 +43,6 @@
 
   --badge-neutral-bg: #f1f5f9;
   --badge-neutral-text: #64748b;
-}
-
-[data-theme="dark"] {
-  --ink: #e2e8f0;
-  --ink-heading: #f8fafc;
-  --muted: #94a3b8;
-  --subtle-text: #64748b;
-  --line: #1e2a32;
-  --line-strong: #2c3e48;
-  --paper: #0a1014;
-  --white: #121c22;
-  --surface-hover: #18252d;
-  --navy: #080d10;
-  --teal: #2dd4bf;
-  --teal-soft: rgba(45, 212, 191, 0.15);
-  --blue: #60a5fa;
-  --amber: #fbbf24;
-  --coral: #f87171;
-
-  --sidebar-bg: #0b1216;
-  --sidebar-text: #cbd5e1;
-  --sidebar-nav-hover: #16232b;
-
-  --topbar-bg: #121c22;
-  --card-bg: #121c22;
-  --card-border: #1e2a32;
-  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-
-  --table-header-bg: #121c22;
-  --table-row-border: #1a2730;
-  --table-row-hover: #17242c;
-
-  --input-bg: #0d1519;
-  --input-border: #263842;
-  --input-text: #f1f5f9;
-  --input-placeholder: #64748b;
-
-  --popover-bg: #142027;
-  --popover-border: #263842;
-  --popover-shadow: 0 14px 35px rgba(0, 0, 0, 0.5);
-
-  --badge-neutral-bg: #1a2730;
-  --badge-neutral-text: #94a3b8;
 }
 
 * {

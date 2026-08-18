@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next';
 import { PwaRegister } from './components/pwa-register';
-import { ThemeProvider } from './components/theme-provider';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -39,21 +38,18 @@ export const viewport: Viewport = {
 const themeInitScript = `
 (function() {
   try {
-    var stored = localStorage.getItem('caresignal-theme');
-    var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    var resolved = (stored === 'dark' || (stored === 'system' && systemDark)) ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', resolved);
-    document.documentElement.classList.add(resolved);
-    document.documentElement.style.colorScheme = resolved;
-    var meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', resolved === 'dark' ? '#0a1014' : '#1b8b83');
+    localStorage.removeItem('caresignal-theme');
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.add('light');
+    document.documentElement.style.colorScheme = 'light';
   } catch (e) {}
 })();
 `;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" data-theme="light" suppressHydrationWarning>
       <head>
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-touch-fullscreen" content="yes" />
@@ -62,10 +58,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body suppressHydrationWarning>
-        <ThemeProvider>
-          <PwaRegister />
-          {children}
-        </ThemeProvider>
+        <PwaRegister />
+        {children}
       </body>
     </html>
   );

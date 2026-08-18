@@ -1,6 +1,6 @@
 'use client';
 
-import { Activity, Boxes, ClipboardList, FileBarChart, LayoutDashboard, LogOut, MoreHorizontal, Settings, ShieldCheck, Users, X } from 'lucide-react';
+import { Activity, Boxes, ClipboardList, FileBarChart, LayoutDashboard, LogOut, MoreHorizontal, ShieldCheck, Users, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -23,7 +23,6 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
   const [authState, setAuthState] = useState<'loading' | 'ready' | 'error'>(cachedSession ? 'ready' : 'loading');
   const activeLabel = navigation.find((item) => item.href === pathname)?.label ?? (
     pathname.startsWith('/users') ? 'User management' : 
-    pathname.startsWith('/settings') ? 'Settings' : 
     'Workspace'
   );
 
@@ -123,10 +122,6 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
             <Users size={17} strokeWidth={1.8} />
             <span style={{ fontWeight: 500 }}>User management</span>
           </Link>
-          <Link className={`nav-item ${activeLabel === 'Settings' ? 'nav-active' : ''}`} href="/settings" onClick={() => setSidebarOpen(false)}>
-            <Settings size={17} strokeWidth={1.8} />
-            <span style={{ fontWeight: 500 }}>Settings</span>
-          </Link>
         </nav>
 
         <div className="sidebar-footer" style={{ padding: '12px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
@@ -205,18 +200,6 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
                     <small>Team accounts & role matrix</small>
                   </div>
                 </Link>
-
-                <Link
-                  href="/settings"
-                  className={`mobile-more-item ${pathname.startsWith('/settings') ? 'active' : ''}`}
-                  onClick={() => setMoreSheetOpen(false)}
-                >
-                  <div className="mobile-more-icon"><Settings size={18} /></div>
-                  <div className="mobile-more-text">
-                    <strong>Settings</strong>
-                    <small>Appearance, theme & preferences</small>
-                  </div>
-                </Link>
               </div>
 
               <div className="mobile-more-footer">
@@ -252,11 +235,11 @@ export function AppShell({ children, title, headerCenter, headerActions }: Reado
           </Link>
           <button
             type="button"
-            className={`mobile-nav-item ${moreSheetOpen || pathname.startsWith('/audit') || pathname.startsWith('/users') || pathname.startsWith('/settings') ? 'active' : ''}`}
+            className={`mobile-nav-item ${moreSheetOpen || pathname.startsWith('/audit') || pathname.startsWith('/users') ? 'active' : ''}`}
             onClick={() => setMoreSheetOpen(!moreSheetOpen)}
             aria-label="More navigation options"
           >
-            <MoreHorizontal size={19} strokeWidth={moreSheetOpen || pathname.startsWith('/audit') || pathname.startsWith('/users') || pathname.startsWith('/settings') ? 2.3 : 1.8} />
+            <MoreHorizontal size={19} strokeWidth={moreSheetOpen || pathname.startsWith('/audit') || pathname.startsWith('/users') ? 2.3 : 1.8} />
             <span>More</span>
           </button>
         </nav>

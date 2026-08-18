@@ -206,29 +206,6 @@
   white-space: nowrap;
 }
 
-.topbar-center-wrap .settings-tabs {
-  border-bottom: 0;
-  margin-bottom: 0;
-  gap: 4px;
-}
-
-.topbar-center-wrap .settings-tab {
-  border-bottom: 2px solid transparent;
-  height: 42px;
-  padding: 0 14px;
-  border-radius: 4px;
-}
-
-.topbar-center-wrap .settings-tab:hover {
-  color: var(--ink);
-}
-
-.topbar-center-wrap .settings-tab-active {
-  border-bottom-color: var(--teal);
-  color: var(--teal);
-  font-weight: 600;
-}
-
 .topbar-right {
   align-items: center;
   display: flex;
