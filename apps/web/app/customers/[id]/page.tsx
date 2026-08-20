@@ -12,7 +12,6 @@ import {
   Phone,
   Plus,
   RefreshCw,
-  Tag,
   UserCheck,
   UserPlus,
   X,
@@ -709,7 +708,6 @@ export default function CustomerDetailPage() {
                         <thead style={{ background: '#f8fafc' }}>
                           <tr>
                             <th>Serial Number</th>
-                            <th>Sensor Type & Model</th>
                             <th>Installation Date</th>
                             <th>Expiration Date</th>
                             <th>Status</th>
@@ -725,27 +723,6 @@ export default function CustomerDetailPage() {
                                   <strong className="serial" style={{ fontSize: '13px' }}>
                                     {sensor.serialNumber}
                                   </strong>
-                                </td>
-                                <td>
-                                  <div>
-                                    <span
-                                      style={{
-                                        display: 'inline-flex',
-                                        alignItems: 'center',
-                                        gap: '4px',
-                                        fontWeight: 600,
-                                        color: '#1e293b',
-                                      }}
-                                    >
-                                      <Tag size={12} style={{ color: '#0f766e' }} />
-                                      {sensor.sensorTypeName || sensor.sensorTypeCode || sensor.sensorTypeId}
-                                    </span>
-                                    {(sensor.manufacturer || sensor.model) && (
-                                      <div style={{ fontSize: '11px', color: '#64748b', marginTop: '1px' }}>
-                                        {[sensor.manufacturer, sensor.model].filter(Boolean).join(' · ')}
-                                      </div>
-                                    )}
-                                  </div>
                                 </td>
                                 <td>
                                   <span style={{ fontWeight: 500, color: '#334155' }}>
@@ -1011,7 +988,7 @@ export default function CustomerDetailPage() {
                           <option value="" disabled>Choose a sensor...</option>
                           {availableSensors.map((s) => (
                             <option key={s._id} value={s._id}>
-                              {s.serialNumber}{s.sensorTypeName && s.sensorTypeName !== 'default' ? ` — ${s.sensorTypeName}` : ''}
+                              {s.serialNumber}
                             </option>
                           ))}
                         </select>

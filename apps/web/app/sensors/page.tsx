@@ -12,7 +12,6 @@ import {
   Plus,
   RefreshCw,
   Search,
-  Tag,
   User,
   UserCheck,
   UserPlus,
@@ -260,9 +259,7 @@ export default function SensorsPage() {
         sensor.effective.key === statusFilter ||
         sensor.status === statusFilter;
 
-      const searchableText = `${sensor.serialNumber} ${sensor.sensorTypeName || ''} ${
-        sensor.sensorTypeCode || ''
-      } ${sensor.sensorTypeId} ${sensor.manufacturer || ''} ${sensor.model || ''} ${
+      const searchableText = `${sensor.serialNumber} ${
         sensor.customerName || ''
       } ${sensor.customerNumber || ''} ${sensor.effective.label}`.toLowerCase();
 
@@ -525,7 +522,6 @@ export default function SensorsPage() {
                       <thead style={{ position: 'sticky', top: 0, background: '#ffffff', zIndex: 3, boxShadow: '0 1px 0 #edf1f1' }}>
                         <tr>
                           <th style={{ background: '#ffffff' }}>Serial Number</th>
-                          <th style={{ background: '#ffffff' }}>Sensor Type & Model</th>
                           <th style={{ background: '#ffffff' }}>Assigned Customer</th>
                           <th style={{ background: '#ffffff' }}>Installed Date</th>
                           <th style={{ background: '#ffffff' }}>Expiration Date</th>
@@ -539,27 +535,6 @@ export default function SensorsPage() {
                             <td>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                 <strong className="serial">{sensor.serialNumber}</strong>
-                              </div>
-                            </td>
-                            <td>
-                              <div>
-                                <span
-                                  style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '5px',
-                                    fontWeight: 600,
-                                    color: '#1e293b',
-                                  }}
-                                >
-                                  <Tag size={13} style={{ color: '#0f766e' }} />
-                                  {sensor.sensorTypeName || sensor.sensorTypeCode || sensor.sensorTypeId}
-                                </span>
-                                {(sensor.manufacturer || sensor.model) && (
-                                  <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
-                                    {[sensor.manufacturer, sensor.model].filter(Boolean).join(' · ')}
-                                  </div>
-                                )}
                               </div>
                             </td>
                             <td>
@@ -880,7 +855,6 @@ export default function SensorsPage() {
                   </h2>
                   <p style={{ fontSize: '12px', color: '#64748b' }}>
                     Serial: <strong style={{ fontFamily: 'monospace' }}>{assignSensor.serialNumber}</strong>
-                    {assignSensor.sensorTypeName && assignSensor.sensorTypeName !== 'default' ? ` (${assignSensor.sensorTypeName})` : ''}
                   </p>
                 </div>
                 <button
@@ -1103,7 +1077,6 @@ export default function SensorsPage() {
                   <h2 style={{ fontSize: '18px' }}>Assignment & Telemetry History</h2>
                   <p style={{ fontSize: '12px', color: '#64748b' }}>
                     Sensor: <strong style={{ fontFamily: 'monospace' }}>{historySensor.serialNumber}</strong>
-                    {historySensor.sensorTypeName && historySensor.sensorTypeName !== 'default' ? ` (${historySensor.sensorTypeName})` : ''}
                   </p>
                 </div>
                 <button

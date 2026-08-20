@@ -8,7 +8,6 @@ import {
   ExternalLink,
   MoreHorizontal,
   RefreshCw,
-  Tag,
   User,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -265,7 +264,6 @@ export function Dashboard() {
               <thead style={{ position: 'sticky', top: 0, background: '#ffffff', zIndex: 3, boxShadow: '0 1px 0 #edf1f1' }}>
                 <tr>
                   <th style={{ background: '#ffffff', padding: '12px' }}>Serial Number</th>
-                  <th style={{ background: '#ffffff', padding: '12px' }}>Sensor Type</th>
                   <th style={{ background: '#ffffff', padding: '12px' }}>Assigned Customer</th>
                   <th style={{ background: '#ffffff', padding: '12px' }}>Expiration Date</th>
                   <th style={{ background: '#ffffff', padding: '12px' }}>Status</th>
@@ -284,24 +282,6 @@ export function Dashboard() {
                         <strong className="serial" style={{ fontFamily: 'monospace', fontSize: '13px' }}>
                           {sensor.serialNumber}
                         </strong>
-                      </td>
-                      <td style={{ padding: '16px 12px' }}>
-                        <span
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '5px',
-                            background: '#f1f5f9',
-                            color: '#334155',
-                            padding: '3px 8px',
-                            borderRadius: '4px',
-                            fontSize: '12px',
-                            fontWeight: 600,
-                          }}
-                        >
-                          <Tag size={12} style={{ color: '#0f766e' }} />
-                          {sensor.sensorTypeName || sensor.sensorTypeCode || sensor.sensorTypeId}
-                        </span>
                       </td>
                       <td style={{ padding: '16px 12px' }}>
                         {sensor.customerName ? (
