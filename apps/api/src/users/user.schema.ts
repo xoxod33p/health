@@ -28,6 +28,9 @@ export class User {
 
   @Prop({ required: true })
   salt!: string;
+
+  @Prop({ type: Date })
+  lastActiveAt?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

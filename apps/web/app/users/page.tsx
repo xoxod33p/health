@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   Check,
   CheckCircle2,
+  Clock,
   Database,
   Edit2,
   KeyRound,
@@ -79,8 +80,61 @@ type UserMember = {
   status: 'ACTIVE' | 'INVITED' | 'SUSPENDED';
   isProtected?: boolean;
   isOnline?: boolean;
+  lastActiveAt?: string;
   createdAt?: string;
 };
+
+function formatLastActive(dateStr?: string, isOnline?: boolean): { label: string; subtext: string; isRecent: boolean } {
+  if (isOnline) {
+    const timeStr = dateStr
+      ? new Date(dateStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      : '';
+    return {
+      label: 'Active now',
+      subtext: timeStr ? `Since ${timeStr}` : 'Online',
+      isRecent: true,
+    };
+  }
+
+  if (!dateStr) {
+    return {
+      label: 'Never',
+      subtext: 'No recorded activity',
+      isRecent: false,
+    };
+  }
+
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) {
+    return {
+      label: '—',
+      subtext: '',
+      isRecent: false,
+    };
+  }
+
+  const now = new Date();
+  const diffMs = Math.max(0, now.getTime() - d.getTime());
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  let relative = '';
+  if (diffMins < 1) relative = 'Just now';
+  else if (diffMins < 60) relative = `${diffMins}m ago`;
+  else if (diffHours < 24) relative = `${diffHours}h ago`;
+  else if (diffDays === 1) relative = 'Yesterday';
+  else if (diffDays < 7) relative = `${diffDays}d ago`;
+  else relative = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+
+  const exactFormatted = `${d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}, ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+
+  return {
+    label: relative,
+    subtext: exactFormatted,
+    isRecent: diffHours < 12,
+  };
+}
 
 export const PERMISSION_LEVELS: { id: string; name: string; category: string; description: string }[] = [
   { id: 'dashboard.view', name: 'View Dashboard Telemetry', category: 'Analytics', description: 'Access real-time operational health telemetry & alerts' },
@@ -664,6 +718,7 @@ export default function UsersPage() {
                               <th style={{ background: '#ffffff' }}>Role</th>
                               <th style={{ background: '#ffffff' }}>Permissions</th>
                               <th style={{ background: '#ffffff' }}>Status</th>
+                              <th style={{ background: '#ffffff' }}>Last Active</th>
                               <th style={{ textAlign: 'right', background: '#ffffff' }}>Actions</th>
                             </tr>
                           </thead>
@@ -675,6 +730,7 @@ export default function UsersPage() {
                               const initials = (userItem.lastName && userItem.lastName.trim())
                                 ? `${userItem.firstName.slice(0, 1)}${userItem.lastName.slice(0, 1)}`.toUpperCase()
                                 : userItem.firstName.slice(0, 1).toUpperCase();
+                              const activeInfo = formatLastActive(userItem.lastActiveAt || userItem.createdAt, userItem.isOnline);
 
                               return (
                                 <tr key={userItem._id}>
@@ -767,6 +823,19 @@ export default function UsersPage() {
                                       </span>
                                     )}
                                   </td>
+                                  <td>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                                      <span style={{ fontWeight: 600, fontSize: '12px', color: userItem.isOnline ? '#059669' : '#334155', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                        <Clock size={11} style={{ color: userItem.isOnline ? '#059669' : '#94a3b8' }} />
+                                        {activeInfo.label}
+                                      </span>
+                                      {activeInfo.subtext && (
+                                        <small style={{ color: '#64748b', fontSize: '11px', whiteSpace: 'nowrap' }}>
+                                          {activeInfo.subtext}
+                                        </small>
+                                      )}
+                                    </div>
+                                  </td>
                                   <td style={{ textAlign: 'right' }}>
                                     <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
                                       {userItem.isProtected ? (
@@ -835,6 +904,7 @@ export default function UsersPage() {
                         const initials = (userItem.lastName && userItem.lastName.trim())
                           ? `${userItem.firstName.slice(0, 1)}${userItem.lastName.slice(0, 1)}`.toUpperCase()
                           : userItem.firstName.slice(0, 1).toUpperCase();
+                        const activeInfo = formatLastActive(userItem.lastActiveAt || userItem.createdAt, userItem.isOnline);
 
                         return (
                           <article className="mobile-card" key={`mobile-user-${userItem._id}`}>
@@ -931,6 +1001,21 @@ export default function UsersPage() {
                                   ) : (
                                     <span className="status status-healthy" style={{ fontSize: '11px', padding: '2px 6px' }}>
                                       <KeyRound size={11} /> {activePermCount} / {PERMISSION_LEVELS.length}
+                                    </span>
+                                  )}
+                                </span>
+                              </div>
+
+                              <div className="mobile-card-field full-width">
+                                <span className="mobile-card-field-label">Last Active</span>
+                                <span className="mobile-card-field-value" style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                                  <span style={{ fontWeight: 600, color: userItem.isOnline ? '#059669' : '#1e293b', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                    <Clock size={11} style={{ color: userItem.isOnline ? '#059669' : '#94a3b8' }} />
+                                    {activeInfo.label}
+                                  </span>
+                                  {activeInfo.subtext && (
+                                    <span style={{ fontSize: '11px', color: '#64748b' }}>
+                                      ({activeInfo.subtext})
                                     </span>
                                   )}
                                 </span>

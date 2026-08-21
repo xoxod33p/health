@@ -15,6 +15,7 @@ export class Employee {
   @Prop({ required: true, enum: ['ACTIVE', 'INVITED', 'SUSPENDED'], default: 'ACTIVE' }) status!: string;
   @Prop() phone?: string;
   @Prop() title?: string;
+  @Prop({ type: Date }) lastActiveAt?: Date;
 }
 
 export const EmployeeSchema = SchemaFactory.createForClass(Employee);

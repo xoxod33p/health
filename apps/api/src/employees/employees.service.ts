@@ -78,11 +78,19 @@ export class EmployeesService {
 
     const onlineEmails = new Set(this.realtime.getOnlineUsers(user.companyId).map((e) => e.toLowerCase().trim()));
 
-    return list.map((e) => ({
-      ...e,
-      isProtected: e.email.toLowerCase().trim() === this.defaultAdminEmail,
-      isOnline: onlineEmails.has(e.email.toLowerCase().trim()),
-    }));
+    return list.map((e) => {
+      const isOnline = onlineEmails.has(e.email.toLowerCase().trim());
+      const effectiveLastActive = isOnline
+        ? new Date()
+        : (e.lastActiveAt || (e as any).updatedAt || (e as any).createdAt);
+
+      return {
+        ...e,
+        lastActiveAt: effectiveLastActive,
+        isProtected: e.email.toLowerCase().trim() === this.defaultAdminEmail,
+        isOnline,
+      };
+    });
   }
 
   async update(user: AuthenticatedUser, id: string, dto: UpdateEmployeeDto): Promise<Employee> {

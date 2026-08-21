@@ -35,6 +35,10 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
+    const now = new Date();
+    user.lastActiveAt = now;
+    await this.users.updateOne({ _id: user._id }, { $set: { lastActiveAt: now } }).exec();
+
     const token = await this.signToken(user);
     const isDefaultAdmin = user.email.toLowerCase().trim() === this.defaultAdminEmail;
     return {
