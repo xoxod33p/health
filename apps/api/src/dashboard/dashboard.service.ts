@@ -35,7 +35,7 @@ export class DashboardService {
         this.sensors
           .countDocuments({
             companyId,
-            expiresAt: { $gte: new Date(), $lte: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000) },
+            expiresAt: { $gte: new Date(), $lte: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
             status: { $nin: ['DISABLED', 'REPLACED'] },
           })
           .exec(),

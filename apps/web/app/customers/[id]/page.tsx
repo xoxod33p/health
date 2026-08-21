@@ -90,7 +90,16 @@ function getSensorStatusBadge(sensor: Sensor) {
     };
   }
 
-  if (sensor.status === 'EXPIRING_SOON' || (days >= 0 && days <= 30)) {
+  if (sensor.status === 'DISABLED' || sensor.status === 'REPLACED') {
+    return {
+      label: sensor.status,
+      className: 'status status-critical',
+      daysLabel: `${days}d left`,
+      tone: 'critical',
+    };
+  }
+
+  if (days >= 0 && days <= 7) {
     return {
       label: 'EXPIRING SOON',
       className: 'status status-warning',

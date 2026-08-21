@@ -102,17 +102,6 @@ function getSensorEffectiveStatus(sensor: Sensor) {
     };
   }
 
-  if (sensor.status === 'EXPIRING_SOON' || (days >= 0 && days <= 30 && Boolean(sensor.customerId))) {
-    return {
-      key: 'EXPIRING_SOON',
-      label: 'EXPIRING SOON',
-      className: 'status status-warning',
-      badgeTone: 'warning',
-      daysLeft: days,
-      daysLabel: `${days}d left`,
-    };
-  }
-
   if (sensor.status === 'DISABLED' || sensor.status === 'REPLACED') {
     return {
       key: sensor.status,
@@ -124,7 +113,18 @@ function getSensorEffectiveStatus(sensor: Sensor) {
     };
   }
 
-  if (sensor.customerId || sensor.status === 'ACTIVE' || sensor.status === 'ASSIGNED') {
+  if (days >= 0 && days <= 7 && (Boolean(sensor.customerId) || sensor.status === 'ACTIVE' || sensor.status === 'ASSIGNED' || sensor.status === 'EXPIRING_SOON')) {
+    return {
+      key: 'EXPIRING_SOON',
+      label: 'EXPIRING SOON',
+      className: 'status status-warning',
+      badgeTone: 'warning',
+      daysLeft: days,
+      daysLabel: `${days}d left`,
+    };
+  }
+
+  if (sensor.customerId || sensor.status === 'ACTIVE' || sensor.status === 'ASSIGNED' || sensor.status === 'EXPIRING_SOON') {
     return {
       key: 'ACTIVE',
       label: 'ACTIVE',
@@ -442,7 +442,7 @@ export default function SensorsPage() {
               <Clock size={18} />
             </div>
             <strong>{stats.expiring}</strong>
-            <small>Expiring within 30 days</small>
+            <small>Expiring within 7 days</small>
           </div>
           <div className="mini-stat mini-stat-blue">
             <div className="mini-stat-top">

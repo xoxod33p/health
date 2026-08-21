@@ -64,11 +64,14 @@ function getStatusBadge(status: string, daysLeft: number) {
   if (status === 'EXPIRED' || daysLeft < 0) {
     return { className: 'status status-critical', label: 'EXPIRED' };
   }
-  if (status === 'EXPIRING_SOON' || (daysLeft >= 0 && daysLeft <= 30)) {
+  if (status === 'DISABLED' || status === 'REPLACED') {
+    return { className: 'status status-neutral', label: status };
+  }
+  if (daysLeft >= 0 && daysLeft <= 7) {
     return { className: 'status status-warning', label: 'EXPIRING SOON' };
   }
-  if (status === 'ACTIVE' || status === 'ASSIGNED') {
-    return { className: 'status status-healthy', label: status };
+  if (status === 'ACTIVE' || status === 'ASSIGNED' || status === 'EXPIRING_SOON') {
+    return { className: 'status status-healthy', label: status === 'EXPIRING_SOON' ? 'ACTIVE' : status };
   }
   return { className: 'status status-neutral', label: status };
 }
@@ -109,8 +112,9 @@ export function Dashboard() {
   const expiringSensors = useMemo(() => {
     return allSensors
       .filter((s) => {
+        if (s.status === 'DISABLED' || s.status === 'REPLACED') return false;
         const days = getDaysRemaining(s.expiresAt);
-        return s.status === 'EXPIRING_SOON' || s.status === 'EXPIRED' || days <= 30;
+        return s.status === 'EXPIRED' || days <= 7;
       })
       .sort((a, b) => new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime());
   }, [allSensors]);
@@ -160,7 +164,7 @@ export function Dashboard() {
       tone: 'blue',
     },
     {
-      label: 'Expiring in 30 days',
+      label: 'Expiring in 7 days',
       value: summary.expiringSensors,
       delta: `${summary.expiredSensors} already expired`,
       note: 'Requires clinical action',
@@ -247,7 +251,7 @@ export function Dashboard() {
               All Active Sensors are Healthy
             </h3>
             <p style={{ fontSize: '13px', color: '#64748b', margin: 0, maxWidth: '440px' }}>
-              No sensors in service are expiring within the next 30 days. Operating telemetry devices are within standard lifecycles.
+              No sensors in service are expiring within the next 7 days. Operating telemetry devices are within standard lifecycles.
             </p>
           </div>
         ) : (
