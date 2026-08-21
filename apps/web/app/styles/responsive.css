@@ -20,6 +20,18 @@
 
 /* Tablet Portrait & Mobile */
 @media (max-width: 768px) {
+  /* Table to Mobile Card Switch */
+  .desktop-table-view {
+    display: none !important;
+  }
+
+  .mobile-cards-view {
+    display: flex !important;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+
   /* Prevent automatic mobile browser zoom on touch/focus */
   input:not([type="checkbox"]):not([type="radio"]),
   select,

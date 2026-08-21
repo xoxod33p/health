@@ -509,78 +509,252 @@ export default function SensorsPage() {
                     <p>Try adjusting your search criteria or register a new device.</p>
                   </div>
                 ) : (
-                  <div
-                    className="table-wrap custom-scrollbar"
-                    style={{
-                      overflowX: 'auto',
-                      borderRadius: '6px',
-                      border: '1px solid #edf1f1',
-                      width: '100%',
-                    }}
-                  >
-                    <table className="rich-table" style={{ width: '100%', minWidth: '700px', tableLayout: 'auto' }}>
-                      <thead style={{ position: 'sticky', top: 0, background: '#ffffff', zIndex: 3, boxShadow: '0 1px 0 #edf1f1' }}>
-                        <tr>
-                          <th style={{ background: '#ffffff' }}>Serial Number</th>
-                          <th style={{ background: '#ffffff' }}>Assigned Customer</th>
-                          <th style={{ background: '#ffffff' }}>Installed Date</th>
-                          <th style={{ background: '#ffffff' }}>Expiration Date</th>
-                          <th style={{ background: '#ffffff' }}>Status</th>
-                          <th style={{ textAlign: 'right', background: '#ffffff' }}>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredSensors.map((sensor) => (
-                          <tr key={sensor._id}>
-                            <td>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <strong className="serial">{sensor.serialNumber}</strong>
-                              </div>
-                            </td>
-                            <td>
-                              {sensor.customerName ? (
-                                <Link
-                                  href={`/customers/${sensor.customerId}`}
-                                  style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '6px',
-                                    color: '#0f766e',
-                                    fontWeight: 600,
-                                    textDecoration: 'none',
-                                  }}
-                                >
-                                  <User size={13} style={{ color: '#64748b' }} />
-                                  <span>{sensor.customerName}</span>
-                                  {sensor.customerNumber && (
-                                    <span style={{ fontSize: '11px', color: '#94a3b8' }}>
-                                      ({sensor.customerNumber})
+                  <>
+                    {/* Desktop Table View */}
+                    <div className="desktop-table-view">
+                      <div
+                        className="table-wrap custom-scrollbar"
+                        style={{
+                          overflowX: 'auto',
+                          borderRadius: '6px',
+                          border: '1px solid #edf1f1',
+                          width: '100%',
+                        }}
+                      >
+                        <table className="rich-table" style={{ width: '100%', minWidth: '700px', tableLayout: 'auto' }}>
+                          <thead style={{ position: 'sticky', top: 0, background: '#ffffff', zIndex: 3, boxShadow: '0 1px 0 #edf1f1' }}>
+                            <tr>
+                              <th style={{ background: '#ffffff' }}>Serial Number</th>
+                              <th style={{ background: '#ffffff' }}>Assigned Customer</th>
+                              <th style={{ background: '#ffffff' }}>Installed Date</th>
+                              <th style={{ background: '#ffffff' }}>Expiration Date</th>
+                              <th style={{ background: '#ffffff' }}>Status</th>
+                              <th style={{ textAlign: 'right', background: '#ffffff' }}>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {filteredSensors.map((sensor) => (
+                              <tr key={sensor._id}>
+                                <td>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <strong className="serial">{sensor.serialNumber}</strong>
+                                  </div>
+                                </td>
+                                <td>
+                                  {sensor.customerName ? (
+                                    <Link
+                                      href={`/customers/${sensor.customerId}`}
+                                      style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '6px',
+                                        color: '#0f766e',
+                                        fontWeight: 600,
+                                        textDecoration: 'none',
+                                      }}
+                                    >
+                                      <User size={13} style={{ color: '#64748b' }} />
+                                      <span>{sensor.customerName}</span>
+                                      {sensor.customerNumber && (
+                                        <span style={{ fontSize: '11px', color: '#94a3b8' }}>
+                                          ({sensor.customerNumber})
+                                        </span>
+                                      )}
+                                    </Link>
+                                  ) : (
+                                    <span
+                                      className="muted-cell"
+                                      style={{ fontStyle: 'italic', fontSize: '12px' }}
+                                    >
+                                      Unassigned
                                     </span>
                                   )}
-                                </Link>
-                              ) : (
-                                <span
-                                  className="muted-cell"
-                                  style={{ fontStyle: 'italic', fontSize: '12px' }}
-                                >
-                                  Unassigned
-                                </span>
-                              )}
-                            </td>
-                            <td>
-                              <span style={{ fontWeight: 500, color: '#334155', fontSize: '13px' }}>
+                                </td>
+                                <td>
+                                  <span style={{ fontWeight: 500, color: '#334155', fontSize: '13px' }}>
+                                    {formatDate(sensor.installedAt || sensor.activatedAt)}
+                                  </span>
+                                </td>
+                                <td>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <span style={{ fontWeight: 500 }}>{formatDate(sensor.expiresAt)}</span>
+                                    <span
+                                      style={{
+                                        fontSize: '11px',
+                                        fontWeight: 700,
+                                        padding: '2px 6px',
+                                        borderRadius: '4px',
+                                        background:
+                                          sensor.effective.badgeTone === 'critical'
+                                            ? '#fee2e2'
+                                            : sensor.effective.badgeTone === 'warning'
+                                            ? '#fef3c7'
+                                            : '#f1f5f9',
+                                        color:
+                                          sensor.effective.badgeTone === 'critical'
+                                            ? '#dc2626'
+                                            : sensor.effective.badgeTone === 'warning'
+                                            ? '#b45309'
+                                            : '#64748b',
+                                      }}
+                                    >
+                                      {sensor.effective.daysLabel}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td>
+                                  <span className={sensor.effective.className}>
+                                    <i />
+                                    {sensor.effective.label}
+                                  </span>
+                                </td>
+                                <td style={{ textAlign: 'right' }}>
+                                  <div
+                                    style={{
+                                      display: 'inline-flex',
+                                      gap: '6px',
+                                      alignItems: 'center',
+                                      justifyContent: 'flex-end',
+                                    }}
+                                  >
+                                    {sensor.customerId ? (
+                                      <>
+                                        <button
+                                          type="button"
+                                          className="secondary-button"
+                                          onClick={() => handleOpenReplace(sensor)}
+                                          style={{
+                                            fontSize: '11px',
+                                            padding: '5px 9px',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '4px',
+                                            color: '#d97706',
+                                            borderColor: '#fde68a',
+                                          }}
+                                        >
+                                          <AlertTriangle size={12} /> Replace
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="secondary-button"
+                                          onClick={() => handleOpenAssign(sensor)}
+                                          style={{
+                                            fontSize: '11px',
+                                            padding: '5px 9px',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '4px',
+                                          }}
+                                        >
+                                          <ArrowRightLeft size={12} /> Reassign
+                                        </button>
+                                      </>
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        className="primary-button"
+                                        onClick={() => handleOpenAssign(sensor)}
+                                        style={{
+                                          fontSize: '11px',
+                                          padding: '5px 10px',
+                                          display: 'inline-flex',
+                                          alignItems: 'center',
+                                          gap: '4px',
+                                        }}
+                                      >
+                                        <UserPlus size={12} /> Assign
+                                      </button>
+                                    )}
+                                    <button
+                                      type="button"
+                                      className="secondary-button"
+                                      onClick={() => void handleOpenHistory(sensor)}
+                                      style={{
+                                        fontSize: '11px',
+                                        padding: '5px 8px',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '3px',
+                                      }}
+                                      title="View assignment audit history"
+                                    >
+                                      <History size={12} />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    {/* Mobile Cards View */}
+                    <div className="mobile-cards-view">
+                      {filteredSensors.map((sensor) => (
+                        <article className="mobile-card" key={`mobile-${sensor._id}`}>
+                          <div className="mobile-card-header">
+                            <div className="mobile-card-title">
+                              <strong className="serial" style={{ fontSize: '13px' }}>
+                                {sensor.serialNumber}
+                              </strong>
+                            </div>
+                            <span className={sensor.effective.className}>
+                              <i />
+                              {sensor.effective.label}
+                            </span>
+                          </div>
+
+                          <div className="mobile-card-body">
+                            <div className="mobile-card-field full-width">
+                              <span className="mobile-card-field-label">Assigned Customer</span>
+                              <span className="mobile-card-field-value">
+                                {sensor.customerName ? (
+                                  <Link
+                                    href={`/customers/${sensor.customerId}`}
+                                    style={{
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '5px',
+                                      color: '#0f766e',
+                                      fontWeight: 600,
+                                      textDecoration: 'none',
+                                    }}
+                                  >
+                                    <User size={13} />
+                                    <span>{sensor.customerName}</span>
+                                    {sensor.customerNumber && (
+                                      <span style={{ fontSize: '11px', color: '#64748b' }}>
+                                        ({sensor.customerNumber})
+                                      </span>
+                                    )}
+                                  </Link>
+                                ) : (
+                                  <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Unassigned</span>
+                                )}
+                              </span>
+                            </div>
+
+                            <div className="mobile-card-field">
+                              <span className="mobile-card-field-label">Installed</span>
+                              <span className="mobile-card-field-value">
                                 {formatDate(sensor.installedAt || sensor.activatedAt)}
                               </span>
-                            </td>
-                            <td>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <span style={{ fontWeight: 500 }}>{formatDate(sensor.expiresAt)}</span>
+                            </div>
+
+                            <div className="mobile-card-field">
+                              <span className="mobile-card-field-label">Expiration</span>
+                              <span className="mobile-card-field-value">
+                                <span style={{ display: 'block' }}>{formatDate(sensor.expiresAt)}</span>
                                 <span
                                   style={{
-                                    fontSize: '11px',
+                                    fontSize: '10.5px',
                                     fontWeight: 700,
-                                    padding: '2px 6px',
+                                    padding: '2px 5px',
                                     borderRadius: '4px',
+                                    marginTop: '2px',
+                                    display: 'inline-block',
                                     background:
                                       sensor.effective.badgeTone === 'critical'
                                         ? '#fee2e2'
@@ -597,94 +771,52 @@ export default function SensorsPage() {
                                 >
                                   {sensor.effective.daysLabel}
                                 </span>
-                              </div>
-                            </td>
-                            <td>
-                              <span className={sensor.effective.className}>
-                                <i />
-                                {sensor.effective.label}
                               </span>
-                            </td>
-                            <td style={{ textAlign: 'right' }}>
-                              <div
-                                style={{
-                                  display: 'inline-flex',
-                                  gap: '6px',
-                                  alignItems: 'center',
-                                  justifyContent: 'flex-end',
-                                }}
-                              >
-                                {sensor.customerId ? (
-                                  <>
-                                    <button
-                                      type="button"
-                                      className="secondary-button"
-                                      onClick={() => handleOpenReplace(sensor)}
-                                      style={{
-                                        fontSize: '11px',
-                                        padding: '5px 9px',
-                                        display: 'inline-flex',
-                                        alignItems: 'center',
-                                        gap: '4px',
-                                        color: '#d97706',
-                                        borderColor: '#fde68a',
-                                      }}
-                                    >
-                                      <AlertTriangle size={12} /> Replace
-                                    </button>
-                                    <button
-                                      type="button"
-                                      className="secondary-button"
-                                      onClick={() => handleOpenAssign(sensor)}
-                                      style={{
-                                        fontSize: '11px',
-                                        padding: '5px 9px',
-                                        display: 'inline-flex',
-                                        alignItems: 'center',
-                                        gap: '4px',
-                                      }}
-                                    >
-                                      <ArrowRightLeft size={12} /> Reassign
-                                    </button>
-                                  </>
-                                ) : (
-                                  <button
-                                    type="button"
-                                    className="primary-button"
-                                    onClick={() => handleOpenAssign(sensor)}
-                                    style={{
-                                      fontSize: '11px',
-                                      padding: '5px 10px',
-                                      display: 'inline-flex',
-                                      alignItems: 'center',
-                                      gap: '4px',
-                                    }}
-                                  >
-                                    <UserPlus size={12} /> Assign
-                                  </button>
-                                )}
+                            </div>
+                          </div>
+
+                          <div className="mobile-card-actions">
+                            {sensor.customerId ? (
+                              <>
                                 <button
                                   type="button"
                                   className="secondary-button"
-                                  onClick={() => void handleOpenHistory(sensor)}
-                                  style={{
-                                    fontSize: '11px',
-                                    padding: '5px 8px',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '3px',
-                                  }}
-                                  title="View assignment audit history"
+                                  onClick={() => handleOpenReplace(sensor)}
+                                  style={{ color: '#d97706', borderColor: '#fde68a' }}
                                 >
-                                  <History size={12} />
+                                  <AlertTriangle size={13} /> Replace
                                 </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                                <button
+                                  type="button"
+                                  className="secondary-button"
+                                  onClick={() => handleOpenAssign(sensor)}
+                                >
+                                  <ArrowRightLeft size={13} /> Reassign
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                type="button"
+                                className="primary-button"
+                                onClick={() => handleOpenAssign(sensor)}
+                              >
+                                <UserPlus size={13} /> Assign to Customer
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              className="secondary-button"
+                              onClick={() => void handleOpenHistory(sensor)}
+                              title="Audit history"
+                              style={{ flex: '0 0 auto', width: '38px', padding: 0 }}
+                            >
+                              <History size={14} />
+                            </button>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </>
                 )}
               </section>
             )}
@@ -755,33 +887,100 @@ export default function SensorsPage() {
                     <p>Use the &quot;Log Replacement&quot; button to record a sensor issue or replacement.</p>
                   </div>
                 ) : (
-                  <div
-                    className="table-wrap custom-scrollbar"
-                    style={{
-                      overflowX: 'auto',
-                      borderRadius: '6px',
-                      border: '1px solid #edf1f1',
-                      width: '100%',
-                    }}
-                  >
-                    <table className="rich-table" style={{ width: '100%', minWidth: '700px', tableLayout: 'auto' }}>
-                      <thead style={{ position: 'sticky', top: 0, background: '#ffffff', zIndex: 3, boxShadow: '0 1px 0 #edf1f1' }}>
-                        <tr>
-                          <th style={{ background: '#ffffff' }}>Customer Name</th>
-                          <th style={{ background: '#ffffff' }}>Serial Number</th>
-                          <th style={{ background: '#ffffff' }}>Replaced Date</th>
-                          <th style={{ background: '#ffffff' }}>Issue Type</th>
-                          <th style={{ background: '#ffffff' }}>Notes</th>
-                          <th style={{ background: '#ffffff' }}>Logged At</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredReplacements.map((r) => (
-                          <tr key={r._id}>
-                            <td>
-                              <strong>{r.customerName}</strong>
-                            </td>
-                            <td>
+                  <>
+                    {/* Desktop Table View */}
+                    <div className="desktop-table-view">
+                      <div
+                        className="table-wrap custom-scrollbar"
+                        style={{
+                          overflowX: 'auto',
+                          borderRadius: '6px',
+                          border: '1px solid #edf1f1',
+                          width: '100%',
+                        }}
+                      >
+                        <table className="rich-table" style={{ width: '100%', minWidth: '700px', tableLayout: 'auto' }}>
+                          <thead style={{ position: 'sticky', top: 0, background: '#ffffff', zIndex: 3, boxShadow: '0 1px 0 #edf1f1' }}>
+                            <tr>
+                              <th style={{ background: '#ffffff' }}>Customer Name</th>
+                              <th style={{ background: '#ffffff' }}>Serial Number</th>
+                              <th style={{ background: '#ffffff' }}>Replaced Date</th>
+                              <th style={{ background: '#ffffff' }}>Issue Type</th>
+                              <th style={{ background: '#ffffff' }}>Notes</th>
+                              <th style={{ background: '#ffffff' }}>Logged At</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {filteredReplacements.map((r) => (
+                              <tr key={r._id}>
+                                <td>
+                                  <strong>{r.customerName}</strong>
+                                </td>
+                                <td>
+                                  <span
+                                    style={{
+                                      fontFamily: 'monospace',
+                                      fontWeight: 700,
+                                      fontSize: '13px',
+                                      color: '#0f766e',
+                                      background: '#f0fdf4',
+                                      padding: '2px 8px',
+                                      borderRadius: '4px',
+                                    }}
+                                  >
+                                    {r.serialNumber}
+                                  </span>
+                                </td>
+                                <td>
+                                  {new Date(r.replacedDate).toLocaleDateString('en-GB', {
+                                    day: '2-digit',
+                                    month: 'short',
+                                    year: 'numeric',
+                                  })}
+                                </td>
+                                <td>
+                                  <span
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      gap: '4px',
+                                      color: '#d97706',
+                                      fontWeight: 600,
+                                      fontSize: '12px',
+                                    }}
+                                  >
+                                    <AlertTriangle size={13} />
+                                    {r.issueType}
+                                  </span>
+                                </td>
+                                <td
+                                  className="muted-cell"
+                                  style={{
+                                    fontSize: '12px',
+                                    maxWidth: '240px',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                  }}
+                                >
+                                  {r.notes ?? '—'}
+                                </td>
+                                <td className="muted-cell">
+                                  {r.createdAt ? formatDate(r.createdAt) : '—'}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    {/* Mobile Cards View */}
+                    <div className="mobile-cards-view">
+                      {filteredReplacements.map((r) => (
+                        <article className="mobile-card" key={`mobile-repl-${r._id}`}>
+                          <div className="mobile-card-header">
+                            <div className="mobile-card-title">
                               <span
                                 style={{
                                   fontFamily: 'monospace',
@@ -795,49 +994,64 @@ export default function SensorsPage() {
                               >
                                 {r.serialNumber}
                               </span>
-                            </td>
-                            <td>
-                              {new Date(r.replacedDate).toLocaleDateString('en-GB', {
-                                day: '2-digit',
-                                month: 'short',
-                                year: 'numeric',
-                              })}
-                            </td>
-                            <td>
-                              <span
-                                style={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '4px',
-                                  color: '#d97706',
-                                  fontWeight: 600,
-                                  fontSize: '12px',
-                                }}
-                              >
-                                <AlertTriangle size={13} />
-                                {r.issueType}
-                              </span>
-                            </td>
-                            <td
-                              className="muted-cell"
+                            </div>
+                            <span
                               style={{
-                                fontSize: '12px',
-                                maxWidth: '240px',
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                color: '#d97706',
+                                fontWeight: 600,
+                                fontSize: '11px',
+                                background: '#fef3c7',
+                                padding: '2px 6px',
+                                borderRadius: '4px',
                               }}
                             >
-                              {r.notes ?? '—'}
-                            </td>
-                            <td className="muted-cell">
-                              {r.createdAt ? formatDate(r.createdAt) : '—'}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                              <AlertTriangle size={12} />
+                              {r.issueType}
+                            </span>
+                          </div>
+
+                          <div className="mobile-card-body">
+                            <div className="mobile-card-field full-width">
+                              <span className="mobile-card-field-label">Customer</span>
+                              <span className="mobile-card-field-value" style={{ fontWeight: 600 }}>
+                                {r.customerName}
+                              </span>
+                            </div>
+
+                            <div className="mobile-card-field">
+                              <span className="mobile-card-field-label">Replaced Date</span>
+                              <span className="mobile-card-field-value">
+                                {new Date(r.replacedDate).toLocaleDateString('en-GB', {
+                                  day: '2-digit',
+                                  month: 'short',
+                                  year: 'numeric',
+                                })}
+                              </span>
+                            </div>
+
+                            <div className="mobile-card-field">
+                              <span className="mobile-card-field-label">Logged At</span>
+                              <span className="mobile-card-field-value">
+                                {r.createdAt ? formatDate(r.createdAt) : '—'}
+                              </span>
+                            </div>
+
+                            {r.notes && (
+                              <div className="mobile-card-field full-width">
+                                <span className="mobile-card-field-label">Clinical Notes</span>
+                                <span className="mobile-card-field-value" style={{ color: '#475569', fontSize: '12px' }}>
+                                  {r.notes}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </>
                 )}
               </section>
             )}

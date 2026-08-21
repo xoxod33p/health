@@ -255,133 +255,233 @@ export function Dashboard() {
             </p>
           </div>
         ) : (
-          <div
-            className="table-wrap custom-scrollbar"
-            style={{
-              overflowX: 'auto',
-              border: '1px solid #edf1f1',
-              borderRadius: '6px',
-              width: '100%',
-            }}
-          >
-            <table className="rich-table" style={{ width: '100%', minWidth: '600px', tableLayout: 'auto' }}>
-              <thead style={{ position: 'sticky', top: 0, background: '#ffffff', zIndex: 3, boxShadow: '0 1px 0 #edf1f1' }}>
-                <tr>
-                  <th style={{ background: '#ffffff', padding: '12px' }}>Serial Number</th>
-                  <th style={{ background: '#ffffff', padding: '12px' }}>Assigned Customer</th>
-                  <th style={{ background: '#ffffff', padding: '12px' }}>Expiration Date</th>
-                  <th style={{ background: '#ffffff', padding: '12px' }}>Status</th>
-                  <th style={{ background: '#ffffff', textAlign: 'right', padding: '12px' }}>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {expiringSensors.map((sensor) => {
-                  const days = getDaysRemaining(sensor.expiresAt);
-                  const isPast = days < 0;
-                  const badge = getStatusBadge(sensor.status, days);
+          <>
+            {/* Desktop Table View */}
+            <div className="desktop-table-view">
+              <div
+                className="table-wrap custom-scrollbar"
+                style={{
+                  overflowX: 'auto',
+                  border: '1px solid #edf1f1',
+                  borderRadius: '6px',
+                  width: '100%',
+                }}
+              >
+                <table className="rich-table" style={{ width: '100%', minWidth: '600px', tableLayout: 'auto' }}>
+                  <thead style={{ position: 'sticky', top: 0, background: '#ffffff', zIndex: 3, boxShadow: '0 1px 0 #edf1f1' }}>
+                    <tr>
+                      <th style={{ background: '#ffffff', padding: '12px' }}>Serial Number</th>
+                      <th style={{ background: '#ffffff', padding: '12px' }}>Assigned Customer</th>
+                      <th style={{ background: '#ffffff', padding: '12px' }}>Expiration Date</th>
+                      <th style={{ background: '#ffffff', padding: '12px' }}>Status</th>
+                      <th style={{ background: '#ffffff', textAlign: 'right', padding: '12px' }}>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {expiringSensors.map((sensor) => {
+                      const days = getDaysRemaining(sensor.expiresAt);
+                      const isPast = days < 0;
+                      const badge = getStatusBadge(sensor.status, days);
 
-                  return (
-                    <tr key={sensor._id}>
-                      <td style={{ padding: '16px 12px 16px 0' }}>
+                      return (
+                        <tr key={sensor._id}>
+                          <td style={{ padding: '16px 12px 16px 0' }}>
+                            <strong className="serial" style={{ fontFamily: 'monospace', fontSize: '13px' }}>
+                              {sensor.serialNumber}
+                            </strong>
+                          </td>
+                          <td style={{ padding: '16px 12px' }}>
+                            {sensor.customerName ? (
+                              sensor.customerId ? (
+                                <Link
+                                  href={`/customers/${sensor.customerId}`}
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    textDecoration: 'none',
+                                    color: '#0f766e',
+                                    fontWeight: 600,
+                                  }}
+                                  title={`View ${sensor.customerName}'s profile`}
+                                >
+                                  <User size={13} style={{ color: '#0f766e' }} />
+                                  <strong
+                                    style={{
+                                      color: '#0f766e',
+                                      textDecoration: 'underline',
+                                      textDecorationColor: 'rgba(15, 118, 110, 0.35)',
+                                      textUnderlineOffset: '3px',
+                                    }}
+                                  >
+                                    {sensor.customerName}
+                                  </strong>
+                                  {sensor.customerNumber && (
+                                    <span style={{ fontSize: '11px', color: '#64748b', textDecoration: 'none', fontWeight: 500 }}>
+                                      ({sensor.customerNumber})
+                                    </span>
+                                  )}
+                                </Link>
+                              ) : (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                  <User size={13} style={{ color: '#64748b' }} />
+                                  <div>
+                                    <strong>{sensor.customerName}</strong>
+                                    {sensor.customerNumber && (
+                                      <span style={{ fontSize: '11px', color: '#94a3b8', marginLeft: '4px' }}>
+                                        ({sensor.customerNumber})
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              )
+                            ) : (
+                              <span style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '12px' }}>
+                                Unassigned
+                              </span>
+                            )}
+                          </td>
+                          <td style={{ padding: '16px 12px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span style={{ fontWeight: 500 }}>{formatDate(sensor.expiresAt)}</span>
+                              <span
+                                style={{
+                                  fontSize: '11px',
+                                  fontWeight: 700,
+                                  padding: '2px 6px',
+                                  borderRadius: '4px',
+                                  background: isPast ? '#fee2e2' : '#fef3c7',
+                                  color: isPast ? '#ef4444' : '#b45309',
+                                }}
+                              >
+                                {isPast ? `Expired ${Math.abs(days)}d ago` : `${days}d left`}
+                              </span>
+                            </div>
+                          </td>
+                          <td style={{ padding: '16px 12px' }}>
+                            <span className={badge.className}>
+                              <i />
+                              {badge.label}
+                            </span>
+                          </td>
+                          <td style={{ textAlign: 'right', padding: '16px 0 16px 12px' }}>
+                            <Link
+                              href="/sensors"
+                              className="secondary-button"
+                              style={{
+                                fontSize: '11px',
+                                padding: '6px 10px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                              }}
+                            >
+                              Replace <ExternalLink size={11} />
+                            </Link>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Mobile Cards View */}
+            <div className="mobile-cards-view">
+              {expiringSensors.map((sensor) => {
+                const days = getDaysRemaining(sensor.expiresAt);
+                const isPast = days < 0;
+                const badge = getStatusBadge(sensor.status, days);
+
+                return (
+                  <article className="mobile-card" key={`mobile-${sensor._id}`}>
+                    <div className="mobile-card-header">
+                      <div className="mobile-card-title">
                         <strong className="serial" style={{ fontFamily: 'monospace', fontSize: '13px' }}>
                           {sensor.serialNumber}
                         </strong>
-                      </td>
-                      <td style={{ padding: '16px 12px' }}>
-                        {sensor.customerName ? (
-                          sensor.customerId ? (
-                            <Link
-                              href={`/customers/${sensor.customerId}`}
-                              style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '6px',
-                                textDecoration: 'none',
-                                color: '#0f766e',
-                                fontWeight: 600,
-                              }}
-                              title={`View ${sensor.customerName}'s profile`}
-                            >
-                              <User size={13} style={{ color: '#0f766e' }} />
-                              <strong
+                      </div>
+                      <span className={badge.className}>
+                        <i />
+                        {badge.label}
+                      </span>
+                    </div>
+
+                    <div className="mobile-card-body">
+                      <div className="mobile-card-field full-width">
+                        <span className="mobile-card-field-label">Assigned Customer</span>
+                        <span className="mobile-card-field-value">
+                          {sensor.customerName ? (
+                            sensor.customerId ? (
+                              <Link
+                                href={`/customers/${sensor.customerId}`}
                                 style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '5px',
                                   color: '#0f766e',
-                                  textDecoration: 'underline',
-                                  textDecorationColor: 'rgba(15, 118, 110, 0.35)',
-                                  textUnderlineOffset: '3px',
+                                  fontWeight: 600,
+                                  textDecoration: 'none',
                                 }}
                               >
+                                <User size={13} />
                                 {sensor.customerName}
-                              </strong>
-                              {sensor.customerNumber && (
-                                <span style={{ fontSize: '11px', color: '#64748b', textDecoration: 'none', fontWeight: 500 }}>
-                                  ({sensor.customerNumber})
-                                </span>
-                              )}
-                            </Link>
-                          ) : (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <User size={13} style={{ color: '#64748b' }} />
-                              <div>
-                                <strong>{sensor.customerName}</strong>
                                 {sensor.customerNumber && (
-                                  <span style={{ fontSize: '11px', color: '#94a3b8', marginLeft: '4px' }}>
+                                  <span style={{ fontSize: '11px', color: '#64748b' }}>
                                     ({sensor.customerNumber})
                                   </span>
                                 )}
-                              </div>
-                            </div>
-                          )
-                        ) : (
-                          <span style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '12px' }}>
-                            Unassigned
-                          </span>
-                        )}
-                      </td>
-                      <td style={{ padding: '16px 12px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span style={{ fontWeight: 500 }}>{formatDate(sensor.expiresAt)}</span>
-                          <span
-                            style={{
-                              fontSize: '11px',
-                              fontWeight: 700,
-                              padding: '2px 6px',
-                              borderRadius: '4px',
-                              background: isPast ? '#fee2e2' : '#fef3c7',
-                              color: isPast ? '#ef4444' : '#b45309',
-                            }}
-                          >
-                            {isPast ? `Expired ${Math.abs(days)}d ago` : `${days}d left`}
-                          </span>
-                        </div>
-                      </td>
-                      <td style={{ padding: '16px 12px' }}>
-                        <span className={badge.className}>
-                          <i />
-                          {badge.label}
+                              </Link>
+                            ) : (
+                              <span>
+                                {sensor.customerName} {sensor.customerNumber && `(${sensor.customerNumber})`}
+                              </span>
+                            )
+                          ) : (
+                            <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Unassigned</span>
+                          )}
                         </span>
-                      </td>
-                      <td style={{ textAlign: 'right', padding: '16px 0 16px 12px' }}>
-                        <Link
-                          href="/sensors"
-                          className="secondary-button"
+                      </div>
+
+                      <div className="mobile-card-field">
+                        <span className="mobile-card-field-label">Expiration Date</span>
+                        <span className="mobile-card-field-value">{formatDate(sensor.expiresAt)}</span>
+                      </div>
+
+                      <div className="mobile-card-field">
+                        <span className="mobile-card-field-label">Remaining</span>
+                        <span
                           style={{
                             fontSize: '11px',
-                            padding: '6px 10px',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
+                            fontWeight: 700,
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            background: isPast ? '#fee2e2' : '#fef3c7',
+                            color: isPast ? '#ef4444' : '#b45309',
+                            display: 'inline-block',
+                            width: 'fit-content',
                           }}
                         >
-                          Replace <ExternalLink size={11} />
-                        </Link>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                          {isPast ? `Expired ${Math.abs(days)}d ago` : `${days}d left`}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="mobile-card-actions">
+                      <Link
+                        href="/sensors"
+                        className="secondary-button"
+                        style={{ width: '100%', justifyContent: 'center' }}
+                      >
+                        Replace Sensor <ExternalLink size={12} />
+                      </Link>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </>
         )}
       </section>
 

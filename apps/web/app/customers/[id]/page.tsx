@@ -712,41 +712,148 @@ export default function CustomerDetailPage() {
                       </button>
                     </div>
                   ) : (
-                    <div className="table-wrap custom-scrollbar" style={{ border: '1px solid #edf1f1', borderRadius: '6px' }}>
-                      <table className="rich-table">
-                        <thead style={{ background: '#f8fafc' }}>
-                          <tr>
-                            <th>Serial Number</th>
-                            <th>Installation Date</th>
-                            <th>Expiration Date</th>
-                            <th>Status</th>
-                            <th style={{ textAlign: 'right' }}>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {assignedSensors.map((sensor) => {
-                            const badge = getSensorStatusBadge(sensor);
-                            return (
-                              <tr key={sensor._id}>
-                                <td>
+                    <>
+                      {/* Desktop Table View */}
+                      <div className="desktop-table-view">
+                        <div className="table-wrap custom-scrollbar" style={{ border: '1px solid #edf1f1', borderRadius: '6px' }}>
+                          <table className="rich-table">
+                            <thead style={{ background: '#f8fafc' }}>
+                              <tr>
+                                <th>Serial Number</th>
+                                <th>Installation Date</th>
+                                <th>Expiration Date</th>
+                                <th>Status</th>
+                                <th style={{ textAlign: 'right' }}>Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {assignedSensors.map((sensor) => {
+                                const badge = getSensorStatusBadge(sensor);
+                                return (
+                                  <tr key={sensor._id}>
+                                    <td>
+                                      <strong className="serial" style={{ fontSize: '13px' }}>
+                                        {sensor.serialNumber}
+                                      </strong>
+                                    </td>
+                                    <td>
+                                      <span style={{ fontWeight: 500, color: '#334155' }}>
+                                        {formatDate(sensor.installedAt || sensor.activatedAt)}
+                                      </span>
+                                    </td>
+                                    <td>
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <span style={{ fontWeight: 500 }}>{formatDate(sensor.expiresAt)}</span>
+                                        <span
+                                          style={{
+                                            fontSize: '11px',
+                                            fontWeight: 700,
+                                            padding: '2px 6px',
+                                            borderRadius: '4px',
+                                            background:
+                                              badge.tone === 'critical'
+                                                ? '#fee2e2'
+                                                : badge.tone === 'warning'
+                                                ? '#fef3c7'
+                                                : '#f1f5f9',
+                                            color:
+                                              badge.tone === 'critical'
+                                                ? '#dc2626'
+                                                : badge.tone === 'warning'
+                                                ? '#b45309'
+                                                : '#64748b',
+                                          }}
+                                        >
+                                          {badge.daysLabel}
+                                        </span>
+                                      </div>
+                                    </td>
+                                    <td>
+                                      <span className={badge.className}>
+                                        <i />
+                                        {badge.label}
+                                      </span>
+                                    </td>
+                                    <td style={{ textAlign: 'right' }}>
+                                      <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                                        <button
+                                          type="button"
+                                          className="secondary-button"
+                                          onClick={() => handleOpenReplace(sensor.serialNumber)}
+                                          style={{
+                                            fontSize: '11px',
+                                            padding: '4px 8px',
+                                            color: '#d97706',
+                                            borderColor: '#fde68a',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '3px',
+                                          }}
+                                        >
+                                          <AlertTriangle size={12} /> Replace
+                                        </button>
+                                        <Link
+                                          href="/sensors"
+                                          className="secondary-button"
+                                          style={{
+                                            fontSize: '11px',
+                                            padding: '4px 8px',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '3px',
+                                          }}
+                                          title="Manage in inventory"
+                                        >
+                                          <ExternalLink size={12} />
+                                        </Link>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      {/* Mobile Cards View */}
+                      <div className="mobile-cards-view">
+                        {assignedSensors.map((sensor) => {
+                          const badge = getSensorStatusBadge(sensor);
+                          return (
+                            <article className="mobile-card" key={`mobile-${sensor._id}`}>
+                              <div className="mobile-card-header">
+                                <div className="mobile-card-title">
                                   <strong className="serial" style={{ fontSize: '13px' }}>
                                     {sensor.serialNumber}
                                   </strong>
-                                </td>
-                                <td>
-                                  <span style={{ fontWeight: 500, color: '#334155' }}>
+                                </div>
+                                <span className={badge.className}>
+                                  <i />
+                                  {badge.label}
+                                </span>
+                              </div>
+
+                              <div className="mobile-card-body">
+                                <div className="mobile-card-field">
+                                  <span className="mobile-card-field-label">Installation</span>
+                                  <span className="mobile-card-field-value">
                                     {formatDate(sensor.installedAt || sensor.activatedAt)}
                                   </span>
-                                </td>
-                                <td>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    <span style={{ fontWeight: 500 }}>{formatDate(sensor.expiresAt)}</span>
+                                </div>
+
+                                <div className="mobile-card-field">
+                                  <span className="mobile-card-field-label">Expiration</span>
+                                  <span className="mobile-card-field-value">
+                                    <span style={{ display: 'block' }}>{formatDate(sensor.expiresAt)}</span>
                                     <span
                                       style={{
-                                        fontSize: '11px',
+                                        fontSize: '10.5px',
                                         fontWeight: 700,
-                                        padding: '2px 6px',
+                                        padding: '2px 5px',
                                         borderRadius: '4px',
+                                        marginTop: '2px',
+                                        display: 'inline-block',
                                         background:
                                           badge.tone === 'critical'
                                             ? '#fee2e2'
@@ -763,54 +870,33 @@ export default function CustomerDetailPage() {
                                     >
                                       {badge.daysLabel}
                                     </span>
-                                  </div>
-                                </td>
-                                <td>
-                                  <span className={badge.className}>
-                                    <i />
-                                    {badge.label}
                                   </span>
-                                </td>
-                                <td style={{ textAlign: 'right' }}>
-                                  <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
-                                    <button
-                                      type="button"
-                                      className="secondary-button"
-                                      onClick={() => handleOpenReplace(sensor.serialNumber)}
-                                      style={{
-                                        fontSize: '11px',
-                                        padding: '4px 8px',
-                                        color: '#d97706',
-                                        borderColor: '#fde68a',
-                                        display: 'inline-flex',
-                                        alignItems: 'center',
-                                        gap: '3px',
-                                      }}
-                                    >
-                                      <AlertTriangle size={12} /> Replace
-                                    </button>
-                                    <Link
-                                      href="/sensors"
-                                      className="secondary-button"
-                                      style={{
-                                        fontSize: '11px',
-                                        padding: '4px 8px',
-                                        display: 'inline-flex',
-                                        alignItems: 'center',
-                                        gap: '3px',
-                                      }}
-                                      title="Manage in inventory"
-                                    >
-                                      <ExternalLink size={12} />
-                                    </Link>
-                                  </div>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
+                                </div>
+                              </div>
+
+                              <div className="mobile-card-actions">
+                                <button
+                                  type="button"
+                                  className="secondary-button"
+                                  onClick={() => handleOpenReplace(sensor.serialNumber)}
+                                  style={{ color: '#d97706', borderColor: '#fde68a' }}
+                                >
+                                  <AlertTriangle size={13} /> Log Replacement
+                                </button>
+                                <Link
+                                  href="/sensors"
+                                  className="secondary-button"
+                                  style={{ flex: '0 0 auto', padding: '0 12px' }}
+                                  title="Manage in inventory"
+                                >
+                                  <ExternalLink size={13} />
+                                </Link>
+                              </div>
+                            </article>
+                          );
+                        })}
+                      </div>
+                    </>
                   )}
                 </section>
 
@@ -825,46 +911,92 @@ export default function CustomerDetailPage() {
                         </h2>
                       </div>
                     </div>
-                    <div className="table-wrap custom-scrollbar" style={{ border: '1px solid #edf1f1', borderRadius: '6px' }}>
-                      <table className="rich-table">
-                        <thead style={{ background: '#f8fafc' }}>
-                          <tr>
-                            <th>Serial Number</th>
-                            <th>Replaced Date</th>
-                            <th>Issue Type</th>
-                            <th>Clinical Notes</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {customerReplacements.map((r) => (
-                            <tr key={r._id}>
-                              <td>
-                                <span
-                                  style={{
-                                    fontFamily: 'monospace',
-                                    fontWeight: 700,
-                                    color: '#0f766e',
-                                    background: '#f0fdf4',
-                                    padding: '2px 6px',
-                                    borderRadius: '4px',
-                                  }}
-                                >
-                                  {r.serialNumber}
-                                </span>
-                              </td>
-                              <td>{formatDate(r.replacedDate)}</td>
-                              <td>
-                                <span style={{ color: '#d97706', fontWeight: 600, fontSize: '12px' }}>
-                                  {r.issueType}
-                                </span>
-                              </td>
-                              <td className="muted-cell" style={{ fontSize: '12px' }}>
-                                {r.notes || '—'}
-                              </td>
+                    {/* Desktop Table View */}
+                    <div className="desktop-table-view">
+                      <div className="table-wrap custom-scrollbar" style={{ border: '1px solid #edf1f1', borderRadius: '6px' }}>
+                        <table className="rich-table">
+                          <thead style={{ background: '#f8fafc' }}>
+                            <tr>
+                              <th>Serial Number</th>
+                              <th>Replaced Date</th>
+                              <th>Issue Type</th>
+                              <th>Clinical Notes</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                          </thead>
+                          <tbody>
+                            {customerReplacements.map((r) => (
+                              <tr key={r._id}>
+                                <td>
+                                  <span
+                                    style={{
+                                      fontFamily: 'monospace',
+                                      fontWeight: 700,
+                                      color: '#0f766e',
+                                      background: '#f0fdf4',
+                                      padding: '2px 6px',
+                                      borderRadius: '4px',
+                                    }}
+                                  >
+                                    {r.serialNumber}
+                                  </span>
+                                </td>
+                                <td>{formatDate(r.replacedDate)}</td>
+                                <td>
+                                  <span style={{ color: '#d97706', fontWeight: 600, fontSize: '12px' }}>
+                                    {r.issueType}
+                                  </span>
+                                </td>
+                                <td className="muted-cell" style={{ fontSize: '12px' }}>
+                                  {r.notes || '—'}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    {/* Mobile Cards View */}
+                    <div className="mobile-cards-view">
+                      {customerReplacements.map((r) => (
+                        <article className="mobile-card" key={`mobile-repl-${r._id}`}>
+                          <div className="mobile-card-header">
+                            <div className="mobile-card-title">
+                              <span
+                                style={{
+                                  fontFamily: 'monospace',
+                                  fontWeight: 700,
+                                  color: '#0f766e',
+                                  background: '#f0fdf4',
+                                  padding: '2px 6px',
+                                  borderRadius: '4px',
+                                }}
+                              >
+                                {r.serialNumber}
+                              </span>
+                            </div>
+                            <span style={{ color: '#d97706', fontWeight: 600, fontSize: '11px', background: '#fef3c7', padding: '2px 6px', borderRadius: '4px' }}>
+                              {r.issueType}
+                            </span>
+                          </div>
+
+                          <div className="mobile-card-body">
+                            <div className="mobile-card-field">
+                              <span className="mobile-card-field-label">Replaced Date</span>
+                              <span className="mobile-card-field-value">{formatDate(r.replacedDate)}</span>
+                            </div>
+
+                            {r.notes && (
+                              <div className="mobile-card-field full-width">
+                                <span className="mobile-card-field-label">Notes</span>
+                                <span className="mobile-card-field-value" style={{ color: '#475569', fontSize: '12px' }}>
+                                  {r.notes}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </article>
+                      ))}
                     </div>
                   </section>
                 )}

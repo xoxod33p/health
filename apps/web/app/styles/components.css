@@ -270,6 +270,110 @@ table {
   width: 100%;
 }
 
+/* Desktop vs Mobile Responsive Views */
+.desktop-table-view {
+  display: block;
+  width: 100%;
+}
+
+.mobile-cards-view {
+  display: none;
+}
+
+.mobile-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.mobile-card:hover {
+  border-color: #cbd5e1;
+}
+
+.mobile-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.mobile-card-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mobile-card-body {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px 14px;
+}
+
+.mobile-card-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.mobile-card-field.full-width {
+  grid-column: span 2;
+}
+
+.mobile-card-field-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.mobile-card-field-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1e293b;
+  word-break: break-word;
+}
+
+.mobile-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid #f1f5f9;
+  margin-top: 2px;
+}
+
+.mobile-card-actions .primary-button,
+.mobile-card-actions .secondary-button,
+.mobile-card-actions .ghost-button,
+.mobile-card-actions button,
+.mobile-card-actions a {
+  flex: 1 1 auto;
+  justify-content: center;
+  font-size: 12px;
+  padding: 8px 10px;
+  height: 36px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
 th {
   color: #64748b;
   font: 600 11px 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;

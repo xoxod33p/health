@@ -116,55 +116,158 @@ export default function CustomersPage() {
                 <p>Create the first customer for this workspace.</p>
               </div>
             ) : (
-              <div
-                className="table-wrap custom-scrollbar"
-                style={{
-                  maxHeight: 'calc(100vh - 280px)',
-                  minHeight: '300px',
-                  overflowY: 'auto',
-                  overflowX: 'auto',
-                  borderRadius: '6px',
-                  border: '1px solid #edf1f1',
-                }}
-              >
-                <table className="rich-table">
-                  <thead style={{ position: 'sticky', top: 0, background: '#ffffff', zIndex: 3, boxShadow: '0 1px 0 #edf1f1' }}>
-                    <tr>
-                      <th style={{ background: '#ffffff' }}>Customer ID</th>
-                      <th style={{ background: '#ffffff' }}>Customer Name</th>
-                      <th style={{ background: '#ffffff' }}>Contact & Mobile</th>
-                      <th style={{ background: '#ffffff' }}>Attached Sensor</th>
-                      <th style={{ background: '#ffffff', textAlign: 'right' }}>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered.map((customer) => {
-                      const initials = [customer.firstName?.[0], customer.lastName?.[0]]
-                        .filter(Boolean)
-                        .join('')
-                        .toUpperCase() || (customer.firstName?.[0] ? customer.firstName[0].toUpperCase() : 'C');
+              <>
+                {/* Desktop Table View */}
+                <div className="desktop-table-view">
+                  <div className="table-wrap custom-scrollbar" style={{ border: '1px solid #edf1f1', borderRadius: '6px' }}>
+                  <table className="rich-table">
+                    <thead style={{ position: 'sticky', top: 0, background: '#ffffff', zIndex: 3, boxShadow: '0 1px 0 #edf1f1' }}>
+                      <tr>
+                        <th style={{ background: '#ffffff' }}>Customer ID</th>
+                        <th style={{ background: '#ffffff' }}>Customer Name</th>
+                        <th style={{ background: '#ffffff' }}>Contact & Mobile</th>
+                        <th style={{ background: '#ffffff' }}>Attached Sensor</th>
+                        <th style={{ background: '#ffffff', textAlign: 'right' }}>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filtered.map((customer) => {
+                        const initials = [customer.firstName?.[0], customer.lastName?.[0]]
+                          .filter(Boolean)
+                          .join('')
+                          .toUpperCase() || (customer.firstName?.[0] ? customer.firstName[0].toUpperCase() : 'C');
 
-                      return (
-                        <tr key={customer._id}>
-                          <td>
-                            <span className="id-badge">
-                              {customer.customerNumber}
-                            </span>
-                          </td>
-                          <td>
-                            <div className="entity-cell">
-                              <div className="entity-avatar">
-                                {initials}
+                        return (
+                          <tr key={customer._id}>
+                            <td>
+                              <span className="id-badge">
+                                {customer.customerNumber}
+                              </span>
+                            </td>
+                            <td>
+                              <div className="entity-cell">
+                                <div className="entity-avatar">
+                                  {initials}
+                                </div>
+                                <div>
+                                  <strong>
+                                    {customer.firstName} {customer.lastName}
+                                  </strong>
+                                </div>
                               </div>
+                            </td>
+                            <td>
                               <div>
-                                <strong>
-                                  {customer.firstName} {customer.lastName}
-                                </strong>
+                                {customer.phone ? (
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 600, color: '#1e293b' }}>
+                                    <Phone size={12} style={{ color: '#0f766e' }} />
+                                    <span>{customer.phone}</span>
+                                  </div>
+                                ) : null}
+                                {customer.email ? (
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: '#64748b', marginTop: customer.phone ? '2px' : '0' }}>
+                                    <Mail size={11} style={{ color: '#94a3b8' }} />
+                                    <span>{customer.email}</span>
+                                  </div>
+                                ) : !customer.phone ? (
+                                  <span className="muted-cell">No contact provided</span>
+                                ) : null}
                               </div>
-                            </div>
-                          </td>
-                        <td>
-                          <div>
+                            </td>
+                            <td>
+                              {customer.attachedSensorSerial ? (
+                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                  <span
+                                    style={{
+                                      fontFamily: "'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+                                      fontWeight: 600,
+                                      fontSize: '12px',
+                                      color: '#0f766e',
+                                      background: '#f0fdf4',
+                                      padding: '3px 8px',
+                                      borderRadius: '5px',
+                                      border: '1px solid #bbf7d0',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '5px',
+                                    }}
+                                  >
+                                    <Radio size={12} style={{ color: '#0f766e' }} />
+                                    {customer.attachedSensorSerial}
+                                  </span>
+                                  {customer.attachedSensorSerials && customer.attachedSensorSerials.length > 1 && (
+                                    <span
+                                      style={{
+                                        fontSize: '10.5px',
+                                        color: '#64748b',
+                                        background: '#f1f5f9',
+                                        padding: '2px 6px',
+                                        borderRadius: '4px',
+                                        fontWeight: 600,
+                                      }}
+                                    >
+                                      +{customer.attachedSensorSerials.length - 1} more
+                                    </span>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="muted-cell" style={{ fontStyle: 'italic', fontSize: '12px' }}>
+                                  No sensor attached
+                                </span>
+                              )}
+                            </td>
+                            <td style={{ textAlign: 'right' }}>
+                              <Link
+                                className="primary-button"
+                                href={`/customers/${customer._id}`}
+                                style={{
+                                  fontSize: '11.5px',
+                                  padding: '5px 12px',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '5px',
+                                  textDecoration: 'none',
+                                  fontWeight: 600,
+                                  boxShadow: '0 1px 2px rgba(15, 118, 110, 0.15)',
+                                }}
+                              >
+                                <UserRound size={13} /> View profile
+                              </Link>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Mobile Cards View */}
+              <div className="mobile-cards-view">
+                {filtered.map((customer) => {
+                  const initials = [customer.firstName?.[0], customer.lastName?.[0]]
+                    .filter(Boolean)
+                    .join('')
+                    .toUpperCase() || (customer.firstName?.[0] ? customer.firstName[0].toUpperCase() : 'C');
+
+                  return (
+                    <article className="mobile-card" key={`mobile-cust-${customer._id}`}>
+                      <div className="mobile-card-header">
+                        <div className="mobile-card-title">
+                          <div className="entity-avatar" style={{ width: '28px', height: '28px', fontSize: '10px' }}>
+                            {initials}
+                          </div>
+                          <span>{customer.firstName} {customer.lastName}</span>
+                        </div>
+                        <span className="id-badge" style={{ fontSize: '11px', padding: '2px 6px' }}>
+                          {customer.customerNumber}
+                        </span>
+                      </div>
+
+                      <div className="mobile-card-body">
+                        <div className="mobile-card-field full-width">
+                          <span className="mobile-card-field-label">Contact Info</span>
+                          <span className="mobile-card-field-value">
                             {customer.phone ? (
                               <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 600, color: '#1e293b' }}>
                                 <Phone size={12} style={{ color: '#0f766e' }} />
@@ -177,76 +280,72 @@ export default function CustomersPage() {
                                 <span>{customer.email}</span>
                               </div>
                             ) : !customer.phone ? (
-                              <span className="muted-cell">No contact provided</span>
+                              <span className="muted-cell" style={{ fontSize: '12px' }}>No contact provided</span>
                             ) : null}
-                          </div>
-                        </td>
-                        <td>
-                          {customer.attachedSensorSerial ? (
-                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                              <span
-                                style={{
-                                  fontFamily: "'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-                                  fontWeight: 600,
-                                  fontSize: '12px',
-                                  color: '#0f766e',
-                                  background: '#f0fdf4',
-                                  padding: '3px 8px',
-                                  borderRadius: '5px',
-                                  border: '1px solid #bbf7d0',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '5px',
-                                }}
-                              >
-                                <Radio size={12} style={{ color: '#0f766e' }} />
-                                {customer.attachedSensorSerial}
-                              </span>
-                              {customer.attachedSensorSerials && customer.attachedSensorSerials.length > 1 && (
+                          </span>
+                        </div>
+
+                        <div className="mobile-card-field full-width">
+                          <span className="mobile-card-field-label">Attached Sensor</span>
+                          <span className="mobile-card-field-value">
+                            {customer.attachedSensorSerial ? (
+                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
                                 <span
                                   style={{
-                                    fontSize: '10.5px',
-                                    color: '#64748b',
-                                    background: '#f1f5f9',
-                                    padding: '2px 6px',
-                                    borderRadius: '4px',
+                                    fontFamily: "'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
                                     fontWeight: 600,
+                                    fontSize: '11.5px',
+                                    color: '#0f766e',
+                                    background: '#f0fdf4',
+                                    padding: '2px 6px',
+                                    borderRadius: '5px',
+                                    border: '1px solid #bbf7d0',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '4px',
                                   }}
                                 >
-                                  +{customer.attachedSensorSerials.length - 1} more
+                                  <Radio size={11} style={{ color: '#0f766e' }} />
+                                  {customer.attachedSensorSerial}
                                 </span>
-                              )}
-                            </div>
-                          ) : (
-                            <span className="muted-cell" style={{ fontStyle: 'italic', fontSize: '12px' }}>
-                              No sensor attached
-                            </span>
-                          )}
-                        </td>
-                        <td style={{ textAlign: 'right' }}>
-                          <Link
-                            className="primary-button"
-                            href={`/customers/${customer._id}`}
-                            style={{
-                              fontSize: '11.5px',
-                              padding: '5px 12px',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '5px',
-                              textDecoration: 'none',
-                              fontWeight: 600,
-                              boxShadow: '0 1px 2px rgba(15, 118, 110, 0.15)',
-                            }}
-                          >
-                            <UserRound size={13} /> View profile
-                          </Link>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  </tbody>
-                </table>
+                                {customer.attachedSensorSerials && customer.attachedSensorSerials.length > 1 && (
+                                  <span
+                                    style={{
+                                      fontSize: '10px',
+                                      color: '#64748b',
+                                      background: '#f1f5f9',
+                                      padding: '2px 5px',
+                                      borderRadius: '4px',
+                                      fontWeight: 600,
+                                    }}
+                                  >
+                                    +{customer.attachedSensorSerials.length - 1} more
+                                  </span>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="muted-cell" style={{ fontStyle: 'italic', fontSize: '12px' }}>
+                                No sensor attached
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="mobile-card-actions">
+                        <Link
+                          className="primary-button"
+                          href={`/customers/${customer._id}`}
+                          style={{ width: '100%', justifyContent: 'center' }}
+                        >
+                          <UserRound size={13} /> View Customer Profile
+                        </Link>
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
+            </>
             )}
           </section>
         )}
