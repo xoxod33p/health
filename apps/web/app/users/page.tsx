@@ -642,185 +642,356 @@ export default function UsersPage() {
                     <p>Add team members to configure workspace permissions.</p>
                   </div>
                 ) : (
-                  <div
-                    className="table-wrap custom-scrollbar"
-                    style={{
-                      maxHeight: 'calc(100vh - 360px)',
-                      minHeight: '300px',
-                      overflowY: 'auto',
-                      overflowX: 'auto',
-                      borderRadius: '6px',
-                      border: '1px solid #edf1f1',
-                    }}
-                  >
-                    <table className="rich-table">
-                      <thead style={{ position: 'sticky', top: 0, background: '#ffffff', zIndex: 3, boxShadow: '0 1px 0 #edf1f1' }}>
-                        <tr>
-                          <th style={{ background: '#ffffff' }}>Account</th>
-                          <th style={{ background: '#ffffff' }}>Email</th>
-                          <th style={{ background: '#ffffff' }}>Role</th>
-                          <th style={{ background: '#ffffff' }}>Permissions</th>
-                          <th style={{ background: '#ffffff' }}>Status</th>
-                          <th style={{ textAlign: 'right', background: '#ffffff' }}>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filtered.map((userItem) => {
-                          const activePermCount = userItem.permissions?.length ?? 0;
-                          const roleMeta = ROLE_LABELS[userItem.role] || { label: userItem.role, bg: '#f1f5f9', textColor: '#475569' };
-                          const displayName = [userItem.firstName, userItem.lastName].filter(Boolean).join(' ') || 'Admin';
-                          const initials = (userItem.lastName && userItem.lastName.trim())
-                            ? `${userItem.firstName.slice(0, 1)}${userItem.lastName.slice(0, 1)}`.toUpperCase()
-                            : userItem.firstName.slice(0, 1).toUpperCase();
+                  <>
+                    {/* Desktop Table View */}
+                    <div className="desktop-table-view">
+                      <div
+                        className="table-wrap custom-scrollbar"
+                        style={{
+                          maxHeight: 'calc(100vh - 360px)',
+                          minHeight: '300px',
+                          overflowY: 'auto',
+                          overflowX: 'auto',
+                          borderRadius: '6px',
+                          border: '1px solid #edf1f1',
+                        }}
+                      >
+                        <table className="rich-table">
+                          <thead style={{ position: 'sticky', top: 0, background: '#ffffff', zIndex: 3, boxShadow: '0 1px 0 #edf1f1' }}>
+                            <tr>
+                              <th style={{ background: '#ffffff' }}>Account</th>
+                              <th style={{ background: '#ffffff' }}>Email</th>
+                              <th style={{ background: '#ffffff' }}>Role</th>
+                              <th style={{ background: '#ffffff' }}>Permissions</th>
+                              <th style={{ background: '#ffffff' }}>Status</th>
+                              <th style={{ textAlign: 'right', background: '#ffffff' }}>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {filtered.map((userItem) => {
+                              const activePermCount = userItem.permissions?.length ?? 0;
+                              const roleMeta = ROLE_LABELS[userItem.role] || { label: userItem.role, bg: '#f1f5f9', textColor: '#475569' };
+                              const displayName = [userItem.firstName, userItem.lastName].filter(Boolean).join(' ') || 'Admin';
+                              const initials = (userItem.lastName && userItem.lastName.trim())
+                                ? `${userItem.firstName.slice(0, 1)}${userItem.lastName.slice(0, 1)}`.toUpperCase()
+                                : userItem.firstName.slice(0, 1).toUpperCase();
 
-                          return (
-                            <tr key={userItem._id}>
-                              <td>
-                                <div className="entity-cell">
-                                  <div className="entity-avatar">
-                                    {initials}
-                                  </div>
-                                  <div>
+                              return (
+                                <tr key={userItem._id}>
+                                  <td>
+                                    <div className="entity-cell">
+                                      <div className="entity-avatar">
+                                        {initials}
+                                      </div>
+                                      <div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                          <strong>
+                                            {displayName}
+                                          </strong>
+                                          {userItem.isProtected && (
+                                            <span
+                                              style={{
+                                                fontSize: '9px',
+                                                background: '#e0efeb',
+                                                color: '#0f766e',
+                                                fontWeight: 700,
+                                                padding: '1px 5px',
+                                                borderRadius: '4px',
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '0.5px',
+                                              }}
+                                            >
+                                              Protected
+                                            </span>
+                                          )}
+                                        </div>
+                                        <span>{userItem.title ?? roleMeta.label}</span>
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="muted-cell">{userItem.email}</td>
+                                  <td>
+                                    <span
+                                      style={{
+                                        display: 'inline-block',
+                                        fontSize: '11px',
+                                        fontFamily: 'DM Sans, sans-serif',
+                                        padding: '4px 10px',
+                                        borderRadius: '6px',
+                                        background: roleMeta.bg,
+                                        color: roleMeta.textColor,
+                                        fontWeight: 700,
+                                      }}
+                                    >
+                                      {roleMeta.label}
+                                    </span>
+                                  </td>
+                                  <td>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                      <strong>
-                                        {displayName}
-                                      </strong>
-                                      {userItem.isProtected && (
+                                      {userItem.role === 'SYSTEM_ADMIN' || userItem.isProtected ? (
                                         <span
                                           style={{
-                                            fontSize: '9px',
-                                            background: '#e0efeb',
-                                            color: '#0f766e',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '5px',
+                                            fontSize: '11px',
+                                            padding: '3px 8px',
+                                            borderRadius: '6px',
+                                            background: '#ecfdf5',
+                                            color: '#065f46',
                                             fontWeight: 700,
-                                            padding: '1px 5px',
-                                            borderRadius: '4px',
-                                            textTransform: 'uppercase',
-                                            letterSpacing: '0.5px',
+                                            border: '1px solid #a7f3d0',
                                           }}
                                         >
-                                          Protected
+                                          <ShieldCheck size={12} /> All ({PERMISSION_LEVELS.length} levels)
+                                        </span>
+                                      ) : (
+                                        <span className="status status-healthy" style={{ fontSize: '11px' }}>
+                                          <KeyRound size={12} /> {activePermCount} of {PERMISSION_LEVELS.length} levels
                                         </span>
                                       )}
                                     </div>
-                                    <span>{userItem.title ?? roleMeta.label}</span>
-                                  </div>
+                                  </td>
+                                  <td>
+                                    {userItem.status === 'SUSPENDED' ? (
+                                      <span className="status status-critical" title="Account is suspended">
+                                        <i /> Suspended
+                                      </span>
+                                    ) : userItem.isOnline ? (
+                                      <span className="status status-online" title="User is currently active in workspace">
+                                        <span className="presence-pulse-dot" /> Online
+                                      </span>
+                                    ) : (
+                                      <span className="status status-offline" title="User is currently offline">
+                                        <span className="presence-static-dot" /> Offline
+                                      </span>
+                                    )}
+                                  </td>
+                                  <td style={{ textAlign: 'right' }}>
+                                    <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                                      {userItem.isProtected ? (
+                                        <span
+                                          style={{
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '5px',
+                                            fontSize: '11px',
+                                            padding: '6px 12px',
+                                            borderRadius: '6px',
+                                            background: '#f8fafc',
+                                            color: '#64748b',
+                                            fontWeight: 600,
+                                            border: '1px solid #e2e8f0',
+                                            cursor: 'not-allowed',
+                                          }}
+                                          title="This primary administrator account is configured in the environment and is protected from modification or deletion."
+                                        >
+                                          <Lock size={12} /> Protected (Root Admin)
+                                        </span>
+                                      ) : (
+                                        <>
+                                          <button
+                                            className="secondary-button"
+                                            type="button"
+                                            onClick={() => handleOpenEditUser(userItem)}
+                                            style={{ fontSize: '11px', padding: '6px 10px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                                          >
+                                            <Edit2 size={12} /> Edit Role & Permissions
+                                          </button>
+                                          <button
+                                            className="secondary-button"
+                                            type="button"
+                                            onClick={() => void handleToggleStatus(userItem._id, userItem.status)}
+                                            style={{ fontSize: '11px', padding: '6px 10px' }}
+                                          >
+                                            {userItem.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
+                                          </button>
+                                          <button
+                                            className="secondary-button"
+                                            type="button"
+                                            onClick={() => handleOpenDelete(userItem)}
+                                            style={{ fontSize: '11px', padding: '6px 10px', display: 'flex', alignItems: 'center', gap: '4px', color: '#ef4444', borderColor: '#fecaca' }}
+                                          >
+                                            <Trash2 size={12} /> Delete
+                                          </button>
+                                        </>
+                                      )}
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    {/* Mobile Cards View */}
+                    <div className="mobile-cards-view">
+                      {filtered.map((userItem) => {
+                        const activePermCount = userItem.permissions?.length ?? 0;
+                        const roleMeta = ROLE_LABELS[userItem.role] || { label: userItem.role, bg: '#f1f5f9', textColor: '#475569' };
+                        const displayName = [userItem.firstName, userItem.lastName].filter(Boolean).join(' ') || 'Admin';
+                        const initials = (userItem.lastName && userItem.lastName.trim())
+                          ? `${userItem.firstName.slice(0, 1)}${userItem.lastName.slice(0, 1)}`.toUpperCase()
+                          : userItem.firstName.slice(0, 1).toUpperCase();
+
+                        return (
+                          <article className="mobile-card" key={`mobile-user-${userItem._id}`}>
+                            <div className="mobile-card-header">
+                              <div className="mobile-card-title">
+                                <div className="entity-avatar" style={{ width: '30px', height: '30px', fontSize: '11px' }}>
+                                  {initials}
                                 </div>
-                              </td>
-                              <td className="muted-cell">{userItem.email}</td>
-                              <td>
-                                <span
-                                  style={{
-                                    display: 'inline-block',
-                                    fontSize: '11px',
-                                    fontFamily: 'DM Sans, sans-serif',
-                                    padding: '4px 10px',
-                                    borderRadius: '6px',
-                                    background: roleMeta.bg,
-                                    color: roleMeta.textColor,
-                                    fontWeight: 700,
-                                  }}
-                                >
-                                  {roleMeta.label}
+                                <div>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                    <span style={{ fontWeight: 700, fontSize: '13px' }}>{displayName}</span>
+                                    {userItem.isProtected && (
+                                      <span
+                                        style={{
+                                          fontSize: '9px',
+                                          background: '#e0efeb',
+                                          color: '#0f766e',
+                                          fontWeight: 700,
+                                          padding: '1px 4px',
+                                          borderRadius: '3px',
+                                          textTransform: 'uppercase',
+                                        }}
+                                      >
+                                        Root
+                                      </span>
+                                    )}
+                                  </div>
+                                  <span style={{ fontSize: '11px', color: '#64748b' }}>{userItem.title ?? roleMeta.label}</span>
+                                </div>
+                              </div>
+                              {userItem.status === 'SUSPENDED' ? (
+                                <span className="status status-critical" style={{ fontSize: '10.5px' }}>
+                                  <i /> Suspended
                                 </span>
-                              </td>
-                              <td>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              ) : userItem.isOnline ? (
+                                <span className="status status-online" style={{ fontSize: '10.5px' }}>
+                                  <span className="presence-pulse-dot" /> Online
+                                </span>
+                              ) : (
+                                <span className="status status-offline" style={{ fontSize: '10.5px' }}>
+                                  <span className="presence-static-dot" /> Offline
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="mobile-card-body">
+                              <div className="mobile-card-field full-width">
+                                <span className="mobile-card-field-label">Email Address</span>
+                                <span className="mobile-card-field-value" style={{ wordBreak: 'break-all', fontSize: '12px' }}>
+                                  {userItem.email}
+                                </span>
+                              </div>
+
+                              <div className="mobile-card-field">
+                                <span className="mobile-card-field-label">Assigned Role</span>
+                                <span className="mobile-card-field-value">
+                                  <span
+                                    style={{
+                                      display: 'inline-block',
+                                      fontSize: '11px',
+                                      fontFamily: 'DM Sans, sans-serif',
+                                      padding: '3px 8px',
+                                      borderRadius: '5px',
+                                      background: roleMeta.bg,
+                                      color: roleMeta.textColor,
+                                      fontWeight: 700,
+                                    }}
+                                  >
+                                    {roleMeta.label}
+                                  </span>
+                                </span>
+                              </div>
+
+                              <div className="mobile-card-field">
+                                <span className="mobile-card-field-label">Permissions</span>
+                                <span className="mobile-card-field-value">
                                   {userItem.role === 'SYSTEM_ADMIN' || userItem.isProtected ? (
                                     <span
                                       style={{
                                         display: 'inline-flex',
                                         alignItems: 'center',
-                                        gap: '5px',
+                                        gap: '4px',
                                         fontSize: '11px',
-                                        padding: '3px 8px',
-                                        borderRadius: '6px',
+                                        padding: '2px 6px',
+                                        borderRadius: '5px',
                                         background: '#ecfdf5',
                                         color: '#065f46',
                                         fontWeight: 700,
                                         border: '1px solid #a7f3d0',
                                       }}
                                     >
-                                      <ShieldCheck size={12} /> All ({PERMISSION_LEVELS.length} levels)
+                                      <ShieldCheck size={11} /> All ({PERMISSION_LEVELS.length})
                                     </span>
                                   ) : (
-                                    <span className="status status-healthy" style={{ fontSize: '11px' }}>
-                                      <KeyRound size={12} /> {activePermCount} of {PERMISSION_LEVELS.length} levels
+                                    <span className="status status-healthy" style={{ fontSize: '11px', padding: '2px 6px' }}>
+                                      <KeyRound size={11} /> {activePermCount} / {PERMISSION_LEVELS.length}
                                     </span>
                                   )}
-                                </div>
-                              </td>
-                              <td>
-                                {userItem.status === 'SUSPENDED' ? (
-                                  <span className="status status-critical" title="Account is suspended">
-                                    <i /> Suspended
-                                  </span>
-                                ) : userItem.isOnline ? (
-                                  <span className="status status-online" title="User is currently active in workspace">
-                                    <span className="presence-pulse-dot" /> Online
-                                  </span>
-                                ) : (
-                                  <span className="status status-offline" title="User is currently offline">
-                                    <span className="presence-static-dot" /> Offline
-                                  </span>
-                                )}
-                              </td>
-                              <td style={{ textAlign: 'right' }}>
-                                <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
-                                  {userItem.isProtected ? (
-                                    <span
-                                      style={{
-                                        display: 'inline-flex',
-                                        alignItems: 'center',
-                                        gap: '5px',
-                                        fontSize: '11px',
-                                        padding: '6px 12px',
-                                        borderRadius: '6px',
-                                        background: '#f8fafc',
-                                        color: '#64748b',
-                                        fontWeight: 600,
-                                        border: '1px solid #e2e8f0',
-                                        cursor: 'not-allowed',
-                                      }}
-                                      title="This primary administrator account is configured in the environment and is protected from modification or deletion."
-                                    >
-                                      <Lock size={12} /> Protected (Root Admin)
-                                    </span>
-                                  ) : (
-                                    <>
-                                      <button
-                                        className="secondary-button"
-                                        type="button"
-                                        onClick={() => handleOpenEditUser(userItem)}
-                                        style={{ fontSize: '11px', padding: '6px 10px', display: 'flex', alignItems: 'center', gap: '4px' }}
-                                      >
-                                        <Edit2 size={12} /> Edit Role & Permissions
-                                      </button>
-                                      <button
-                                        className="secondary-button"
-                                        type="button"
-                                        onClick={() => void handleToggleStatus(userItem._id, userItem.status)}
-                                        style={{ fontSize: '11px', padding: '6px 10px' }}
-                                      >
-                                        {userItem.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
-                                      </button>
-                                      <button
-                                        className="secondary-button"
-                                        type="button"
-                                        onClick={() => handleOpenDelete(userItem)}
-                                        style={{ fontSize: '11px', padding: '6px 10px', display: 'flex', alignItems: 'center', gap: '4px', color: '#ef4444', borderColor: '#fecaca' }}
-                                      >
-                                        <Trash2 size={12} /> Delete
-                                      </button>
-                                    </>
-                                  )}
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="mobile-card-actions">
+                              {userItem.isProtected ? (
+                                <span
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '5px',
+                                    fontSize: '11px',
+                                    padding: '7px 12px',
+                                    borderRadius: '6px',
+                                    background: '#f8fafc',
+                                    color: '#64748b',
+                                    fontWeight: 600,
+                                    border: '1px solid #e2e8f0',
+                                    width: '100%',
+                                  }}
+                                >
+                                  <Lock size={12} /> Protected (Root Admin)
+                                </span>
+                              ) : (
+                                <>
+                                  <button
+                                    className="secondary-button"
+                                    type="button"
+                                    onClick={() => handleOpenEditUser(userItem)}
+                                    style={{ flex: '1 1 auto', justifyContent: 'center' }}
+                                  >
+                                    <Edit2 size={12} /> Edit Role
+                                  </button>
+                                  <button
+                                    className="secondary-button"
+                                    type="button"
+                                    onClick={() => void handleToggleStatus(userItem._id, userItem.status)}
+                                    style={{ flex: '0 0 auto', padding: '0 10px' }}
+                                  >
+                                    {userItem.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
+                                  </button>
+                                  <button
+                                    className="secondary-button"
+                                    type="button"
+                                    onClick={() => handleOpenDelete(userItem)}
+                                    style={{ flex: '0 0 auto', padding: '0 10px', color: '#ef4444', borderColor: '#fecaca' }}
+                                    title="Delete User"
+                                  >
+                                    <Trash2 size={13} />
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </article>
+                        );
+                      })}
+                    </div>
+                  </>
                 )}
               </section>
             )}
@@ -840,57 +1011,108 @@ export default function UsersPage() {
               </div>
             </div>
 
-            <div className="table-wrap" style={{ overflowX: 'auto' }}>
-              <table className="rich-table">
-                <thead>
-                  <tr>
-                    <th style={{ minWidth: '220px' }}>Permission Level</th>
-                    <th>System Admin</th>
-                    <th>Manager</th>
-                    <th>Inhouse Employee</th>
-                    <th>Out Employee</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {PERMISSION_LEVELS.map((perm) => (
-                    <tr key={perm.id}>
-                      <td>
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          <strong>{perm.name}</strong>
-                          <small style={{ color: '#64748b', fontSize: '11px' }}>{perm.description}</small>
-                        </div>
-                      </td>
-                      {(['SYSTEM_ADMIN', 'MANAGER', 'INHOUSE_STAFF', 'OUT_EMPLOYEE'] as UserRole[]).map((rKey) => {
-                        const isGranted = (roleMatrixDefaults[rKey] ?? []).includes(perm.id);
-                        return (
-                          <td key={rKey} style={{ textAlign: 'center' }}>
-                            <button
-                              type="button"
-                              onClick={() => handleToggleRoleMatrixPermission(rKey, perm.id)}
-                              style={{
-                                border: 'none',
-                                background: isGranted ? '#e0efeb' : '#f1f5f9',
-                                color: isGranted ? '#0f766e' : '#94a3b8',
-                                padding: '6px 12px',
-                                borderRadius: '6px',
-                                cursor: 'pointer',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '4px',
-                                fontSize: '12px',
-                                fontWeight: 600,
-                              }}
-                            >
-                              {isGranted ? <Check size={14} /> : <X size={14} />}
-                              {isGranted ? 'Allowed' : 'Denied'}
-                            </button>
-                          </td>
-                        );
-                      })}
+            {/* Desktop Table View */}
+            <div className="desktop-table-view">
+              <div className="table-wrap" style={{ overflowX: 'auto' }}>
+                <table className="rich-table">
+                  <thead>
+                    <tr>
+                      <th style={{ minWidth: '220px' }}>Permission Level</th>
+                      <th>System Admin</th>
+                      <th>Manager</th>
+                      <th>Inhouse Employee</th>
+                      <th>Out Employee</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {PERMISSION_LEVELS.map((perm) => (
+                      <tr key={perm.id}>
+                        <td>
+                          <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <strong>{perm.name}</strong>
+                            <small style={{ color: '#64748b', fontSize: '11px' }}>{perm.description}</small>
+                          </div>
+                        </td>
+                        {(['SYSTEM_ADMIN', 'MANAGER', 'INHOUSE_STAFF', 'OUT_EMPLOYEE'] as UserRole[]).map((rKey) => {
+                          const isGranted = (roleMatrixDefaults[rKey] ?? []).includes(perm.id);
+                          return (
+                            <td key={rKey} style={{ textAlign: 'center' }}>
+                              <button
+                                type="button"
+                                onClick={() => handleToggleRoleMatrixPermission(rKey, perm.id)}
+                                style={{
+                                  border: 'none',
+                                  background: isGranted ? '#e0efeb' : '#f1f5f9',
+                                  color: isGranted ? '#0f766e' : '#94a3b8',
+                                  padding: '6px 12px',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  fontSize: '12px',
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {isGranted ? <Check size={14} /> : <X size={14} />}
+                                {isGranted ? 'Allowed' : 'Denied'}
+                              </button>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Mobile Cards View */}
+            <div className="mobile-cards-view">
+              {PERMISSION_LEVELS.map((perm) => (
+                <article className="mobile-card" key={`mobile-perm-${perm.id}`}>
+                  <div className="mobile-card-header">
+                    <div className="mobile-card-title">
+                      <strong style={{ fontSize: '13px' }}>{perm.name}</strong>
+                    </div>
+                    <span style={{ fontSize: '10px', color: '#64748b', background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>
+                      {perm.category}
+                    </span>
+                  </div>
+                  <div className="mobile-card-body" style={{ paddingBottom: '4px' }}>
+                    <p style={{ fontSize: '11.5px', color: '#64748b', margin: 0 }}>{perm.description}</p>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px', marginTop: '10px' }}>
+                    {(['SYSTEM_ADMIN', 'MANAGER', 'INHOUSE_STAFF', 'OUT_EMPLOYEE'] as UserRole[]).map((rKey) => {
+                      const isGranted = (roleMatrixDefaults[rKey] ?? []).includes(perm.id);
+                      const roleLabel = ROLE_LABELS[rKey]?.label || rKey;
+                      return (
+                        <button
+                          key={rKey}
+                          type="button"
+                          onClick={() => handleToggleRoleMatrixPermission(rKey, perm.id)}
+                          style={{
+                            border: isGranted ? '1px solid #a7f3d0' : '1px solid #e2e8f0',
+                            background: isGranted ? '#ecfdf5' : '#f8fafc',
+                            color: isGranted ? '#065f46' : '#64748b',
+                            padding: '6px 8px',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            fontSize: '11px',
+                            fontWeight: 600,
+                          }}
+                        >
+                          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{roleLabel}</span>
+                          {isGranted ? <Check size={13} style={{ color: '#059669', flexShrink: 0 }} /> : <X size={13} style={{ color: '#94a3b8', flexShrink: 0 }} />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </article>
+              ))}
             </div>
           </section>
         )}
